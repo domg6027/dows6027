@@ -1,0 +1,53 @@
+{
+  "requests": [
+    {
+      "id": 1,
+      "text": "Peace in Middle East, South Africa and the world.",
+      "source": "initial",
+      "date_added": "2025-12-11"
+    },
+    {
+      "id": 2,
+      "text": "End-time revival.",
+      "source": "initial",
+      "date_added": "2025-12-11"
+    },
+    {
+      "id": 3,
+      "text": "The elderly, especially those subject to abuse and neglect.",
+      "source": "initial",
+      "date_added": "2025-12-11"
+    },
+    {
+      "id": 4,
+      "text": "The farmers, especially those in danger of attacks.",
+      "source": "initial",
+      "date_added": "2025-12-11"
+    },
+    {
+      "id": 5,
+      "text": "Evangelists all over the world, especially in those countries where they are persecuted.",
+      "source": "initial",
+      "date_added": "2025-12-11"
+    },
+    {
+      "id": 6,
+      "text": "Ill people, especially those with cancer and new viral diseases that are spreading like wildfires.",
+      "source": "initial",
+      "date_added": "2025-12-11"
+    },
+    {
+      "id": 7,
+      "text": "The coming tribulation as the signs of the birth pains are here already.",
+      "source": "initial",
+      "date_added": "2025-12-11"
+    },
+    {
+      "id": 8,
+      "text": "Our ministry (Derech Olam Ministries).",
+      "source": "initial",
+      "date_added": "2025-12-11"
+    }
+  ],
+  "last_id": 8
+}
