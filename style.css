@@ -1,0 +1,125 @@
+/* ====== GLOBAL RESET ====== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* ====== BACKGROUND + TEXT ====== */
+body {
+  font-family: "Segoe UI", Arial, sans-serif;
+  background: #111;
+  color: #eee;
+  line-height: 1.6;
+  padding: 0 1rem;
+}
+
+/* ====== LINKS (WARNING: MUST STAY CLASSIC STYLE) ====== */
+a {
+  color: #0066ee;          /* Blue */
+  text-decoration: underline;
+}
+
+a:hover,
+a:focus,
+a:active {
+  color: #0066ee;
+  text-decoration: underline;
+}
+
+/* ====== HEADER ====== */
+header {
+  background: #000;
+  color: #ffcc00;          /* Gold warning tone */
+  padding: 1.2rem 0;
+  text-align: center;
+  border-bottom: 3px solid #ff0000; /* Red strike for urgency */
+}
+
+header h1 {
+  font-size: 2rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-weight: 800;
+}
+
+/* ====== NAVIGATION ====== */
+nav {
+  background: #1a1a1a;
+  padding: 0.7rem 0;
+  text-align: center;
+  border-bottom: 2px solid #333;
+}
+
+nav a {
+  color: #ffcc00; /* Gold navigation links */
+  margin: 0 1rem;
+  text-decoration: underline; /* Matches requirement */
+  font-weight: bold;
+}
+
+nav a:hover {
+  text-decoration: underline; /* Lock the effect: no animations */
+}
+
+/* ====== MAIN AREA ====== */
+main {
+  background: #181818;
+  padding: 1.5rem;
+  margin: 1rem auto;
+  max-width: 950px;
+  border-left: 5px solid #ff0000;
+  border-right: 5px solid #ff0000;
+  border-radius: 4px;
+  box-shadow: 0 0 15px rgba(255, 0, 0, 0.25);
+}
+
+/* ====== HEADERS ====== */
+h2, h3, h4 {
+  margin-bottom: 0.8rem;
+  margin-top: 1.2rem;
+  color: #ffcc00;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 700;
+}
+
+/* ====== SECTIONS ====== */
+section {
+  margin-bottom: 2rem;
+}
+
+/* ====== FOOTER ====== */
+footer {
+  text-align: center;
+  padding: 1rem 0;
+  margin-top: 2rem;
+  background: #000;
+  color: #ffcc00;
+  font-size: 0.85rem;
+  border-top: 2px solid #ff0000;
+}
+
+/* ====== HR ====== */
+hr {
+  border: 0;
+  border-top: 1px solid #ff0000;
+  margin: 1.8rem 0;
+}
+
+/* ====== UTILITIES ====== */
+.center { text-align: center; }
+.small { font-size: 0.85rem; }
+.bold { font-weight: bold; }
+
+/* ====== MOBILE ====== */
+@media (max-width: 600px) {
+  nav a {
+    display: inline-block;
+    margin: 0.4rem;
+  }
+
+  main {
+    padding: 1.2rem;
+  }
+}
