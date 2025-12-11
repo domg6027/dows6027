@@ -1,34 +1,35 @@
-const fs = require("fs");
-const path = require("path");
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+import { getWeeklyData, setWeeklyData } from "./helpers/dataManager.js";
 
-// -------------------- Load Data --------------------
-const data = JSON.parse(
-  fs.readFileSync(path.join(__dirname, "data.js"), "utf8")
-);
+// For __dirname in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-let { current_date, last_article_number } = data;
+/* -------------------- Load weekly data safely -------------------- */
+let { current_date, last_article_number } = getWeeklyData();
 
-// -------------------- Read PDF Folder --------------------
+/* -------------------- Read PDF Folder -------------------- */
 const pdfDir = path.join(__dirname, "PDFS");
 const pdfFiles = fs.readdirSync(pdfDir).filter(f => f.endsWith(".PDF"));
 
-// Extract article numbers from filenames
+/* Extract article numbers and dates from filenames */
 const newArticles = pdfFiles
   .map(filename => {
     const match = filename.match(/(\d{8})-(\d+)\.PDF/i);
     if (!match) return null;
 
-    const articleNumber = parseInt(match[2], 10);
     return {
       filename,
       date: match[1],
-      number: articleNumber
+      number: Number(match[2])
     };
   })
   .filter(item => item && item.number > last_article_number)
   .sort((a, b) => a.number - b.number);
 
-// -------------------- Build Weekly Warning Message --------------------
+/* -------------------- Build Weekly Warning Message -------------------- */
 let message = `## 📡 Weekly Warning Update  
 **Date:** ${current_date}  
 **Articles Found:** ${newArticles.length}
@@ -40,30 +41,28 @@ let message = `## 📡 Weekly Warning Update
 if (newArticles.length === 0) {
   message += `No new high-impact articles were found since the last weekly scan.`;
 } else {
-  message += `### 📰 New Articles This Week  
-`;
+  message += `### 📰 New Articles This Week\n`;
   newArticles.forEach(a => {
     message += `- **${a.date} — #${a.number}** (PDF: \`${a.filename}\`)\n`;
   });
 }
 
-// -------------------- Update data.js --------------------
+/* -------------------- Update weekly data safely -------------------- */
+let updated_last_article_number = last_article_number;
+
 if (newArticles.length > 0) {
-  const newest = newArticles[newArticles.length - 1].number;
-  data.last_article_number = newest;
+  updated_last_article_number = newArticles[newArticles.length - 1].number;
 }
 
-// Advance current_date to today's date (UTC)
+// Advance current_date → UTC date
 const todayUTC = new Date().toISOString().split("T")[0];
-data.current_date = todayUTC;
 
-// Write new data.js
-fs.writeFileSync(
-  path.join(__dirname, "data.js"),
-  JSON.stringify(data, null, 2)
-);
+setWeeklyData({
+  current_date: todayUTC,
+  last_article_number: updated_last_article_number
+});
 
-// Save output file for GitHub Discussion
+/* -------------------- Save output for GitHub Discussion -------------------- */
 fs.writeFileSync(
   path.join(__dirname, "weekly_output.txt"),
   message
