@@ -1,17 +1,15 @@
 import fs from "fs";
 import https from "https";
 import child_process from "child_process";
+import { getDailyData, setDailyData } from "./helpers/dataManager.js";
 
 /* ------------------------------
-   Load existing data.js
+   Load ONLY the daily fields
 ------------------------------ */
-let data = JSON.parse(fs.readFileSync("data.js", "utf8"));
+let { last_URL_processed, last_date_used } = getDailyData();
 
-let lastURL = data.last_URL_processed;
-let lastDateUsed = data.last_date_used;
-
-/* Extract last article number */
-let lastID = Number(lastURL.split("recent_news_id=")[1]);
+/* Extract last article number from URL */
+let lastID = Number(last_URL_processed.split("recent_news_id=")[1]);
 
 /* Base URL */
 const BASE = "https://www.prophecynewswatch.com/article.cfm?recent_news_id=";
@@ -35,7 +33,7 @@ function fetchPage(url) {
   });
 }
 
-/* Extract publish date from page */
+/* Extract publish date from HTML */
 function extractDate(html) {
   // Format example: <strong>Published: November 12, 2025</strong>
   let match = html.match(/Published:\s*([A-Za-z]+\s+\d{1,2},\s+\d{4})/);
@@ -44,7 +42,7 @@ function extractDate(html) {
   return new Date(match[1]);
 }
 
-/* Convert date → yyyyMMdd */
+/* Convert JS Date → yyyyMMdd */
 function formatDate(dateObj) {
   let yyyy = dateObj.getFullYear();
   let mm = String(dateObj.getMonth() + 1).padStart(2, "0");
@@ -52,7 +50,7 @@ function formatDate(dateObj) {
   return `${yyyy}${mm}${dd}`;
 }
 
-/* Create PDF using wkhtmltopdf */
+/* Convert HTML to PDF using wkhtmltopdf */
 function createPDF(html, filename) {
   return new Promise((resolve, reject) => {
     const tmp = "temp.html";
@@ -74,6 +72,8 @@ function createPDF(html, filename) {
 ------------------------------------- */
 (async () => {
   let newProcessedCount = 0;
+  let latestURL = last_URL_processed;
+  let latestDate = last_date_used;
 
   for (let id = lastID + 1; id < lastID + 200; id++) {
     let url = BASE + id;
@@ -81,7 +81,7 @@ function createPDF(html, filename) {
     try {
       let html = await fetchPage(url);
 
-      // If site returns "not found", break loop
+      // If site returns 404 or placeholder, stop processing
       if (html.includes("404") || html.includes("Not Found")) break;
 
       let pubDate = extractDate(html);
@@ -92,9 +92,9 @@ function createPDF(html, filename) {
 
       await createPDF(html, outfile);
 
-      // Update daily tracking
-      data.last_URL_processed = url;
-      data.last_date_used = yyyymmdd;
+      // Update in-memory latest values
+      latestURL = url;
+      latestDate = yyyymmdd;
 
       newProcessedCount++;
       console.log(`PDF CREATED: ${outfile}`);
@@ -105,9 +105,12 @@ function createPDF(html, filename) {
   }
 
   /* ------------------------------------
-     Write updated data.js
+     Write updated SAFE daily data fields
   ------------------------------------- */
-  fs.writeFileSync("data.js", JSON.stringify(data, null, 2));
+  setDailyData({
+    last_URL_processed: latestURL,
+    last_date_used: latestDate
+  });
 
   console.log(`Daily service completed: ${newProcessedCount} new PDF(s) created.`);
 })();
