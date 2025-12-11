@@ -1,77 +1,72 @@
-// weekly.js
 const fs = require("fs");
 const path = require("path");
 
-// Load data.js
-const dataPath = path.join(__dirname, "data.js");
-const data = JSON.parse(fs.readFileSync(dataPath, "utf-8"));
+// -------------------- Load Data --------------------
+const data = JSON.parse(
+  fs.readFileSync(path.join(__dirname, "data.js"), "utf8")
+);
 
-// Pull values for weekly automation
 let { current_date, last_article_number } = data;
 
-// TODAY (UTC) for file naming
-const today = new Date().toISOString().split("T")[0];
+// -------------------- Read PDF Folder --------------------
+const pdfDir = path.join(__dirname, "PDFS");
+const pdfFiles = fs.readdirSync(pdfDir).filter(f => f.endsWith(".PDF"));
 
-// Folder paths
-const pdfFolder = path.join(__dirname, "PDFS");
-const warningsFolder = path.join(__dirname, "warning2026");
-
-// Ensure folder exists
-if (!fs.existsSync(warningsFolder)) {
-  fs.mkdirSync(warningsFolder);
-}
-
-// Extract all PDFs
-const pdfFiles = fs.readdirSync(pdfFolder).filter(f => f.endsWith(".pdf"));
-
-/**
- * Parse filenames like:
- *    20251129-9053.pdf
- */
-function parsePdfName(filename) {
-  const base = filename.replace(".pdf", "");
-  const [date, seq] = base.split("-");
-  return { date, seq: parseInt(seq, 10), filename };
-}
-
-// Identify new articles
+// Extract article numbers from filenames
 const newArticles = pdfFiles
-  .map(parsePdfName)
-  .filter(item => item.seq > last_article_number)
-  .sort((a, b) => a.seq - b.seq);
+  .map(filename => {
+    const match = filename.match(/(\d{8})-(\d+)\.PDF/i);
+    if (!match) return null;
+
+    const articleNumber = parseInt(match[2], 10);
+    return {
+      filename,
+      date: match[1],
+      number: articleNumber
+    };
+  })
+  .filter(item => item && item.number > last_article_number)
+  .sort((a, b) => a.number - b.number);
+
+// -------------------- Build Weekly Warning Message --------------------
+let message = `## 📡 Weekly Warning Update  
+**Date:** ${current_date}  
+**Articles Found:** ${newArticles.length}
+
+---
+
+`;
 
 if (newArticles.length === 0) {
-  console.log("No new PDFs for weekly summary.");
+  message += `No new high-impact articles were found since the last weekly scan.`;
 } else {
-  console.log("New articles found:", newArticles.length);
+  message += `### 📰 New Articles This Week  
+`;
+  newArticles.forEach(a => {
+    message += `- **${a.date} — #${a.number}** (PDF: \`${a.filename}\`)\n`;
+  });
 }
 
-// Build weekly summary message
-let summaryText = `WEEKLY WARNING SUMMARY – ${today}\n`;
-summaryText += `Generated automatically by DOWS6027 automation.\n\n`;
-summaryText += `Total new articles: ${newArticles.length}\n\n`;
-
-for (const article of newArticles) {
-  summaryText += `• ${article.date} — Article #${article.seq}\n`;
-}
-
-// Save to a new file in warning2026/
-const outputFilename = `weekly-${today}.txt`;
-const outputPath = path.join(warningsFolder, outputFilename);
-
-fs.writeFileSync(outputPath, summaryText, "utf-8");
-
-console.log(`Weekly summary saved: ${outputFilename}`);
-
-// Update data.js
-data.current_date = today;
+// -------------------- Update data.js --------------------
 if (newArticles.length > 0) {
-  data.last_article_number =
-    newArticles[newArticles.length - 1].seq;
+  const newest = newArticles[newArticles.length - 1].number;
+  data.last_article_number = newest;
 }
 
-// Save updated data.js
-fs.writeFileSync(dataPath, JSON.stringify(data, null, 2));
+// Advance current_date to today's date (UTC)
+const todayUTC = new Date().toISOString().split("T")[0];
+data.current_date = todayUTC;
 
-console.log("data.js updated.");
-console.log("Weekly processing complete.");
+// Write new data.js
+fs.writeFileSync(
+  path.join(__dirname, "data.js"),
+  JSON.stringify(data, null, 2)
+);
+
+// Save output file for GitHub Discussion
+fs.writeFileSync(
+  path.join(__dirname, "weekly_output.txt"),
+  message
+);
+
+console.log("Weekly summary generated and saved.");
