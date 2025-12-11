@@ -1,39 +1,48 @@
-name: Weekly Warning Summary
-
-defaults:
-  run:
-    working-directory: .
+name: Weekly Warning Service
 
 on:
   schedule:
-    - cron: "0 0 * * 0"   # Weekly, every Sunday 00:00 UTC
+    - cron: "0 0 * * 0"   # Runs every Sunday at 00:00 UTC
   workflow_dispatch:
 
 jobs:
-  weekly-summary:
+  weekly:
     runs-on: ubuntu-latest
 
+    defaults:
+      run:
+        working-directory: ./
+
     steps:
-      - name: Checkout repo
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node
+      - name: Use Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: '20'
 
-      - name: Install dependencies
-        run: npm ci
+      - name: Install dependencies from root
+        run: npm ci --ignore-scripts
 
-      - name: Run Weekly Script
+      - name: Run Weekly Warning Script
         run: node weekly.js
 
-      - name: Commit changes
-        run: |
-          git config user.name "github-actions"
-          git config user.email "actions@github.com"
-          git add .
-          git commit -m "Weekly warnings summary" || echo "No changes"
+      - name: Commit updated data.js
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Weekly update: data.js"
+          file_pattern: data.js
 
-      - name: Push
-        run: git push
+      - name: Post Weekly Warning to Discussion #9
+        uses: abhishekbanthia/action-post-discussion@v1.0.3
+        with:
+          token: ${{ secrets.NEWSWARNINGSBOT }}
+          repository: domg6027/dom6027
+          discussion_number: 9
+          body_file: weekly_output.txt
+          title: "Weekly Warning – ${{ steps.date.outputs.today }}"
+
+      - name: Set Today Date Output
+        id: date
+        run: echo "today=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
