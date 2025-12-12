@@ -1,6 +1,6 @@
-import fs from "fs";
+import { existsSync, mkdirSync, writeFileSync, unlinkSync } from "fs";
 import https from "https";
-import child_process from "child_process";
+import { exec } from "child_process";
 import { getDailyData, setDailyData } from "./helpers/dataManager.js";
 
 /* ------------------------------
@@ -17,9 +17,9 @@ const BASE = "https://www.prophecynewswatch.com/article.cfm?recent_news_id=";
 /* Output folder */
 const PDF_DIR = "./PDFS";
 
-/* Ensure PDF dir exists */
-if (!fs.existsSync(PDF_DIR)) {
-  fs.mkdirSync(PDF_DIR);
+/* Ensure PDF directory exists */
+if (!existsSync(PDF_DIR)) {
+  mkdirSync(PDF_DIR);
 }
 
 /* Fetch HTML page as text */
@@ -33,16 +33,15 @@ function fetchPage(url) {
   });
 }
 
-/* Extract publish date from HTML */
+/* Extract publish date */
 function extractDate(html) {
-  // Format example: <strong>Published: November 12, 2025</strong>
+  // Looks for: <strong>Published: November 12, 2025</strong>
   let match = html.match(/Published:\s*([A-Za-z]+\s+\d{1,2},\s+\d{4})/);
   if (!match) return null;
-
   return new Date(match[1]);
 }
 
-/* Convert JS Date → yyyyMMdd */
+/* Convert Date → yyyyMMdd */
 function formatDate(dateObj) {
   let yyyy = dateObj.getFullYear();
   let mm = String(dateObj.getMonth() + 1).padStart(2, "0");
@@ -50,25 +49,22 @@ function formatDate(dateObj) {
   return `${yyyy}${mm}${dd}`;
 }
 
-/* Convert HTML to PDF using wkhtmltopdf */
+/* Convert HTML to PDF */
 function createPDF(html, filename) {
   return new Promise((resolve, reject) => {
     const tmp = "temp.html";
-    fs.writeFileSync(tmp, html);
+    writeFileSync(tmp, html);
 
-    child_process.exec(
-      `wkhtmltopdf ${tmp} ${filename}`,
-      (err, stdout, stderr) => {
-        fs.unlinkSync(tmp);
-        if (err) reject(err);
-        else resolve(true);
-      }
-    );
+    exec(`wkhtmltopdf ${tmp} ${filename}`, (err) => {
+      unlinkSync(tmp);
+      if (err) reject(err);
+      else resolve(true);
+    });
   });
 }
 
 /* ------------------------------------
-   Main processing loop — FETCH NEW ARTICLES
+   Main — process new articles
 ------------------------------------- */
 (async () => {
   let newProcessedCount = 0;
@@ -81,7 +77,6 @@ function createPDF(html, filename) {
     try {
       let html = await fetchPage(url);
 
-      // If site returns 404 or placeholder, stop processing
       if (html.includes("404") || html.includes("Not Found")) break;
 
       let pubDate = extractDate(html);
@@ -92,7 +87,6 @@ function createPDF(html, filename) {
 
       await createPDF(html, outfile);
 
-      // Update in-memory latest values
       latestURL = url;
       latestDate = yyyymmdd;
 
@@ -104,9 +98,7 @@ function createPDF(html, filename) {
     }
   }
 
-  /* ------------------------------------
-     Write updated SAFE daily data fields
-  ------------------------------------- */
+  /* Save SAFE daily data fields */
   setDailyData({
     last_URL_processed: latestURL,
     last_date_used: latestDate
