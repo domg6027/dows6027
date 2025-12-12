@@ -1,71 +1,70 @@
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-import { getWeeklyData, setWeeklyData } from "./helpers/dataManager.js";
 
-// For __dirname in ES modules
+/* Resolve current directory */
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-/* -------------------- Load weekly data safely -------------------- */
-let { current_date, last_article_number } = getWeeklyData();
+/* -------------------------------------------------- */
+/*               PATHS + DEFAULT VALUES               */
+/* -------------------------------------------------- */
 
-/* -------------------- Read PDF Folder -------------------- */
-const pdfDir = path.join(__dirname, "PDFS");
-const pdfFiles = fs.readdirSync(pdfDir).filter(f => f.endsWith(".PDF"));
+const DATA_DIR = path.join(__dirname, "..", "data");
+const WEEKLY_FILE = path.join(DATA_DIR, "weekly.json");
 
-/* Extract article numbers and dates from filenames */
-const newArticles = pdfFiles
-  .map(filename => {
-    const match = filename.match(/(\d{8})-(\d+)\.PDF/i);
-    if (!match) return null;
+const DEFAULT_DATA = {
+  current_date: "0000-00-00",
+  last_article_number: 0
+};
 
-    return {
-      filename,
-      date: match[1],
-      number: Number(match[2])
-    };
-  })
-  .filter(item => item && item.number > last_article_number)
-  .sort((a, b) => a.number - b.number);
-
-/* -------------------- Build Weekly Warning Message -------------------- */
-let message = `## 📡 Weekly Warning Update  
-**Date:** ${current_date}  
-**Articles Found:** ${newArticles.length}
-
----
-
-`;
-
-if (newArticles.length === 0) {
-  message += `No new high-impact articles were found since the last weekly scan.`;
-} else {
-  message += `### 📰 New Articles This Week\n`;
-  newArticles.forEach(a => {
-    message += `- **${a.date} — #${a.number}** (PDF: \`${a.filename}\`)\n`;
-  });
+/* -------------------------------------------------- */
+/*              Ensure data folder exists             */
+/* -------------------------------------------------- */
+if (!fs.existsSync(DATA_DIR)) {
+  fs.mkdirSync(DATA_DIR, { recursive: true });
 }
 
-/* -------------------- Update weekly data safely -------------------- */
-let updated_last_article_number = last_article_number;
+/* -------------------------------------------------- */
+/*               Internal: safe JSON read             */
+/* -------------------------------------------------- */
+function loadJSON(filePath, fallback) {
+  try {
+    if (!fs.existsSync(filePath)) {
+      fs.writeFileSync(filePath, JSON.stringify(fallback, null, 2));
+      return structuredClone(fallback);
+    }
 
-if (newArticles.length > 0) {
-  updated_last_article_number = newArticles[newArticles.length - 1].number;
+    const raw = fs.readFileSync(filePath, "utf8");
+    const parsed = JSON.parse(raw);
+
+    return { ...fallback, ...parsed };
+  } catch (e) {
+    console.error("JSON read error:", e);
+    return structuredClone(fallback);
+  }
 }
 
-// Advance current_date → UTC date
-const todayUTC = new Date().toISOString().split("T")[0];
+/* -------------------------------------------------- */
+/*            Internal: safe JSON write               */
+/* -------------------------------------------------- */
+function saveJSON(filePath, data) {
+  try {
+    fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
+  } catch (e) {
+    console.error("JSON write error:", e);
+  }
+}
 
-setWeeklyData({
-  current_date: todayUTC,
-  last_article_number: updated_last_article_number
-});
+/* -------------------------------------------------- */
+/*                  Exported methods                  */
+/* -------------------------------------------------- */
 
-/* -------------------- Save output for GitHub Discussion -------------------- */
-fs.writeFileSync(
-  path.join(__dirname, "weekly_output.txt"),
-  message
-);
+export function getWeeklyData() {
+  return loadJSON(WEEKLY_FILE, DEFAULT_DATA);
+}
 
-console.log("Weekly summary generated and saved.");
+export function setWeeklyData(data) {
+  const finalData = { ...DEFAULT_DATA, ...data };
+  saveJSON(WEEKLY_FILE, finalData);
+}
