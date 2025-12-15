@@ -2,16 +2,12 @@ name: Weekly Warning Service
 
 on:
   schedule:
-    - cron: "0 0 * * 0"   # Runs every Sunday at 00:00 UTC
+    - cron: "0 0 * * 0"
   workflow_dispatch:
 
 jobs:
   weekly:
     runs-on: ubuntu-latest
-
-    defaults:
-      run:
-        working-directory: ./
 
     steps:
       - name: Checkout repository
@@ -22,27 +18,18 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install dependencies from root
+      - name: Install dependencies
         run: npm ci --ignore-scripts
 
       - name: Run Weekly Warning Script
         run: node weekly.js
 
-      - name: Commit updated data.js
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: "Weekly update: data.js"
-          file_pattern: data.js
-
-      - name: Post Weekly Warning to Discussion #9
-        uses: abhishekbanthia/action-post-discussion@v1.0.3
-        with:
-          token: ${{ secrets.NEWSWARNINGSBOT }}
-          repository: domg6027/dom6027
-          discussion_number: 9
-          body_file: weekly_output.txt
-          title: "Weekly Warning – ${{ steps.date.outputs.today }}"
-
       - name: Set Today Date Output
         id: date
         run: echo "today=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
+
+      - name: Commit updated weekly data
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Weekly update: weekly.json"
+          file_pattern: data/weekly.json
