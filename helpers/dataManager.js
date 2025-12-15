@@ -8,8 +8,8 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-/* Path to data.js */
-const DATA_PATH = path.join(__dirname, "..", "data.js");
+/* Path to data.json */
+const DATA_PATH = path.join(__dirname, "..", "data.json");
 
 /* Load JSON safely */
 function loadRaw() {
