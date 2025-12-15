@@ -1,17 +1,16 @@
 name: Monthly Archive & Year-Rollover
 
+permissions:
+  contents: write
+
 on:
   schedule:
-    - cron: "0 0 1 * *"   # 00:00 UTC on the 1st day of each month
+    - cron: "0 0 1 * *"
   workflow_dispatch:
 
 jobs:
   monthly:
     runs-on: ubuntu-latest
-
-    defaults:
-      run:
-        working-directory: ./
 
     steps:
       - name: Checkout repository
@@ -22,19 +21,19 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Install dependencies from root (no deps required but keeps env consistent)
+      - name: Install dependencies
         run: npm ci --ignore-scripts
 
       - name: Run Monthly Archive Script
         run: node monthly.js
 
-      - name: Commit monthly changes (archives, index2.html, archive.html, data.js, warning folder)
+      - name: Commit monthly changes
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "Monthly archive & year-rollover update"
           file_pattern: |
-            PDFS/*
+            PDFS/**
             index2.html
             archive.html
-            data.js
-            warning*/
+            data/*.json
+            warning/**
