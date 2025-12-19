@@ -2,15 +2,10 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 
-/* Resolve current directory */
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-/* -------------------------------------------------- */
-/*               PATHS + DEFAULT VALUES               */
-/* -------------------------------------------------- */
-
-const DATA_DIR = path.join(__dirname, "..", "data");
+const DATA_DIR = path.join(__dirname, "data");
 const WEEKLY_FILE = path.join(DATA_DIR, "weekly.json");
 
 const DEFAULT_DATA = {
@@ -18,53 +13,38 @@ const DEFAULT_DATA = {
   last_article_number: 0
 };
 
-/* -------------------------------------------------- */
-/*              Ensure data folder exists             */
-/* -------------------------------------------------- */
 if (!fs.existsSync(DATA_DIR)) {
   fs.mkdirSync(DATA_DIR, { recursive: true });
 }
 
-/* -------------------------------------------------- */
-/*               Internal: safe JSON read             */
-/* -------------------------------------------------- */
-function loadJSON(filePath, fallback) {
+function loadWeeklyData() {
   try {
-    if (!fs.existsSync(filePath)) {
-      fs.writeFileSync(filePath, JSON.stringify(fallback, null, 2));
-      return structuredClone(fallback);
+    if (!fs.existsSync(WEEKLY_FILE)) {
+      fs.writeFileSync(WEEKLY_FILE, JSON.stringify(DEFAULT_DATA, null, 2));
+      return structuredClone(DEFAULT_DATA);
     }
-
-    const raw = fs.readFileSync(filePath, "utf8");
+    const raw = fs.readFileSync(WEEKLY_FILE, "utf8");
     const parsed = JSON.parse(raw);
-
-    return { ...fallback, ...parsed };
-  } catch (e) {
-    console.error("JSON read error:", e);
-    return structuredClone(fallback);
+    return { ...DEFAULT_DATA, ...parsed };
+  } catch {
+    return structuredClone(DEFAULT_DATA);
   }
 }
 
-/* -------------------------------------------------- */
-/*            Internal: safe JSON write               */
-/* -------------------------------------------------- */
-function saveJSON(filePath, data) {
-  try {
-    fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
-  } catch (e) {
-    console.error("JSON write error:", e);
-  }
+function saveWeeklyData(data) {
+  fs.writeFileSync(WEEKLY_FILE, JSON.stringify(data, null, 2));
 }
 
-/* -------------------------------------------------- */
-/*                  Exported methods                  */
-/* -------------------------------------------------- */
-
-export function getWeeklyData() {
-  return loadJSON(WEEKLY_FILE, DEFAULT_DATA);
+function getTodayUTC() {
+  return new Date().toISOString().slice(0, 10);
 }
 
-export function setWeeklyData(data) {
-  const finalData = { ...DEFAULT_DATA, ...data };
-  saveJSON(WEEKLY_FILE, finalData);
+const today = getTodayUTC();
+const weeklyData = loadWeeklyData();
+
+if (weeklyData.current_date === today) {
+  process.exit(0);
 }
+
+weeklyData.current_date = today;
+saveWeeklyData(weeklyData);
