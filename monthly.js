@@ -23,48 +23,54 @@ export async function runMonthly() {
   const yearlyKey = `${year}`;
   const monthLabel = `${year}-${month}`;
 
-  // -------------------------------------------------------------
-  // 1️⃣ SOFT CHECK using index2.html (monthly)
-  // -------------------------------------------------------------
+  /* -------------------------------------------------- */
+  /* Guard: already ran for this month                  */
+  /* -------------------------------------------------- */
+
+  if (dailyData.last_monthly_run === monthLabel) {
+    console.log(`⛔ Monthly run already completed for ${monthLabel}. Exiting.`);
+    return;
+  }
+
+  /* -------------------------------------------------- */
+  /* Monthly process                                   */
+  /* -------------------------------------------------- */
+
   try {
     const indexHtml = await readFileText("./public/index2.html");
 
-    if (indexHtml.includes(`data-month="${monthLabel}"`)) {
-      console.log(`⛔ Monthly content for ${monthLabel} already present. Skipping monthly tasks.`);
-    } else {
-      console.log("📘 Running monthly tasks...");
-
+    if (!indexHtml.includes(`data-month="${monthLabel}"`)) {
       await runMonthlyProcess();
-
-      console.log(`✨ Monthly tasks completed and index2.html updated for ${monthLabel}.`);
+      console.log(`✨ Monthly tasks completed for ${monthLabel}.`);
+    } else {
+      console.log(`⛔ Monthly content already present in index2.html for ${monthLabel}.`);
     }
   } catch (err) {
-    console.error("❌ Could not read index2.html:", err);
-    console.error("❗ Monthly tasks will still attempt to run.");
+    console.error("❌ Could not read index2.html. Running monthly tasks anyway.");
     await runMonthlyProcess();
   }
 
-  // -------------------------------------------------------------
-  // 2️⃣ YEARLY PROCESS (real hard lock)
-  // -------------------------------------------------------------
+  /* -------------------------------------------------- */
+  /* Yearly process (hard lock)                         */
+  /* -------------------------------------------------- */
+
   if (await checkHardLock("yearly", yearlyKey)) {
-    console.log(`⛔ Yearly run already completed for ${year}. Skipping yearly tasks.`);
+    console.log(`⛔ Yearly run already completed for ${year}.`);
   } else {
-    console.log("📗 Running yearly tasks...");
     try {
       await runYearlyProcess();
       await saveHardLock("yearly", yearlyKey);
-      console.log(`🔐 YEAR-LOCK set for ${year}`);
+      console.log(`🔐 Yearly lock saved for ${year}.`);
     } catch (err) {
-      console.error("❌ Yearly process failed:", err);
-      console.error("⚠️ No year lock saved.");
+      console.error("❌ Yearly process failed. Year lock not saved.");
       throw err;
     }
   }
 
-  // -------------------------------------------------------------
-  // 3️⃣ Update daily data (optional)
-  // -------------------------------------------------------------
+  /* -------------------------------------------------- */
+  /* Persist state                                      */
+  /* -------------------------------------------------- */
+
   await setDailyData({
     ...dailyData,
     last_monthly_run: monthLabel,
