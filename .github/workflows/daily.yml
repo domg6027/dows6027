@@ -3,14 +3,10 @@ name: Daily PDF Generator
 permissions:
   contents: write
 
-defaults:
-  run:
-    working-directory: .
-
 on:
   schedule:
-    # Runs once daily at 00:00 UTC
-    - cron: "0 0 * * *"
+    # Runs every hour at :15 UTC
+    - cron: "15 * * * *"
   workflow_dispatch:
 
 jobs:
@@ -34,19 +30,16 @@ jobs:
       - name: Install Node dependencies
         run: npm ci --ignore-scripts
 
-      - name: Run daily PDF generator
+      - name: Run daily generator
         run: node daily.js
 
-      - name: Commit DAILY outputs
+      - name: Commit generated PDFs and state
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
 
-          # 🔥 THIS IS THE FIX
-          git add -A
-
-          git status
-          git commit -m "Daily PDF generation update" || echo "No changes to commit"
+          git add PDFS data.json || true
+          git commit -m "Daily PDF update" || echo "Nothing to commit"
 
       - name: Push changes
         run: git push
