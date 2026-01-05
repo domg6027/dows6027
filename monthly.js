@@ -1,18 +1,18 @@
-// monthly.js (ESM)
+// monthly.js (ESM) — DOWS6027 WARNING SERVICE
 
 import {
   getDailyData,
   setDailyData,
   checkHardLock,
   saveHardLock,
-  readFileText
+  readFileText,
+  writeJsonFile
 } from "./helpers/dataManager.js";
 
 import { runMonthlyProcess } from "./monthlyTasks.js";
-import { runYearlyProcess } from "./monthlyTasks.js"; // ← yearly logic lives here now
 
 export async function runMonthly() {
-  console.log("📅 Monthly run started...");
+  console.log("📅 Monthly run started (DOWS6027)...");
 
   const dailyData = await getDailyData();
 
@@ -47,24 +47,44 @@ export async function runMonthly() {
       console.log(`⛔ Monthly content already present for ${monthLabel}.`);
     }
   } catch (err) {
-    console.error("❌ index2.html read failed — running monthly anyway.");
+    console.warn("⚠️ index2.html not readable — running monthly tasks anyway.");
     await runMonthlyProcess();
   }
 
   /* -------------------------------------------------- */
-  /* Yearly process — ONLY in January                   */
+  /* Yearly process — ONLY in JANUARY                   */
   /* -------------------------------------------------- */
 
   if (monthIndex === 0) {
-    console.log("📆 January detected — checking yearly process...");
+    console.log("🗓 January detected — checking yearly run...");
 
     if (await checkHardLock("yearly", yearlyKey)) {
       console.log(`⛔ Yearly run already completed for ${year}.`);
     } else {
       try {
-        await runYearlyProcess();
+        console.log(`📦 Building yearly release package for ${year}...`);
+
+        const yearlyPackage = {
+          year,
+          generated_at: new Date().toISOString(),
+          source: "DOWS6027",
+          service: "Warning Service",
+          type: "yearly-release",
+          months_covered: [],
+          notes: "Auto-generated during January monthly run"
+        };
+
+        // Optional: populate months from data store if you wish later
+        // yearlyPackage.months_covered = [...]
+
+        await writeJsonFile(
+          `./releases/yearly-${year}.json`,
+          yearlyPackage
+        );
+
         await saveHardLock("yearly", yearlyKey);
         console.log(`🔐 Yearly lock saved for ${year}.`);
+
       } catch (err) {
         console.error("❌ Yearly process failed — lock NOT saved.");
         throw err;
@@ -84,5 +104,5 @@ export async function runMonthly() {
     last_yearly_run: monthIndex === 0 ? yearlyKey : dailyData.last_yearly_run
   });
 
-  console.log("🏁 Monthly run completed.");
+  console.log("🏁 Monthly run completed (DOWS6027).");
 }
