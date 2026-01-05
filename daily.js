@@ -1,6 +1,6 @@
 /**
- * DOWS6027 – DAILY RUN (GREGORIAN, REAL CRAWLER)
- * Node 20 – ES Module ONLY
+ * DOWS6027 – DAILY RUN (GREGORIAN, HARDENED)
+ * Node 20 – ES Module
  */
 
 import fs from "fs";
@@ -70,6 +70,34 @@ async function fetchArchiveIds() {
 }
 
 /* ─────────────────────────────────────── */
+/* 📅 DATE EXTRACTION (ROBUST) */
+/* ─────────────────────────────────────── */
+
+function extractDate(html) {
+  const patterns = [
+    /Published:\s*([A-Za-z]+)\s+(\d{1,2}),\s*(\d{4})/i,
+    /Posted:\s*([A-Za-z]+)\s+(\d{1,2}),\s*(\d{4})/i
+  ];
+
+  for (const p of patterns) {
+    const m = html.match(p);
+    if (m) {
+      return new Date(`${m[1]} ${m[2]}, ${m[3]}`);
+    }
+  }
+
+  // Meta tag fallback
+  const meta = html.match(/content="(\d{4}-\d{2}-\d{2})"/);
+  if (meta) {
+    return new Date(meta[1]);
+  }
+
+  // Absolute fallback
+  console.warn("⚠️ Date not found — using UTC today");
+  return new Date();
+}
+
+/* ─────────────────────────────────────── */
 /* 📰 FETCH ARTICLE */
 /* ─────────────────────────────────────── */
 
@@ -78,10 +106,7 @@ async function fetchArticle(id) {
   const res = await fetch(url);
   const html = await res.text();
 
-  const dateMatch = html.match(/Published:\s*([A-Za-z]+)\s*(\d+),\s*(\d{4})/);
-  if (!dateMatch) throw new Error("Date not found");
-
-  const date = new Date(`${dateMatch[1]} ${dateMatch[2]}, ${dateMatch[3]}`);
+  const date = extractDate(html);
   const ymd = date.toISOString().slice(0, 10).replace(/-/g, "");
 
   const htmlPath = path.join(TMP_DIR, `${id}.html`);
@@ -113,9 +138,13 @@ for (const id of ids) {
   const pdfName = `${article.ymd}-${id}.pdf`;
   const pdfPath = path.join(PDF_DIR, pdfName);
 
-  if (fs.existsSync(pdfPath)) continue;
+  if (fs.existsSync(pdfPath)) {
+    console.log("⏭ Skipping existing:", pdfName);
+    continue;
+  }
 
   makePDF(article.htmlPath, pdfPath);
+  console.log("✅ PDF CREATED:", pdfName);
 
   state.last_article_number = id;
   state.last_URL_processed = article.url;
