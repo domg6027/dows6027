@@ -26,7 +26,6 @@ jobs:
         with:
           node-version: "20"
 
-      # 🔴 REQUIRED: wkhtmltopdf for PDF generation
       - name: Install wkhtmltopdf
         run: |
           sudo apt-get update
@@ -38,11 +37,15 @@ jobs:
       - name: Run daily PDF generator
         run: node daily.js
 
-      - name: Commit updates
+      - name: Commit DAILY outputs
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
-          git add PDFS data warning archive.html index2.html || true
+
+          # 🔥 THIS IS THE FIX
+          git add -A
+
+          git status
           git commit -m "Daily PDF generation update" || echo "No changes to commit"
 
       - name: Push changes
