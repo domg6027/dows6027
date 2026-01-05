@@ -1,85 +1,89 @@
 /**
  * daily.js
- * DOWS6027 – Daily Article PDF Generator (CORRECT & SAFE)
+ * DOWS6027 – Daily Article PDF Generator (ESM SAFE)
  */
 
-const fs = require("fs");
-const path = require("path");
-const { execSync } = require("child_process");
+import fs from "fs";
+import path from "path";
+import { execSync } from "child_process";
+import { fileURLToPath } from "url";
 
-const ROOT = process.cwd();
+/* ─────────────────────────────────────── */
+/* 📂 ABSOLUTE PATH RESOLUTION (ESM) */
+/* ─────────────────────────────────────── */
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const ROOT = __dirname;
 const PDF_DIR = path.join(ROOT, "PDFS");
 const DATA_FILE = path.join(ROOT, "data.json");
 
-// ─────────────────────────────────────────────
-// 1️⃣ ENSURE PDF DIRECTORY EXISTS
-// ─────────────────────────────────────────────
-if (!fs.existsSync(PDF_DIR)) {
-  fs.mkdirSync(PDF_DIR, { recursive: true });
-}
+/* ─────────────────────────────────────── */
+/* 📁 ENSURE DIRECTORIES */
+/* ─────────────────────────────────────── */
 
-// ─────────────────────────────────────────────
-// 2️⃣ FAILSAFE: DELETE ALL LEGACY WRONG PDFs
-// ─────────────────────────────────────────────
+fs.mkdirSync(PDF_DIR, { recursive: true });
+
+/* ─────────────────────────────────────── */
+/* 🧹 REMOVE WRONG LEGACY PDFs */
+/* ─────────────────────────────────────── */
+
 const BAD_PREFIX = "DOWS6027-DAILY-";
 
-const existingPDFs = fs.readdirSync(PDF_DIR);
-const legacyPDFs = existingPDFs.filter(f => f.startsWith(BAD_PREFIX));
-
-if (legacyPDFs.length > 0) {
-  console.warn(`⚠️ Removing ${legacyPDFs.length} legacy PDFs`);
-  for (const file of legacyPDFs) {
+for (const file of fs.readdirSync(PDF_DIR)) {
+  if (file.startsWith(BAD_PREFIX)) {
     fs.unlinkSync(path.join(PDF_DIR, file));
+    console.warn("🧹 Removed legacy PDF:", file);
   }
 }
 
-// ─────────────────────────────────────────────
-// 3️⃣ LOAD OR REBUILD data.json
-// ─────────────────────────────────────────────
-let state;
+/* ─────────────────────────────────────── */
+/* 🧠 LOAD / FALLBACK STATE */
+/* ─────────────────────────────────────── */
 
 const FALLBACK_STATE = {
   last_date_used: "2025-12-11",
-  last_URL_processed: "https://www.prophecynewswatch.com/article.cfm?recent_news_id=9256",
+  last_URL_processed:
+    "https://www.prophecynewswatch.com/article.cfm?recent_news_id=9256",
   current_date: "2025-12-11",
   last_article_number: 9256,
   generated: {}
 };
 
-if (!fs.existsSync(DATA_FILE)) {
+let state;
+
+try {
+  state = JSON.parse(fs.readFileSync(DATA_FILE, "utf8"));
+  state.generated ||= {};
+} catch {
+  console.warn("⚠️ data.json missing or corrupt – using fallback");
   state = FALLBACK_STATE;
-} else {
-  try {
-    state = JSON.parse(fs.readFileSync(DATA_FILE, "utf8"));
-    state.generated = state.generated || {};
-  } catch {
-    console.warn("⚠️ data.json corrupted – rebuilding");
-    state = FALLBACK_STATE;
-  }
 }
 
-// ─────────────────────────────────────────────
-// 4️⃣ ARTICLE SOURCE (YOU ALREADY HAVE THIS)
-//     This function MUST return one object PER ARTICLE
-// ─────────────────────────────────────────────
+/* ─────────────────────────────────────── */
+/* 🔎 ARTICLE SOURCE (ALREADY IN YOUR PIPE) */
+/* ─────────────────────────────────────── */
+
 function fetchArticles() {
   /**
-   * EXPECTED FORMAT:
+   * MUST RETURN:
    * [
    *   {
    *     id: 9271,
    *     date: "20260105",
-   *     url: "https://www.prophecynewswatch.com/article.cfm?recent_news_id=9271",
-   *     htmlPath: "/absolute/path/to/rendered.html"
+   *     url: "...",
+   *     htmlPath: "/abs/path/article.html"
    *   }
    * ]
    */
   return globalThis.ARTICLES || [];
 }
 
-// ─────────────────────────────────────────────
-// 5️⃣ PDF GENERATION
-// ─────────────────────────────────────────────
+/* ─────────────────────────────────────── */
+/* 🖨 PDF GENERATION */
+/* ─────────────────────────────────────── */
+
 function generatePDF(htmlPath, pdfPath) {
   execSync(
     `wkhtmltopdf --quiet "${htmlPath}" "${pdfPath}"`,
@@ -87,45 +91,45 @@ function generatePDF(htmlPath, pdfPath) {
   );
 }
 
-// ─────────────────────────────────────────────
-// 6️⃣ MAIN
-// ─────────────────────────────────────────────
-(async function run() {
-  console.log("▶ DAILY PDF RUN STARTED");
+/* ─────────────────────────────────────── */
+/* ▶ MAIN */
+/* ─────────────────────────────────────── */
 
-  const articles = fetchArticles();
-  let created = 0;
+console.log("▶ DAILY PDF RUN STARTED");
 
-  for (const article of articles) {
-    const { id, date, url, htmlPath } = article;
+const articles = fetchArticles();
+let created = 0;
 
-    if (!id || !date || !htmlPath) continue;
+for (const article of articles) {
+  const { id, date, url, htmlPath } = article;
 
-    const pdfName = `${date}-${id}.pdf`;
-    const pdfFullPath = path.join(PDF_DIR, pdfName);
+  if (!id || !date || !htmlPath) continue;
 
-    if (fs.existsSync(pdfFullPath)) {
-      continue; // already generated
-    }
+  const pdfName = `${date}-${id}.pdf`;
+  const pdfPath = path.join(PDF_DIR, pdfName);
 
-    generatePDF(htmlPath, pdfFullPath);
+  if (fs.existsSync(pdfPath)) continue;
 
-    state.generated[id] = {
-      date,
-      url,
-      pdf: `PDFS/${pdfName}`
-    };
+  generatePDF(htmlPath, pdfPath);
 
-    state.last_article_number = Math.max(
-      state.last_article_number || 0,
-      id
-    );
-    state.current_date = date;
-    state.last_URL_processed = url;
+  state.generated[id] = {
+    date,
+    url,
+    pdf: `PDFS/${pdfName}`
+  };
 
-    created++;
-  }
+  state.last_article_number = Math.max(
+    state.last_article_number || 0,
+    id
+  );
 
-  fs.writeFileSync(DATA_FILE, JSON.stringify(state, null, 2));
-  console.log(`✅ PDFs created this run: ${created}`);
-})();
+  state.current_date = date;
+  state.last_URL_processed = url;
+
+  created++;
+}
+
+fs.writeFileSync(DATA_FILE, JSON.stringify(state, null, 2), "utf8");
+
+console.log(`✅ PDFs created this run: ${created}`);
+console.log("🏁 DAILY RUN COMPLETE");
