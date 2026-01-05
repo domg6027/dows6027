@@ -1,16 +1,15 @@
 /**
  * DOWS6027 – DAILY RUN (GREGORIAN)
- * FINAL CLEAN VERSION
- * Node 20+ | ES Modules | wkhtmltopdf
+ * wkhtmltopdf SAFE VERSION
  */
 
 import fs from "fs";
 import path from "path";
-import { execFileSync } from "child_process";
 import https from "https";
+import { execFileSync } from "child_process";
 
 /* ─────────────────────────────────────── */
-/* 🔰 BOOT */
+/* BOOT */
 /* ─────────────────────────────────────── */
 
 console.log("▶ DAILY RUN START");
@@ -25,139 +24,142 @@ fs.mkdirSync(PDF_DIR, { recursive: true });
 fs.mkdirSync(TMP_DIR, { recursive: true });
 
 /* ─────────────────────────────────────── */
-/* 🧹 SAFETY CLEANUP */
+/* CLEAN WRONG PDFs */
 /* ─────────────────────────────────────── */
 
 for (const f of fs.readdirSync(PDF_DIR)) {
   if (f.startsWith("DOWS6027-DAILY-")) {
     fs.unlinkSync(path.join(PDF_DIR, f));
-    console.log("🗑 Removed legacy PDF:", f);
   }
 }
 
 /* ─────────────────────────────────────── */
-/* 📄 STATE LOAD */
+/* STATE */
 /* ─────────────────────────────────────── */
 
-const DEFAULT_STATE = {
+const FALLBACK = {
   last_date_used: "2025-12-11",
-  last_URL_processed: "https://www.prophecynewswatch.com/article.cfm?recent_news_id=9256",
+  last_URL_processed: "",
   current_date: "2025-12-11",
   last_article_number: 9256
 };
 
-let state = DEFAULT_STATE;
+let state = FALLBACK;
 if (fs.existsSync(STATE_FILE)) {
   try {
     state = JSON.parse(fs.readFileSync(STATE_FILE, "utf8"));
-  } catch {
-    console.warn("⚠️ data.json invalid — using fallback");
-  }
+  } catch {}
 }
 
-let lastArticle = Number(state.last_article_number) || 9256;
+let lastProcessed = Number(state.last_article_number) || 9256;
 
 /* ─────────────────────────────────────── */
-/* 🌐 FETCH HELPERS */
+/* FETCH */
 /* ─────────────────────────────────────── */
 
 function fetch(url) {
   return new Promise((resolve, reject) => {
     https.get(url, res => {
       let data = "";
-      res.on("data", c => (data += c));
+      res.on("data", d => (data += d));
       res.on("end", () => resolve(data));
     }).on("error", reject);
   });
 }
 
 /* ─────────────────────────────────────── */
-/* 📰 FIND NEW ARTICLES */
+/* FIND NEW IDS (DEDUPED) */
 /* ─────────────────────────────────────── */
 
-const ARCHIVE_URL = "https://www.prophecynewswatch.com/archive.cfm";
-const archiveHTML = await fetch(ARCHIVE_URL);
+const archive = await fetch("https://www.prophecynewswatch.com/archive.cfm");
 
-const ids = [...archiveHTML.matchAll(/recent_news_id=(\d+)/g)]
-  .map(m => Number(m[1]))
-  .filter(n => n > lastArticle)
-  .sort((a, b) => a - b);
+const ids = [...new Set(
+  [...archive.matchAll(/recent_news_id=(\d+)/g)]
+    .map(m => Number(m[1]))
+    .filter(id => id > lastProcessed)
+)].sort((a, b) => a - b);
 
-console.log(`📰 New articles found: ${ids.length}`);
-
-if (!ids.length) {
-  console.log("✔ Nothing to process");
-  process.exit(0);
-}
+console.log("📰 New articles found:", ids.length);
+if (!ids.length) process.exit(0);
 
 /* ─────────────────────────────────────── */
-/* 📄 PROCESS ARTICLES */
+/* PROCESS */
 /* ─────────────────────────────────────── */
 
 for (const id of ids) {
-  const url = `https://www.prophecynewswatch.com/article.cfm?recent_news_id=${id}`;
-  console.log("➡ Processing", url);
+  console.log("➡ Processing", id);
 
   let html;
   try {
-    html = await fetch(url);
+    html = await fetch(`https://www.prophecynewswatch.com/article.cfm?recent_news_id=${id}`);
   } catch {
-    console.warn("⚠️ Fetch failed, skipping", id);
+    console.warn("⚠️ Fetch failed:", id);
     continue;
   }
 
-  const dateMatch =
-    html.match(/(\d{4})-(\d{2})-(\d{2})/) ||
-    html.match(/(\w+ \d{1,2}, \d{4})/);
-
-  let ymd;
-  if (dateMatch) {
-    const d = new Date(dateMatch[0]);
-    ymd = `${d.getUTCFullYear()}${String(d.getUTCMonth() + 1).padStart(2, "0")}${String(d.getUTCDate()).padStart(2, "0")}`;
-  } else {
-    const d = new Date();
-    ymd = `${d.getUTCFullYear()}${String(d.getUTCMonth() + 1).padStart(2, "0")}${String(d.getUTCDate()).padStart(2, "0")}`;
-    console.warn("⚠️ Date not found — using UTC today");
+  const bodyMatch = html.match(/<div class="article-content">([\s\S]*?)<\/div>/i);
+  if (!bodyMatch) {
+    console.warn("⚠️ Article body not found:", id);
+    continue;
   }
 
-  const tmpHTML = path.join(TMP_DIR, `${id}.html`);
-  const pdfFile = `${ymd}-${id}.pdf`;
-  const pdfPath = path.join(PDF_DIR, pdfFile);
+  const dateMatch = html.match(/(\w+ \d{1,2}, \d{4})/);
+  const d = dateMatch ? new Date(dateMatch[1]) : new Date();
 
-  fs.writeFileSync(tmpHTML, html, "utf8");
+  const ymd =
+    `${d.getUTCFullYear()}${String(d.getUTCMonth() + 1).padStart(2, "0")}${String(d.getUTCDate()).padStart(2, "0")}`;
+
+  const safeHTML = `
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Prophecy News Watch</title>
+<style>
+body { font-family: serif; margin: 2em; }
+h1,h2,h3 { color:#222; }
+a { color:#000; text-decoration:none; }
+</style>
+</head>
+<body>
+${bodyMatch[1]}
+</body>
+</html>
+`;
+
+  const tmp = path.join(TMP_DIR, `${id}.html`);
+  const pdf = path.join(PDF_DIR, `${ymd}-${id}.pdf`);
+
+  fs.writeFileSync(tmp, safeHTML, "utf8");
 
   try {
-    execFileSync("wkhtmltopdf", ["--quiet", tmpHTML, pdfPath], {
-      stdio: "ignore"
-    });
-    console.log("✅ PDF created:", pdfFile);
-  } catch (e) {
-    console.error("❌ wkhtmltopdf failed for", id);
-    continue;
+    execFileSync("wkhtmltopdf", ["--quiet", tmp, pdf]);
+    console.log("✅ PDF created:", `${ymd}-${id}.pdf`);
+    lastProcessed = id;
+  } catch {
+    console.error("❌ PDF failed:", id);
   }
-
-  lastArticle = id;
 }
 
 /* ─────────────────────────────────────── */
-/* 📝 SAVE STATE */
+/* SAVE STATE */
 /* ─────────────────────────────────────── */
 
 const today = new Date().toISOString().slice(0, 10);
 
-const newState = {
-  last_date_used: today,
-  last_URL_processed: `https://www.prophecynewswatch.com/article.cfm?recent_news_id=${lastArticle}`,
-  current_date: today,
-  last_article_number: lastArticle
-};
-
-fs.writeFileSync(STATE_FILE, JSON.stringify(newState, null, 2));
+fs.writeFileSync(
+  STATE_FILE,
+  JSON.stringify(
+    {
+      last_date_used: today,
+      last_URL_processed: `https://www.prophecynewswatch.com/article.cfm?recent_news_id=${lastProcessed}`,
+      current_date: today,
+      last_article_number: lastProcessed
+    },
+    null,
+    2
+  )
+);
 
 console.log("💾 data.json updated");
-
-/* ─────────────────────────────────────── */
-/* 🏁 END */
-/* ─────────────────────────────────────── */
-
 console.log("✔ DAILY RUN COMPLETE");
