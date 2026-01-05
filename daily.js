@@ -1,115 +1,127 @@
-/**
- * DOWS6027 – DAILY ARTICLE PDF GENERATOR (HARDENED)
- * ENGINE: Playwright (Chromium)
- * MODE: Batch-safe, CI-stable
- */
-
+// daily.js — ES MODULE VERSION
 import fs from "fs";
 import path from "path";
 import { chromium } from "playwright";
-import fetch from "node-fetch";
+import { execSync } from "child_process";
 
-/* ─────────────────────────────────────── */
-/* 🔥 START */
-/* ─────────────────────────────────────── */
-
-console.log("▶ DAILY RUN START:", new Date().toISOString());
-
+const BASE_URL = "https://www.prophecynewswatch.com";
+const ARCHIVE_URL = `${BASE_URL}/article-archive/`;
 const ROOT = process.cwd();
+
 const PDF_DIR = path.join(ROOT, "PDFS");
-const STATE_DIR = path.join(ROOT, "state");
-const STATE_FILE = path.join(STATE_DIR, "lastRun.json");
+const TMP_DIR = path.join(ROOT, "tmp");
+const DATA_FILE = path.join(ROOT, "data.json");
 
-fs.mkdirSync(PDF_DIR, { recursive: true });
-fs.mkdirSync(STATE_DIR, { recursive: true });
+console.log("▶ DAILY RUN START");
 
-/* ─────────────────────────────────────── */
-/* 🧹 DELETE WRONG PDFs */
-/* ─────────────────────────────────────── */
+/* ─────────────────────────────── */
+/*  ENSURE DIRECTORIES EXIST       */
+/* ─────────────────────────────── */
+for (const dir of [PDF_DIR, TMP_DIR]) {
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+}
 
-for (const f of fs.readdirSync(PDF_DIR)) {
-  if (f.startsWith("DOWS6027-DAILY-")) {
-    fs.unlinkSync(path.join(PDF_DIR, f));
-    console.log("🗑 Deleted invalid PDF:", f);
+/* ─────────────────────────────── */
+/*  DELETE WRONG PDFs SAFELY       */
+/* ─────────────────────────────── */
+for (const file of fs.readdirSync(PDF_DIR)) {
+  if (file.startsWith("DOWS6027-DAILY-")) {
+    fs.unlinkSync(path.join(PDF_DIR, file));
   }
 }
 
-/* ─────────────────────────────────────── */
-/* 📄 LOAD STATE */
-/* ─────────────────────────────────────── */
+/* ─────────────────────────────── */
+/*  LOAD DATA.JSON                 */
+/* ─────────────────────────────── */
+let data = { processed: [] };
+if (fs.existsSync(DATA_FILE)) {
+  data = JSON.parse(fs.readFileSync(DATA_FILE, "utf8"));
+}
+const processedSet = new Set(data.processed);
 
-const DEFAULT_STATE = {
-  last_date_used: "2025-12-11",
-  last_URL_processed: "",
-  current_date: "2025-12-11",
-  last_article_number: 9256
-};
+/* ─────────────────────────────── */
+/*  FETCH ARCHIVE PAGE             */
+/* ─────────────────────────────── */
+async function fetchArchive() {
+  const res = await fetch(ARCHIVE_URL);
+  const html = await res.text();
 
-let state = DEFAULT_STATE;
-if (fs.existsSync(STATE_FILE)) {
-  state = { ...DEFAULT_STATE, ...JSON.parse(fs.readFileSync(STATE_FILE, "utf8")) };
+  const matches = [...html.matchAll(/\/article\/(\d{4})\//g)];
+  const ids = [...new Set(matches.map(m => m[1]))];
+
+  return ids.map(id => ({
+    id,
+    url: `${BASE_URL}/article/${id}/`
+  }));
 }
 
-console.log("📘 LAST ARTICLE:", state.last_article_number);
+/* ─────────────────────────────── */
+/*  EXTRACT ARTICLE DATE           */
+/* ─────────────────────────────── */
+function extractDate(html) {
+  const m = html.match(/([A-Z][a-z]+ \d{1,2}, \d{4})/);
+  if (!m) return null;
 
-/* ─────────────────────────────────────── */
-/* 📰 FETCH ARCHIVE */
-/* ─────────────────────────────────────── */
+  const d = new Date(m[1] + " UTC");
+  const yyyy = d.getUTCFullYear();
+  const mm = String(d.getUTCMonth() + 1).padStart(2, "0");
+  const dd = String(d.getUTCDate()).padStart(2, "0");
+  return `${yyyy}${mm}${dd}`;
+}
 
-const archiveURL = "https://www.prophecynewswatch.com/articles.cfm";
-const archiveHTML = await fetch(archiveURL).then(r => r.text());
-
-const articleRegex = /article\.cfm\?recent_news_id=(\d+)/g;
-const articleIDs = [...archiveHTML.matchAll(articleRegex)]
-  .map(m => Number(m[1]))
-  .filter(id => id > state.last_article_number)
-  .sort((a, b) => a - b);
-
-console.log(`📰 New articles found: ${articleIDs.length}`);
-if (!articleIDs.length) process.exit(0);
-
-/* ─────────────────────────────────────── */
-/* 🖨 PDF GENERATION */
-/* ─────────────────────────────────────── */
-
+/* ─────────────────────────────── */
+/*  MAIN                           */
+/* ─────────────────────────────── */
 const browser = await chromium.launch();
 const page = await browser.newPage();
 
-for (const id of articleIDs) {
+const articles = await fetchArchive();
+console.log(`📰 New articles found: ${articles.length}`);
+
+for (const article of articles) {
+  if (processedSet.has(article.id)) continue;
+
   try {
-    const url = `https://www.prophecynewswatch.com/article.cfm?recent_news_id=${id}`;
-    console.log("➡ Processing:", url);
+    await page.goto(article.url, { waitUntil: "domcontentloaded" });
+    const html = await page.content();
 
-    const html = await fetch(url).then(r => r.text());
+    let ymd = extractDate(html);
+    if (!ymd) {
+      const d = new Date();
+      ymd = `${d.getUTCFullYear()}${String(d.getUTCMonth()+1).padStart(2,"0")}${String(d.getUTCDate()).padStart(2,"0")}`;
+      console.warn(`⚠️ Date not found for ${article.id} — using UTC today`);
+    }
 
-    const dateMatch = html.match(/(\w+ \d{1,2}, \d{4})/);
-    const dateObj = dateMatch ? new Date(dateMatch[1]) : new Date();
-
-    const y = dateObj.getUTCFullYear();
-    const m = String(dateObj.getUTCMonth() + 1).padStart(2, "0");
-    const d = String(dateObj.getUTCDate()).padStart(2, "0");
-    const dateStamp = `${y}${m}${d}`;
-
-    const pdfName = `${dateStamp}-${id}.pdf`;
+    const pdfName = `${ymd}-${article.id}.pdf`;
     const pdfPath = path.join(PDF_DIR, pdfName);
 
-    await page.setContent(html, { waitUntil: "domcontentloaded" });
-    await page.pdf({ path: pdfPath, format: "A4", printBackground: true });
+    if (fs.existsSync(pdfPath)) {
+      processedSet.add(article.id);
+      continue;
+    }
 
-    console.log("✅ PDF CREATED:", pdfName);
+    await page.pdf({
+      path: pdfPath,
+      format: "A4",
+      margin: { top: "20mm", bottom: "20mm", left: "15mm", right: "15mm" },
+      printBackground: true
+    });
 
-    state.last_article_number = id;
-    state.last_URL_processed = url;
-    state.current_date = `${y}-${m}-${d}`;
-
-    fs.writeFileSync(STATE_FILE, JSON.stringify(state, null, 2));
+    processedSet.add(article.id);
+    console.log(`✔ Created ${pdfName}`);
 
   } catch (err) {
-    console.error("❌ FAILED ARTICLE:", id, err.message);
-    continue;
+    console.error(`✖ Failed article ${article.id}: ${err.message}`);
   }
 }
 
-await browser.close();
+/* ─────────────────────────────── */
+/*  SAVE DATA.JSON                 */
+/* ─────────────────────────────── */
+fs.writeFileSync(
+  DATA_FILE,
+  JSON.stringify({ processed: [...processedSet].sort() }, null, 2)
+);
 
-console.log("🏁 DAILY RUN COMPLETE");
+await browser.close();
+console.log("✔ DAILY RUN COMPLETE");
