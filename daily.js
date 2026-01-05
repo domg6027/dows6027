@@ -1,7 +1,7 @@
 /**
- * DOWS6027 – DAILY RUN (GREGORIAN / UTC)
- * HARDENED + DIAGNOSTIC
- * SOURCE OF TRUTH = JSON STATE ONLY
+ * DOWS6027 – DAILY RUN (GREGORIAN)
+ * FULL DIAGNOSTIC + FULL PATH VERSION
+ * ROOT-BASED STATE + MULTI-FILE SAFE
  */
 
 import fs from "fs";
@@ -9,17 +9,16 @@ import path from "path";
 import { execSync } from "child_process";
 
 /* ─────────────────────────────────────── */
-/* 🔥 START */
+/* 🔥 HARD START LOGS */
 /* ─────────────────────────────────────── */
 
-console.log("══════════════════════════════════════");
 console.log("🔥 DAILY.JS STARTED");
 console.log("🕒 ISO TIME:", new Date().toISOString());
+console.log("🕒 LOCAL TIME:", new Date().toString());
 console.log("📂 CWD:", process.cwd());
-console.log("══════════════════════════════════════");
 
 /* ─────────────────────────────────────── */
-/* 📅 GREGORIAN DATE (UTC ONLY) */
+/* 📅 GREGORIAN DATE (UTC) */
 /* ─────────────────────────────────────── */
 
 const now = new Date();
@@ -27,105 +26,134 @@ const YYYY = now.getUTCFullYear();
 const MM = String(now.getUTCMonth() + 1).padStart(2, "0");
 const DD = String(now.getUTCDate()).padStart(2, "0");
 
-const TODAY = `${YYYY}${MM}${DD}`;
+const TODAY_YYYYMMDD = `${YYYY}${MM}${DD}`;
+const TODAY_ISO = `${YYYY}-${MM}-${DD}`;
 
-console.log("📅 UTC DATE (YYYYMMDD):", TODAY);
+console.log("📅 TODAY UTC (YYYYMMDD):", TODAY_YYYYMMDD);
+console.log("📅 TODAY UTC (ISO):", TODAY_ISO);
 
 /* ─────────────────────────────────────── */
-/* 📂 PATHS */
+/* 📂 ABSOLUTE ROOT PATHS */
 /* ─────────────────────────────────────── */
 
 const ROOT = process.cwd();
+
 const PDF_DIR = path.join(ROOT, "PDFS");
 const STATE_DIR = path.join(ROOT, "state");
-const STATE_FILE = path.join(STATE_DIR, "lastRun.json");
+const JSON_PATH = path.join(ROOT, "state", "lastRun.json");
 
 console.log("📁 PDF DIR:", PDF_DIR);
-console.log("🗂 STATE FILE:", STATE_FILE);
+console.log("🗂 STATE DIR:", STATE_DIR);
+console.log("🗂 JSON PATH:", JSON_PATH);
 
-/* Ensure dirs */
+/* ─────────────────────────────────────── */
+/* 📁 ENSURE DIRECTORIES EXIST */
+/* ─────────────────────────────────────── */
+
 fs.mkdirSync(PDF_DIR, { recursive: true });
 fs.mkdirSync(STATE_DIR, { recursive: true });
 
 /* ─────────────────────────────────────── */
-/* 📖 LOAD STATE (SOURCE OF TRUTH) */
+/* 🧩 FALLBACK JSON */
 /* ─────────────────────────────────────── */
 
-let state = {
-  lastDailyRun: null,
-  timestamp: null,
-  pdf: null
+const FALLBACK_STATE = {
+  last_date_used: "2025-12-11",
+  last_URL_processed: "https://www.prophecynewswatch.com/article.cfm?recent_news_id=9256",
+  current_date: "2025-12-11",
+  last_article_number: 9256
 };
 
-if (fs.existsSync(STATE_FILE)) {
-  try {
-    state = JSON.parse(fs.readFileSync(STATE_FILE, "utf8"));
-    console.log("📖 STATE LOADED:", state);
-  } catch (err) {
-    console.error("❌ STATE READ FAILED – RESETTING", err);
+/* ─────────────────────────────────────── */
+/* 📖 LOAD STATE */
+/* ─────────────────────────────────────── */
+
+let state;
+
+try {
+  if (!fs.existsSync(JSON_PATH)) {
+    console.log("⚠️ STATE FILE MISSING – CREATING FALLBACK");
+    fs.writeFileSync(JSON_PATH, JSON.stringify(FALLBACK_STATE, null, 2), "utf8");
+    state = structuredClone(FALLBACK_STATE);
+  } else {
+    const raw = fs.readFileSync(JSON_PATH, "utf8");
+    state = { ...FALLBACK_STATE, ...JSON.parse(raw) };
   }
-} else {
-  console.log("📖 NO STATE FILE FOUND – INITIAL RUN");
+} catch (err) {
+  console.error("❌ STATE LOAD FAILED – USING FALLBACK", err);
+  state = structuredClone(FALLBACK_STATE);
+}
+
+console.log("📦 LOADED STATE:", state);
+
+/* ─────────────────────────────────────── */
+/* 🧠 DETERMINE START DATE */
+/* ─────────────────────────────────────── */
+
+let startDate = state.last_date_used;
+
+console.log("➡️ START DATE FROM STATE:", startDate);
+console.log("➡️ TARGET DATE:", TODAY_ISO);
+
+/* ─────────────────────────────────────── */
+/* 🔁 DATE ITERATOR (YYYY-MM-DD) */
+/* ─────────────────────────────────────── */
+
+function nextDate(iso) {
+  const d = new Date(`${iso}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + 1);
+  return d.toISOString().slice(0, 10);
 }
 
 /* ─────────────────────────────────────── */
-/* ⚠️ DATE DECISION */
+/* 📄 PROCESS DAILY FILES */
 /* ─────────────────────────────────────── */
 
-if (state.lastDailyRun === TODAY) {
-  console.log("⛔ DAILY ALREADY RAN FOR TODAY – CONTINUING ANYWAY (FORCE MODE)");
-} else {
-  console.log("➡️ NEW DAILY RUN REQUIRED");
+let processedCount = 0;
+let currentDate = startDate;
+
+while (currentDate <= TODAY_ISO) {
+  console.log("🔄 PROCESSING DATE:", currentDate);
+
+  const pdfName = `DOWS6027-DAILY-${currentDate.replaceAll("-", "")}.pdf`;
+  const pdfPath = path.join(PDF_DIR, pdfName);
+
+  if (fs.existsSync(pdfPath)) {
+    console.log("⏭ PDF ALREADY EXISTS – SKIPPING:", pdfName);
+  } else {
+    try {
+      fs.writeFileSync(
+        pdfPath,
+        `DOWS6027 DAILY REPORT\nDate: ${currentDate}\nGenerated: ${new Date().toISOString()}\n`,
+        "utf8"
+      );
+      console.log("✅ PDF CREATED:", pdfName);
+      processedCount++;
+    } catch (err) {
+      console.error("❌ PDF WRITE FAILED:", pdfName, err);
+      break;
+    }
+  }
+
+  state.last_date_used = currentDate;
+  state.current_date = currentDate;
+
+  currentDate = nextDate(currentDate);
 }
 
 /* ─────────────────────────────────────── */
-/* 📄 PDF GENERATION */
+/* 📝 SAVE UPDATED STATE */
 /* ─────────────────────────────────────── */
-
-const pdfName = `DOWS6027-DAILY-${TODAY}.pdf`;
-const pdfPath = path.join(PDF_DIR, pdfName);
-
-console.log("🧪 TARGET PDF:", pdfPath);
 
 try {
-  fs.writeFileSync(
-    pdfPath,
-    [
-      "DOWS6027 DAILY REPORT",
-      `DATE (UTC): ${TODAY}`,
-      `GENERATED: ${new Date().toISOString()}`,
-      ""
-    ].join("\n"),
-    "utf8"
-  );
-  console.log("✅ PDF WRITE SUCCESS");
+  fs.writeFileSync(JSON_PATH, JSON.stringify(state, null, 2), "utf8");
+  console.log("✅ STATE JSON UPDATED");
 } catch (err) {
-  console.error("❌ PDF WRITE FAILED", err);
-  process.exit(1);
-}
-
-console.log("📄 PDF EXISTS:", fs.existsSync(pdfPath));
-
-/* ─────────────────────────────────────── */
-/* 📝 UPDATE STATE (AUTHORITATIVE) */
-/* ─────────────────────────────────────── */
-
-const newState = {
-  lastDailyRun: TODAY,
-  timestamp: new Date().toISOString(),
-  pdf: pdfName
-};
-
-try {
-  fs.writeFileSync(STATE_FILE, JSON.stringify(newState, null, 2), "utf8");
-  console.log("✅ STATE UPDATED:", newState);
-} catch (err) {
-  console.error("❌ STATE WRITE FAILED", err);
-  process.exit(1);
+  console.error("❌ STATE SAVE FAILED", err);
 }
 
 /* ─────────────────────────────────────── */
-/* 🧾 GIT DIAGNOSTICS */
+/* 📦 GIT DIAGNOSTICS */
 /* ─────────────────────────────────────── */
 
 try {
@@ -137,9 +165,8 @@ try {
 }
 
 /* ─────────────────────────────────────── */
-/* 🏁 END */
+/* 🏁 FINAL LOGS */
 /* ─────────────────────────────────────── */
 
-console.log("══════════════════════════════════════");
+console.log("📊 FILES PROCESSED:", processedCount);
 console.log("🏁 DAILY.JS COMPLETED");
-console.log("══════════════════════════════════════");
