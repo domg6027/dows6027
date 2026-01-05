@@ -94,6 +94,52 @@ export async function runMonthly() {
     console.log("ℹ️ Not January — yearly process skipped.");
   }
 
+import fs from "fs/promises";
+import path from "path";
+
+async function runYearlyRelease(previousYear) {
+  console.log(`📦 Creating yearly release package for ${previousYear}...`);
+
+  const releaseDir = path.join("releases", `yearly-${previousYear}`);
+
+  await fs.mkdir(releaseDir, { recursive: true });
+
+  const filesToCopy = [
+    "index2.html",
+    "archive.html",
+    "data",
+    "warning",
+    "PDFS"
+  ];
+
+  for (const item of filesToCopy) {
+    const src = path.resolve(item);
+    const dest = path.join(releaseDir, item);
+
+    try {
+      await fs.cp(src, dest, { recursive: true });
+      console.log(`✔ Copied ${item}`);
+    } catch (err) {
+      console.warn(`⚠ Skipped ${item} (not found)`);
+    }
+  }
+
+  const manifest = {
+    system: "DOWS6027",
+    type: "yearly-release",
+    year: previousYear,
+    generated_at: new Date().toISOString(),
+    contents: filesToCopy
+  };
+
+  await fs.writeFile(
+    path.join(releaseDir, "manifest.json"),
+    JSON.stringify(manifest, null, 2)
+  );
+
+  console.log(`📘 Yearly release for ${previousYear} completed.`);
+}
+  
   /* -------------------------------------------------- */
   /* Persist state                                      */
   /* -------------------------------------------------- */
