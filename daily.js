@@ -1,137 +1,108 @@
-// daily.js (ESM) — DOWS6027 WARNING SERVICE
-// Generates DAILY PDFs from ProphecyNewsWatch articles
+/**
+ * DOWS6027 – DAILY RUN (GREGORIAN)
+ * DIAGNOSTIC VERSION – DO NOT TRIM LOGS
+ */
 
-import { existsSync, mkdirSync, writeFileSync, unlinkSync } from "fs";
-import https from "https";
-import { exec } from "child_process";
-import { getDailyData, setDailyData } from "./helpers/dataManager.js";
+import fs from "fs";
+import path from "path";
+import { execSync } from "child_process";
 
-/* ==================================================
-   CONFIGURATION
-================================================== */
+/* ─────────────────────────────────────── */
+/* 🔥 HARD START LOGS */
+/* ─────────────────────────────────────── */
 
-const BASE =
-  "https://www.prophecynewswatch.com/article.cfm?recent_news_id=";
+console.log("🔥 DAILY.JS STARTED");
+console.log("🕒 ISO TIME:", new Date().toISOString());
+console.log("🕒 LOCAL TIME:", new Date().toString());
+console.log("📂 CWD:", process.cwd());
 
-const PDF_DIR = "./PDFS";
-const MAX_SCAN = 200;
+/* ─────────────────────────────────────── */
+/* 📅 GREGORIAN DATE (UTC-SAFE) */
+/* ─────────────────────────────────────── */
 
-/* ==================================================
-   INIT
-================================================== */
+const now = new Date();
+const yyyy = now.getUTCFullYear();
+const mm = String(now.getUTCMonth() + 1).padStart(2, "0");
+const dd = String(now.getUTCDate()).padStart(2, "0");
 
-if (!existsSync(PDF_DIR)) {
-  mkdirSync(PDF_DIR, { recursive: true });
-}
+const today = `${yyyy}${mm}${dd}`;
+console.log("📅 GREGORIAN DATE (YYYYMMDD):", today);
 
-/* ==================================================
-   HELPERS
-================================================== */
+/* ─────────────────────────────────────── */
+/* 📂 PATHS */
+/* ─────────────────────────────────────── */
 
-function fetchPage(url) {
-  return new Promise((resolve, reject) => {
-    https
-      .get(url, (res) => {
-        let data = "";
-        res.on("data", (chunk) => (data += chunk));
-        res.on("end", () => resolve(data));
-      })
-      .on("error", reject);
-  });
-}
+const ROOT = process.cwd();
+const PDF_DIR = path.join(ROOT, "PDFS");
+const JSON_PATH = path.join(ROOT, "state", "lastRun.json");
 
-/* Extract publish date from article body */
-function extractDate(html) {
-  const match = html.match(
-    /Published:\s*([A-Za-z]+\s+\d{1,2},\s+\d{4})/i
+console.log("📁 PDF DIR:", PDF_DIR);
+console.log("🗂 JSON PATH:", JSON_PATH);
+
+/* Ensure directories exist */
+fs.mkdirSync(PDF_DIR, { recursive: true });
+fs.mkdirSync(path.dirname(JSON_PATH), { recursive: true });
+
+/* ─────────────────────────────────────── */
+/* 📄 PDF GENERATION (TEST ARTIFACT) */
+/* ─────────────────────────────────────── */
+
+const pdfName = `DOWS6027-DAILY-${today}.pdf`;
+const pdfPath = path.join(PDF_DIR, pdfName);
+
+console.log("🧪 Attempting PDF write:", pdfPath);
+
+try {
+  fs.writeFileSync(
+    pdfPath,
+    `DOWS6027 DAILY PDF\nDate: ${today}\nGenerated: ${new Date().toISOString()}\n`,
+    "utf8"
   );
-  return match ? new Date(match[1]) : null;
+  console.log("✅ PDF CREATED");
+} catch (err) {
+  console.error("❌ PDF WRITE FAILED", err);
 }
 
-function formatDate(date) {
-  const yyyy = date.getFullYear();
-  const mm = String(date.getMonth() + 1).padStart(2, "0");
-  const dd = String(date.getDate()).padStart(2, "0");
-  return `${yyyy}${mm}${dd}`;
+/* Verify PDF exists */
+const pdfExists = fs.existsSync(pdfPath);
+console.log("📄 PDF EXISTS AFTER WRITE:", pdfExists);
+
+/* ─────────────────────────────────────── */
+/* 📝 JSON STATE UPDATE */
+/* ─────────────────────────────────────── */
+
+console.log("🧪 Attempting JSON update");
+
+const jsonPayload = {
+  lastDailyRun: today,
+  timestamp: new Date().toISOString(),
+  pdf: pdfName
+};
+
+try {
+  fs.writeFileSync(JSON_PATH, JSON.stringify(jsonPayload, null, 2), "utf8");
+  console.log("✅ JSON UPDATED");
+} catch (err) {
+  console.error("❌ JSON WRITE FAILED", err);
 }
 
-function createPDF(html, filename) {
-  return new Promise((resolve, reject) => {
-    const tmpFile = "temp.html";
+/* Verify JSON exists */
+console.log("🗂 JSON EXISTS:", fs.existsSync(JSON_PATH));
 
-    writeFileSync(tmpFile, html);
+/* ─────────────────────────────────────── */
+/* 🧾 GIT STATUS DIAGNOSTIC */
+/* ─────────────────────────────────────── */
 
-    exec(`wkhtmltopdf ${tmpFile} ${filename}`, (err) => {
-      unlinkSync(tmpFile);
-      err ? reject(err) : resolve();
-    });
-  });
+try {
+  const status = execSync("git status --porcelain", { encoding: "utf8" });
+  console.log("📦 GIT STATUS:");
+  console.log(status || "✔️ CLEAN");
+} catch (err) {
+  console.error("❌ GIT STATUS FAILED", err);
 }
 
-/* ==================================================
-   MAIN
-================================================== */
+/* ─────────────────────────────────────── */
+/* ✅ END */
+/* ─────────────────────────────────────── */
 
-(async () => {
-  console.log("📰 DAILY SERVICE STARTED (DOWS6027)");
-
-  const dailyData = await getDailyData();
-
-  let last_URL_processed =
-    dailyData.last_URL_processed || `${BASE}0`;
-  let last_date_used = dailyData.last_date_used || null;
-
-  const lastID =
-    Number(last_URL_processed.split("recent_news_id=")[1]) || 0;
-
-  let createdCount = 0;
-
-  for (let id = lastID + 1; id <= lastID + MAX_SCAN; id++) {
-    const url = BASE + id;
-
-    try {
-      const html = await fetchPage(url);
-
-      if (
-        html.includes("404") ||
-        html.includes("Not Found") ||
-        html.length < 500
-      ) {
-        break;
-      }
-
-      const pubDate = extractDate(html);
-
-      if (!pubDate || isNaN(pubDate)) {
-        console.warn(
-          `⚠ No valid publish date found for ID ${id}, skipping`
-        );
-        continue;
-      }
-
-      const ymd = formatDate(pubDate);
-      const pdfPath = `${PDF_DIR}/${ymd}-${id}.pdf`;
-
-      await createPDF(html, pdfPath);
-
-      last_URL_processed = url;
-      last_date_used = ymd;
-      createdCount++;
-
-      console.log(`📄 PDF CREATED: ${pdfPath}`);
-    } catch (err) {
-      console.error(`⚠ Failed to process ${url}`);
-      continue;
-    }
-  }
-
-  await setDailyData({
-    ...dailyData,
-    last_URL_processed,
-    last_date_used,
-  });
-
-  console.log(
-    `✅ DAILY SERVICE COMPLETED — ${createdCount} PDF(s) created.`
-  );
-})();
+console.log("🏁 DAILY.JS COMPLETED");
