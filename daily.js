@@ -1,6 +1,7 @@
 /**
- * DOWS6027 – DAILY RUN (GREGORIAN)
- * DIAGNOSTIC VERSION – DO NOT TRIM LOGS
+ * DOWS6027 – DAILY RUN (GREGORIAN / UTC)
+ * HARDENED + DIAGNOSTIC
+ * SOURCE OF TRUTH = JSON STATE ONLY
  */
 
 import fs from "fs";
@@ -8,25 +9,27 @@ import path from "path";
 import { execSync } from "child_process";
 
 /* ─────────────────────────────────────── */
-/* 🔥 HARD START LOGS */
+/* 🔥 START */
 /* ─────────────────────────────────────── */
 
+console.log("══════════════════════════════════════");
 console.log("🔥 DAILY.JS STARTED");
 console.log("🕒 ISO TIME:", new Date().toISOString());
-console.log("🕒 LOCAL TIME:", new Date().toString());
 console.log("📂 CWD:", process.cwd());
+console.log("══════════════════════════════════════");
 
 /* ─────────────────────────────────────── */
-/* 📅 GREGORIAN DATE (UTC-SAFE) */
+/* 📅 GREGORIAN DATE (UTC ONLY) */
 /* ─────────────────────────────────────── */
 
 const now = new Date();
-const yyyy = now.getUTCFullYear();
-const mm = String(now.getUTCMonth() + 1).padStart(2, "0");
-const dd = String(now.getUTCDate()).padStart(2, "0");
+const YYYY = now.getUTCFullYear();
+const MM = String(now.getUTCMonth() + 1).padStart(2, "0");
+const DD = String(now.getUTCDate()).padStart(2, "0");
 
-const today = `${yyyy}${mm}${dd}`;
-console.log("📅 GREGORIAN DATE (YYYYMMDD):", today);
+const TODAY = `${YYYY}${MM}${DD}`;
+
+console.log("📅 UTC DATE (YYYYMMDD):", TODAY);
 
 /* ─────────────────────────────────────── */
 /* 📂 PATHS */
@@ -34,63 +37,95 @@ console.log("📅 GREGORIAN DATE (YYYYMMDD):", today);
 
 const ROOT = process.cwd();
 const PDF_DIR = path.join(ROOT, "PDFS");
-const JSON_PATH = path.join(ROOT, "state", "lastRun.json");
+const STATE_DIR = path.join(ROOT, "state");
+const STATE_FILE = path.join(STATE_DIR, "lastRun.json");
 
 console.log("📁 PDF DIR:", PDF_DIR);
-console.log("🗂 JSON PATH:", JSON_PATH);
+console.log("🗂 STATE FILE:", STATE_FILE);
 
-/* Ensure directories exist */
+/* Ensure dirs */
 fs.mkdirSync(PDF_DIR, { recursive: true });
-fs.mkdirSync(path.dirname(JSON_PATH), { recursive: true });
+fs.mkdirSync(STATE_DIR, { recursive: true });
 
 /* ─────────────────────────────────────── */
-/* 📄 PDF GENERATION (TEST ARTIFACT) */
+/* 📖 LOAD STATE (SOURCE OF TRUTH) */
 /* ─────────────────────────────────────── */
 
-const pdfName = `DOWS6027-DAILY-${today}.pdf`;
+let state = {
+  lastDailyRun: null,
+  timestamp: null,
+  pdf: null
+};
+
+if (fs.existsSync(STATE_FILE)) {
+  try {
+    state = JSON.parse(fs.readFileSync(STATE_FILE, "utf8"));
+    console.log("📖 STATE LOADED:", state);
+  } catch (err) {
+    console.error("❌ STATE READ FAILED – RESETTING", err);
+  }
+} else {
+  console.log("📖 NO STATE FILE FOUND – INITIAL RUN");
+}
+
+/* ─────────────────────────────────────── */
+/* ⚠️ DATE DECISION */
+/* ─────────────────────────────────────── */
+
+if (state.lastDailyRun === TODAY) {
+  console.log("⛔ DAILY ALREADY RAN FOR TODAY – CONTINUING ANYWAY (FORCE MODE)");
+} else {
+  console.log("➡️ NEW DAILY RUN REQUIRED");
+}
+
+/* ─────────────────────────────────────── */
+/* 📄 PDF GENERATION */
+/* ─────────────────────────────────────── */
+
+const pdfName = `DOWS6027-DAILY-${TODAY}.pdf`;
 const pdfPath = path.join(PDF_DIR, pdfName);
 
-console.log("🧪 Attempting PDF write:", pdfPath);
+console.log("🧪 TARGET PDF:", pdfPath);
 
 try {
   fs.writeFileSync(
     pdfPath,
-    `DOWS6027 DAILY PDF\nDate: ${today}\nGenerated: ${new Date().toISOString()}\n`,
+    [
+      "DOWS6027 DAILY REPORT",
+      `DATE (UTC): ${TODAY}`,
+      `GENERATED: ${new Date().toISOString()}`,
+      ""
+    ].join("\n"),
     "utf8"
   );
-  console.log("✅ PDF CREATED");
+  console.log("✅ PDF WRITE SUCCESS");
 } catch (err) {
   console.error("❌ PDF WRITE FAILED", err);
+  process.exit(1);
 }
 
-/* Verify PDF exists */
-const pdfExists = fs.existsSync(pdfPath);
-console.log("📄 PDF EXISTS AFTER WRITE:", pdfExists);
+console.log("📄 PDF EXISTS:", fs.existsSync(pdfPath));
 
 /* ─────────────────────────────────────── */
-/* 📝 JSON STATE UPDATE */
+/* 📝 UPDATE STATE (AUTHORITATIVE) */
 /* ─────────────────────────────────────── */
 
-console.log("🧪 Attempting JSON update");
-
-const jsonPayload = {
-  lastDailyRun: today,
+const newState = {
+  lastDailyRun: TODAY,
   timestamp: new Date().toISOString(),
   pdf: pdfName
 };
 
 try {
-  fs.writeFileSync(JSON_PATH, JSON.stringify(jsonPayload, null, 2), "utf8");
-  console.log("✅ JSON UPDATED");
+  fs.writeFileSync(STATE_FILE, JSON.stringify(newState, null, 2), "utf8");
+  console.log("✅ STATE UPDATED:", newState);
 } catch (err) {
-  console.error("❌ JSON WRITE FAILED", err);
+  console.error("❌ STATE WRITE FAILED", err);
+  process.exit(1);
 }
 
-/* Verify JSON exists */
-console.log("🗂 JSON EXISTS:", fs.existsSync(JSON_PATH));
-
 /* ─────────────────────────────────────── */
-/* 🧾 GIT STATUS DIAGNOSTIC */
+/* 🧾 GIT DIAGNOSTICS */
 /* ─────────────────────────────────────── */
 
 try {
@@ -102,7 +137,9 @@ try {
 }
 
 /* ─────────────────────────────────────── */
-/* ✅ END */
+/* 🏁 END */
 /* ─────────────────────────────────────── */
 
+console.log("══════════════════════════════════════");
 console.log("🏁 DAILY.JS COMPLETED");
+console.log("══════════════════════════════════════");
