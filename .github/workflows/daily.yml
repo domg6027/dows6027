@@ -5,8 +5,7 @@ permissions:
 
 on:
   schedule:
-    # Runs every hour at :15 UTC
-    - cron: "15 * * * *"
+    - cron: "15 * * * *"   # every hour at :15
   workflow_dispatch:
 
 jobs:
@@ -14,32 +13,24 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: "20"
 
-      - name: Install wkhtmltopdf
+      - name: Install dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y wkhtmltopdf
-
-      - name: Install Node dependencies
-        run: npm ci --ignore-scripts
+          npm ci --ignore-scripts
+          npx playwright install chromium
 
       - name: Run daily generator
         run: node daily.js
 
-      - name: Commit generated PDFs and state
+      - name: Commit PDFs and state
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
-
-          git add PDFS data.json || true
-          git commit -m "Daily PDF update" || echo "Nothing to commit"
-
-      - name: Push changes
-        run: git push
+          git add PDFS state/lastRun.json
+          git commit -m "Daily article PDFs" || echo "Nothing to commit"
+          git push
