@@ -1,0 +1,60 @@
+name: RESET DAILY STATE
+
+on:
+  workflow_dispatch:
+
+jobs:
+  reset:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Clean folders & reset state
+        run: |
+          node <<'EOF'
+          import fs from "fs";
+          import path from "path";
+
+          const ROOT = process.cwd();
+          const PDFS = path.join(ROOT, "PDFS");
+          const TMP = path.join(ROOT, "TMP");
+          const STATE = path.join(ROOT, "data.json");
+
+          function clean(dir) {
+            if (!fs.existsSync(dir)) return;
+            for (const f of fs.readdirSync(dir)) {
+              if (f === ".nomedia") continue;
+              fs.rmSync(path.join(dir, f), { recursive: true, force: true });
+            }
+          }
+
+          clean(PDFS);
+          clean(TMP);
+
+          fs.writeFileSync(
+            STATE,
+            JSON.stringify({
+              last_date_used: "2025-12-11",
+              last_URL_processed: "https://www.prophecynewswatch.com/article.cfm?recent_news_id=9256",
+              current_date: "2025-12-11",
+              last_article_number: 9256
+            }, null, 2)
+          );
+
+          console.log("RESET COMPLETE");
+          EOF
+
+      - name: Commit reset
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add PDFS TMP data.json
+          git commit -m "Reset PDFs, TMP, and data.json"
+          git push
