@@ -1,200 +1,194 @@
 /**
- * DAILY PDF GENERATOR
- * One article per PDF
- * Node-only, PDFME-only
+ * DOWS6027 – DAILY RUN (PDFME, NODE-ONLY)
+ * HARD-SAFE / NO REWIND / ONE ARTICLE PER PDF
  */
 
 import fs from "fs";
 import path from "path";
-import process from "process";
+import https from "https";
 
 import { generate } from "@pdfme/generator";
-import commonPkg from "@pdfme/common";
-const { text } = commonPkg;
+import pkg from "@pdfme/common";
+const { fonts } = pkg;
 
-const __dirname = new URL(".", import.meta.url).pathname;
+const ROOT = process.cwd();
+const PDF_DIR = path.join(ROOT, "PDFS");
+const TMP_DIR = path.join(ROOT, "tmp");
+const STATE_FILE = path.join(ROOT, "data.json");
 
-// ================= CONFIG =================
+const MIN_VALID_ID = 9000;
 
-const ARCHIVE_URL = "https://www.prophecynewswatch.com/article";
-const STATE_FILE = path.join(__dirname, "state.json");
-const OUTPUT_DIR = path.join(__dirname, "PDFS");
-const TMP_DIR = path.join(__dirname, "TMP");
+console.log("▶ DAILY RUN START");
+console.log("⏱ UTC:", new Date().toISOString());
 
-const MIN_TEXT_LENGTH = 50;
+/* -------------------- HARD STATE GUARD -------------------- */
 
-// ==========================================
-
-function log(...args) {
-  console.log(...args);
+if (!fs.existsSync(STATE_FILE)) {
+  console.error("❌ data.json missing — aborting");
+  process.exit(1);
 }
 
-function ensureDir(dir) {
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+let state;
+try {
+  state = JSON.parse(fs.readFileSync(STATE_FILE, "utf8"));
+} catch {
+  console.error("❌ data.json corrupt — aborting");
+  process.exit(1);
 }
 
-function loadState() {
-  if (!fs.existsSync(STATE_FILE)) return { lastProcessed: 0 };
-  return JSON.parse(fs.readFileSync(STATE_FILE, "utf8"));
+if (
+  typeof state.lastProcessed !== "number" ||
+  !Number.isInteger(state.lastProcessed) ||
+  state.lastProcessed < MIN_VALID_ID
+) {
+  console.error(
+    `❌ INVALID lastProcessed (${state.lastProcessed}) — REFUSING TO RUN`
+  );
+  process.exit(1);
 }
 
-function saveState(state) {
-  fs.writeFileSync(STATE_FILE, JSON.stringify(state, null, 2));
+let lastProcessed = state.lastProcessed;
+
+/* -------------------- DIRECTORIES -------------------- */
+
+fs.mkdirSync(PDF_DIR, { recursive: true });
+fs.mkdirSync(TMP_DIR, { recursive: true });
+
+/* -------------------- FETCH HELPERS -------------------- */
+
+function fetchPage(url) {
+  return new Promise((resolve, reject) => {
+    const req = https.get(
+      url,
+      { headers: { "User-Agent": "Mozilla/5.0" } },
+      res => {
+        let data = "";
+        res.on("data", d => (data += d));
+        res.on("end", () => resolve(data));
+      }
+    );
+    req.on("error", reject);
+    req.setTimeout(20000, () => {
+      req.destroy();
+      reject(new Error("timeout"));
+    });
+  });
 }
 
-// ---------- FETCH ----------
+/* -------------------- CONTENT EXTRACT -------------------- */
 
-async function fetchText(url) {
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return await res.text();
-}
+function extractArticle(html) {
+  const m1 = html.match(/<article[^>]*>([\s\S]*?)<\/article>/i);
+  const m2 = html.match(/class="article-content"[\s\S]*?>([\s\S]*?)<\/div>/i);
+  const raw = m1 ? m1[1] : m2 ? m2[1] : null;
+  if (!raw) return null;
 
-// ---------- HTML PARSING ----------
-
-function stripHTML(html) {
-  return html
+  return raw
     .replace(/<script[\s\S]*?<\/script>/gi, "")
     .replace(/<style[\s\S]*?<\/style>/gi, "")
-    .replace(/<[^>]+>/g, "\n")
-    .replace(/\n{2,}/g, "\n")
+    .replace(/<[^>]+>/g, "")
+    .replace(/\s+/g, " ")
     .trim();
 }
 
-function extractArticle(html) {
-  // FORMAT A (older)
-  let match =
-    html.match(/<article[^>]*>([\s\S]*?)<\/article>/i) ||
-    html.match(/<div class="article-content">([\s\S]*?)<\/div>/i);
+/* -------------------- MAIN -------------------- */
 
-  if (!match) return "";
-
-  return stripHTML(match[1]);
-}
-
-function extractTitle(html) {
-  const m =
-    html.match(/<h1[^>]*>(.*?)<\/h1>/i) ||
-    html.match(/<title>(.*?)<\/title>/i);
-
-  if (!m) return "Untitled Article";
-
-  return stripHTML(m[1]).split("|")[0].trim();
-}
-
-// ---------- PDF TEMPLATE ----------
-
-function buildTemplate(title, body) {
-  return {
-    schemas: [
-      {
-        title: {
-          type: "text",
-          position: { x: 20, y: 20 },
-          width: 170,
-          height: 20,
-          fontSize: 18,
-          fontWeight: "bold",
-        },
-        body: {
-          type: "text",
-          position: { x: 20, y: 45 },
-          width: 170,
-          height: 240,
-          fontSize: 11,
-          lineHeight: 1.4,
-        },
-      },
-    ],
-    basePdf: null,
-  };
-}
-
-// ---------- MAIN ----------
-
-async function main() {
-  log("▶ DAILY RUN START");
-  log("⏱ UTC:", new Date().toISOString());
-
-  ensureDir(OUTPUT_DIR);
-  ensureDir(TMP_DIR);
-
-  const state = loadState();
-  let lastProcessed = state.lastProcessed || 0;
-  let pdfCount = 0;
-
-  // Determine latest article ID
-  const MAX_ID = 9408;
-
-  const ids = [];
-  for (let i = lastProcessed + 1; i <= MAX_ID; i++) {
-    ids.push(i);
+(async function main() {
+  let archive;
+  try {
+    archive = await fetchPage(
+      "https://www.prophecynewswatch.com/archive.cfm"
+    );
+  } catch {
+    console.error("❌ Failed to fetch archive");
+    process.exit(1);
   }
 
-  log("📰 New articles found:", ids.length);
+  const ids = (archive.match(/recent_news_id=\d+/g) || [])
+    .map(x => Number(x.replace("recent_news_id=", "")))
+    .filter(id => id > lastProcessed)
+    .sort((a, b) => a - b);
+
+  console.log("📰 New articles found:", ids.length);
+
+  let generated = 0;
 
   for (const id of ids) {
-    log("➡ Processing", id);
+    if (id <= lastProcessed) continue; // HARD NO-REWIND
+
+    console.log("➡ Processing", id);
 
     let html;
     try {
-      html = await fetchText(`${ARCHIVE_URL}/${id}`);
-    } catch {
-      log("⚠ Fetch failed:", id);
-      lastProcessed = id;
-      continue;
-    }
-
-    const title = extractTitle(html);
-    const body = extractArticle(html);
-
-    if (body.length < MIN_TEXT_LENGTH) {
-      fs.writeFileSync(
-        path.join(TMP_DIR, `EMPTY-${id}.txt`),
-        body
+      html = await fetchPage(
+        `https://www.prophecynewswatch.com/article.cfm?recent_news_id=${id}`
       );
-      log("⚠ Skipped (empty content):", id);
+    } catch {
+      console.warn("⚠ Fetch failed:", id);
       lastProcessed = id;
       continue;
     }
+
+    const text = extractArticle(html);
+    if (!text || text.length < 200) {
+      console.warn("⚠ Empty / short article:", id);
+      lastProcessed = id;
+      continue;
+    }
+
+    const dateMatch = html.match(/(\w+ \d{1,2}, \d{4})/);
+    const d = dateMatch ? new Date(dateMatch[1]) : new Date();
+
+    const ymd =
+      d.getUTCFullYear() +
+      String(d.getUTCMonth() + 1).padStart(2, "0") +
+      String(d.getUTCDate()).padStart(2, "0");
+
+    const pdfPath = path.join(PDF_DIR, `${ymd}-${id}.pdf`);
+
+    const template = {
+      schemas: [
+        {
+          body: {
+            type: "text",
+            position: { x: 10, y: 10 },
+            width: 190,
+            height: 277,
+            fontSize: 11,
+            lineHeight: 1.4
+          }
+        }
+      ]
+    };
+
+    const inputs = [{ body: text }];
 
     try {
-      const template = buildTemplate(title, body);
-
       const pdf = await generate({
         template,
-        inputs: [{ title, body }],
+        inputs,
+        options: { font: fonts.Helvetica }
       });
-
-      const date = new Date().toISOString().slice(0, 10).replace(/-/g, "");
-      const filename = `${date}-${id}.pdf`;
-
-      fs.writeFileSync(
-        path.join(OUTPUT_DIR, filename),
-        Buffer.from(pdf)
-      );
-
-      log("✅ PDF created:", filename);
-      pdfCount++;
-    } catch (err) {
-      log("❌ PDF error:", id, err.message);
+      fs.writeFileSync(pdfPath, pdf);
+      generated++;
+    } catch (e) {
+      console.error("❌ PDF generation failed:", id);
     }
 
     lastProcessed = id;
   }
 
-  saveState({ lastProcessed });
+  fs.writeFileSync(
+    STATE_FILE,
+    JSON.stringify(
+      {
+        lastProcessed,
+        updated_utc: new Date().toISOString()
+      },
+      null,
+      2
+    )
+  );
 
-  if (pdfCount === 0) {
-    log("⚠ No PDFs generated (non-fatal)");
-  } else {
-    log(`✔ DAILY RUN COMPLETE — PDFs: ${pdfCount}`);
-  }
-}
-
-// ---------- RUN ----------
-
-main().catch((err) => {
-  console.error("💥 FATAL ERROR:", err);
-  process.exit(1);
-});
+  console.log(`✔ DAILY RUN COMPLETE — PDFs generated: ${generated}`);
+})();
