@@ -20,7 +20,6 @@ const PDF_DIR = path.join(ROOT, "PDFS");
 const TMP_DIR = path.join(ROOT, "tmp");
 const STATE_FILE = path.join(ROOT, "data.json");
 
-/* ALWAYS ensure folders exist */
 fs.mkdirSync(PDF_DIR, { recursive: true });
 fs.mkdirSync(TMP_DIR, { recursive: true });
 
@@ -43,7 +42,7 @@ let lastProcessed =
   Number(state.last_article_number) || FALLBACK.last_article_number;
 
 /* ─────────────────────────────────────── */
-/* SAFE FETCH (REAL BROWSER HEADERS) */
+/* SAFE FETCH */
 /* ─────────────────────────────────────── */
 
 function fetch(url, timeoutMs = 20000) {
@@ -79,7 +78,7 @@ function fetch(url, timeoutMs = 20000) {
 }
 
 /* ─────────────────────────────────────── */
-/* FIND NEW ARTICLE IDS */
+/* FIND NEW IDS */
 /* ─────────────────────────────────────── */
 
 let archive = "";
@@ -96,12 +95,13 @@ const ids = [...new Set(
 )].sort((a, b) => a - b);
 
 console.log("📰 New articles found:", ids.length);
+
 if (!ids.length) {
   console.log("ℹ️ Nothing new — exiting cleanly");
 }
 
 /* ─────────────────────────────────────── */
-/* PROCESS ARTICLES */
+/* PROCESS */
 /* ─────────────────────────────────────── */
 
 for (const id of ids) {
@@ -118,77 +118,9 @@ for (const id of ids) {
     continue;
   }
 
-  /* MULTI-FALLBACK BODY EXTRACTION */
   let bodyMatch =
     html.match(/<article[^>]*>([\s\S]*?)<\/article>/i) ||
     html.match(/<div[^>]+class="[^"]*content[^"]*"[^>]*>([\s\S]*?)<\/div>/i) ||
     html.match(/<div[^>]+id="[^"]*content[^"]*"[^>]*>([\s\S]*?)<\/div>/i);
 
-  if (!bodyMatch) {
-    console.warn("⚠️ Article body not found:", id);
-
-    /* forensic dump */
-    fs.writeFileSync(
-      path.join(TMP_DIR, `FAIL-${id}.html`),
-      html,
-      "utf8"
-    );
-
-    lastProcessed = id;
-    continue;
-  }
-
-  /* DATE */
-  const dateMatch = html.match(/(\w+ \d{1,2}, \d{4})/);
-  const d = dateMatch ? new Date(dateMatch[1]) : new Date();
-
-  const ymd =
-    `${d.getUTCFullYear()}` +
-    `${String(d.getUTCMonth() + 1).padStart(2, "0")}` +
-    `${String(d.getUTCDate()).padStart(2, "0")}`;
-
-  const filename = `${ymd}-${id}.pdf`;
-
-  /* SAFE HTML */
-  const safeHTML = `<!DOCTYPE html>
-<html>
-<head>
-<meta charset="utf-8">
-<title>Prophecy News Watch</title>
-<style>
-body { font-family: serif; margin: 2em; line-height: 1.4; }
-h1,h2,h3 { color:#222; }
-a { color:#000; text-decoration:none; }
-img { max-width: 100%; height: auto; }
-</style>
-</head>
-<body>
-${bodyMatch[1]}
-</body>
-</html>`;
-
-  const tmpHTML = path.join(TMP_DIR, `${id}.html`);
-  const outPDF = path.join(PDF_DIR, filename);
-
-  fs.writeFileSync(tmpHTML, safeHTML, "utf8");
-
-  /* ───────────────── wkhtmltopdf ───────────────── */
-
-  try {
-    execFileSync(
-      "wkhtmltopdf",
-      [
-        "--enable-local-file-access",
-        "--page-size", "A4",
-        "--encoding", "utf-8",
-        "--disable-smart-shrinking",
-        tmpHTML,
-        outPDF
-      ],
-      {
-        stdio: "inherit",
-        timeout: 60000
-      }
-    );
-
-    if (!fs.existsSync(outPDF) || fs.sta
+  if (!bodyMatc
