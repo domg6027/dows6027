@@ -1,6 +1,7 @@
 /**
  * DOWS6027 – DAILY RUN (GREGORIAN)
  * HARDENED wkhtmltopdf VERSION
+ * Stable against site DOM changes & cron stalls
  */
 
 import fs from "fs";
@@ -40,7 +41,8 @@ if (fs.existsSync(STATE_FILE)) {
   }
 }
 
-let lastProcessed = Number(state.last_article_number) || FALLBACK.last_article_number;
+let lastProcessed =
+  Number(state.last_article_number) || FALLBACK.last_article_number;
 
 /* ─────────────────────────────────────── */
 /* SAFE FETCH WITH TIMEOUT */
@@ -61,6 +63,37 @@ function fetch(url, timeoutMs = 15000) {
 
     req.on("error", reject);
   });
+}
+
+/* ─────────────────────────────────────── */
+/* ARTICLE BODY EXTRACTION */
+/* ─────────────────────────────────────── */
+
+function extractArticleBody(html) {
+  // Anchor on <article class="post">
+  const articleMatch = html.match(
+    /<article[^>]+class="[^"]*post[^"]*"[^>]*>([\s\S]*?)<\/article>/i
+  );
+  if (!articleMatch) return null;
+
+  // Extract <div class="entry_content">
+  const entryMatch = articleMatch[1].match(
+    /<div[^>]+class="[^"]*entry_content[^"]*"[^>]*>([\s\S]*?)<\/div>/i
+  );
+  if (!entryMatch) return null;
+
+  let body = entryMatch[1];
+
+  // Strip ads / noise
+  body = body
+    .replace(/<script[\s\S]*?<\/script>/gi, "")
+    .replace(/<ins[\s\S]*?<\/ins>/gi, "")
+    .replace(/<iframe[\s\S]*?<\/iframe>/gi, "")
+    .replace(/<form[\s\S]*?<\/form>/gi, "")
+    .replace(/<center[\s\S]*?<\/center>/gi, "")
+    .replace(/<img[^>]*>/gi, "");
+
+  return body.trim();
 }
 
 /* ─────────────────────────────────────── */
@@ -87,7 +120,7 @@ if (!ids.length) {
 }
 
 /* ─────────────────────────────────────── */
-/* PROCESS */
+/* PROCESS ARTICLES */
 /* ─────────────────────────────────────── */
 
 for (const id of ids) {
@@ -100,12 +133,12 @@ for (const id of ids) {
     );
   } catch (e) {
     console.warn("⚠️ Fetch failed:", id, e.message);
-    lastProcessed = id; // prevent permanent stall
+    lastProcessed = id;
     continue;
   }
 
-  const bodyMatch = html.match(/<div class="article-content">([\s\S]*?)<\/div>/i);
-  if (!bodyMatch) {
+  const body = extractArticleBody(html);
+  if (!body) {
     console.warn("⚠️ Article body not found:", id);
     lastProcessed = id;
     continue;
@@ -115,7 +148,9 @@ for (const id of ids) {
   const d = dateMatch ? new Date(dateMatch[1]) : new Date();
 
   const ymd =
-    `${d.getUTCFullYear()}${String(d.getUTCMonth() + 1).padStart(2, "0")}${String(d.getUTCDate()).padStart(2, "0")}`;
+    `${d.getUTCFullYear()}${String(d.getUTCMonth() + 1).padStart(2, "0")}${String(
+      d.getUTCDate()
+    ).padStart(2, "0")}`;
 
   const filename = `${ymd}-${id}.pdf`;
 
@@ -131,7 +166,7 @@ a { color:#000; text-decoration:none; }
 </style>
 </head>
 <body>
-${bodyMatch[1]}
+${body}
 </body>
 </html>`;
 
@@ -143,7 +178,7 @@ ${bodyMatch[1]}
   try {
     execFileSync("wkhtmltopdf", ["--quiet", tmp, pdf], { timeout: 30000 });
     console.log("✅ PDF created:", filename);
-  } catch (e) {
+  } catch {
     console.error("❌ PDF failed:", id);
   }
 
