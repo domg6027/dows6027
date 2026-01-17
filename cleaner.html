@@ -1,0 +1,72 @@
+/**
+ * DOWS6027 – TEMPORARY RESET CLEANER
+ * PURPOSE:
+ *  - Delete all generated PDFs (except .nomedia)
+ *  - Delete all TMP files (except .nomedia)
+ *  - Reset data.json to known baseline
+ *
+ * RUN ONCE ONLY:
+ *   node cleaner.html
+ */
+
+import fs from "fs";
+import path from "path";
+
+/* ─────────────────────────────────────── */
+/* PATHS */
+/* ─────────────────────────────────────── */
+
+const ROOT = process.cwd();
+const PDF_DIR = path.join(ROOT, "PDFS");
+const TMP_DIR = path.join(ROOT, "tmp");
+const STATE_FILE = path.join(ROOT, "data.json");
+
+/* ─────────────────────────────────────── */
+/* HELPERS */
+/* ─────────────────────────────────────── */
+
+function cleanDirectory(dir) {
+  if (!fs.existsSync(dir)) return;
+
+  const files = fs.readdirSync(dir);
+  for (const file of files) {
+    if (file === ".nomedia") continue;
+
+    const full = path.join(dir, file);
+    const stat = fs.statSync(full);
+
+    if (stat.isFile()) {
+      fs.unlinkSync(full);
+      console.log("🧹 Deleted:", full);
+    }
+  }
+}
+
+/* ─────────────────────────────────────── */
+/* CLEAN */
+/* ─────────────────────────────────────── */
+
+console.log("▶ CLEANER START");
+
+cleanDirectory(PDF_DIR);
+cleanDirectory(TMP_DIR);
+
+/* ─────────────────────────────────────── */
+/* RESET STATE */
+/* ─────────────────────────────────────── */
+
+const RESET_STATE = {
+  last_date_used: "2025-12-11",
+  last_URL_processed:
+    "https://www.prophecynewswatch.com/article.cfm?recent_news_id=9256",
+  current_date: "2025-12-11",
+  last_article_number: 9256
+};
+
+fs.writeFileSync(
+  STATE_FILE,
+  JSON.stringify(RESET_STATE, null, 2)
+);
+
+console.log("♻ data.json reset to baseline");
+console.log("✔ CLEANER COMPLETE");
