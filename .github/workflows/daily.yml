@@ -5,7 +5,7 @@ permissions:
 
 on:
   schedule:
-    # Run every hour at :15 UTC (safer against clashes)
+    # Every hour at :15 UTC
     - cron: "15 * * * *"
   workflow_dispatch:
 
@@ -19,7 +19,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Set up Node.js (ESM)
+      - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "20"
@@ -31,27 +31,28 @@ jobs:
           sudo apt-get install -y wkhtmltopdf
 
       - name: Install Node dependencies
-        run: |
-          npm ci --ignore-scripts
+        run: npm ci --ignore-scripts
 
       - name: Run daily processor
+        run: node daily.js
+
+      # --- SILENT KILLER BLOCKER ---
+      - name: Touch heartbeat (keep repo active)
         run: |
-          node daily.js
+          mkdir -p .automation
+          date -u +"%Y-%m-%dT%H:%M:%SZ" > .automation/last-run.txt
 
       - name: Commit generated files
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
 
-          git add PDFS data.json tmp || true
+          # IMPORTANT: adjust case to match repo exactly
+          git add PDFs data.json tmp .automation || true
 
           if git diff --cached --quiet; then
-            echo "No changes to commit"
+            echo "No changes to commit (unexpected)"
           else
-            git commit -m "Daily update: PDFs + state"
+            git commit -m "Daily automation heartbeat"
+            git push
           fi
-
-      - name: Push changes
-        run: |
-          git pull --rebase
-          git push
