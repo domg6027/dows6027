@@ -1,20 +1,17 @@
 /**
  * DOWS6027 – DAILY RUN (GREGORIAN)
- * PDFME VERSION – HARD FAIL SAFE
+ * HARDENED MULTI-FORMAT SCRAPER + PDFME
+ * 2026 SAFE VERSION
  */
 
 import fs from "fs";
 import path from "path";
 import https from "https";
-import { generate } from "@pdfme/generator";
-import { text } from "@pdfme/schemas";
+import { generate } from "pdfme";
+import { text } from "pdfme/plugins";
 
 console.log("▶ DAILY RUN START");
 console.log("⏱ UTC:", new Date().toISOString());
-
-/* =======================
-   PATHS & DIRECTORIES
-======================= */
 
 const ROOT = process.cwd();
 const PDF_DIR = path.join(ROOT, "PDFS");
@@ -24,9 +21,7 @@ const STATE_FILE = path.join(ROOT, "data.json");
 fs.mkdirSync(PDF_DIR, { recursive: true });
 fs.mkdirSync(TMP_DIR, { recursive: true });
 
-/* =======================
-   STATE
-======================= */
+/* ---------------- STATE ---------------- */
 
 let lastProcessed = 9256;
 
@@ -39,29 +34,26 @@ if (fs.existsSync(STATE_FILE)) {
   } catch {}
 }
 
-/* =======================
-   FETCH HELPER
-======================= */
+/* ---------------- FETCH ---------------- */
 
 function fetchPage(url) {
-  return new Promise(function (resolve, reject) {
+  return new Promise((resolve, reject) => {
     const req = https.get(
       url,
       {
         headers: {
           "User-Agent": "Mozilla/5.0",
-          "Accept": "text/html",
-          "Accept-Language": "en-US,en;q=0.9"
-        }
+          Accept: "text/html",
+        },
       },
-      function (res) {
+      res => {
         let data = "";
         res.on("data", d => (data += d));
         res.on("end", () => resolve(data));
       }
     );
 
-    req.setTimeout(20000, function () {
+    req.setTimeout(20000, () => {
       req.destroy();
       reject(new Error("timeout"));
     });
@@ -70,81 +62,86 @@ function fetchPage(url) {
   });
 }
 
-/* =======================
-   PDF CREATOR (PDFME)
-======================= */
+/* ---------------- CLEAN HTML ---------------- */
 
-async function createPdf(title, body, outputPath) {
-  const template = {
-    schemas: [
-      {
-        title: {
-          type: "text",
-          position: { x: 20, y: 20 },
-          width: 170,
-          height: 20
-        },
-        body: {
-          type: "text",
-          position: { x: 20, y: 45 },
-          width: 170,
-          height: 230
-        }
-      }
-    ]
-  };
-
-  const inputs = [
-    {
-      title: title,
-      body: body
-    }
-  ];
-
-  const pdfBuffer = await generate({
-    template: template,
-    inputs: inputs,
-    plugins: { text: text }
-  });
-
-  fs.writeFileSync(outputPath, pdfBuffer);
-
-  const stats = fs.statSync(outputPath);
-  if (!stats || stats.size < 1000) {
-    throw new Error("PDF WRITE FAILED: " + outputPath);
-  }
-
-  console.log("✅ PDF GENERATED:", outputPath, stats.size, "bytes");
+function stripNoise(html) {
+  return html
+    .replace(/<script[\s\S]*?<\/script>/gi, "")
+    .replace(/<style[\s\S]*?<\/style>/gi, "")
+    .replace(/<ins[\s\S]*?<\/ins>/gi, "")
+    .replace(/<iframe[\s\S]*?<\/iframe>/gi, "")
+    .replace(/<nav[\s\S]*?<\/nav>/gi, "")
+    .replace(/<aside[\s\S]*?<\/aside>/gi, "");
 }
 
-/* =======================
-   MAIN
-======================= */
+/* ---------------- EXTRACT CONTENT ---------------- */
+
+function extractArticle(html) {
+  let match = null;
+
+  // 1️⃣ OLD FORMAT
+  match = html.match(
+    /<div[^>]*class="entry_content"[^>]*>([\s\S]*?)<\/div>/i
+  );
+  if (match && match[1].length > 500) return match[1];
+
+  // 2️⃣ OLD <article>
+  match = html.match(/<article[^>]*>([\s\S]*?)<\/article>/i);
+  if (match && match[1].length > 500) return match[1];
+
+  // 3️⃣ NEW FORMAT (MAIN CONTENT COLUMN)
+  match = html.match(
+    /<div[^>]*class="col col_9_of_12"[^>]*>([\s\S]*?)<\/div>/i
+  );
+  if (match && match[1].length > 500) return match[1];
+
+  // 4️⃣ LAST RESORT: BODY
+  match = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+  if (match && match[1].length > 1000) return match[1];
+
+  return null;
+}
+
+/* ---------------- TEXTIFY ---------------- */
+
+function htmlToText(html) {
+  return stripNoise(html)
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/p>/gi, "\n\n")
+    .replace(/<[^>]+>/g, "")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
+/* ---------------- MAIN ---------------- */
 
 (async function main() {
-  let archive = "";
+  let archive;
 
   try {
-    archive = await fetchPage("https://www.prophecynewswatch.com/archive.cfm");
+    archive = await fetchPage(
+      "https://www.prophecynewswatch.com/archive.cfm"
+    );
   } catch {
-    console.error("❌ Archive fetch failed");
+    console.error("❌ Failed to fetch archive");
     return;
   }
 
-  const matches = archive.match(/recent_news_id=\d+/g) || [];
-
-  const ids = matches
-    .map(x => Number(x.replace("recent_news_id=", "")))
-    .filter(id => id > lastProcessed)
-    .sort((a, b) => a - b);
+  const ids =
+    archive
+      .match(/recent_news_id=\d+/g)
+      ?.map(x => Number(x.replace("recent_news_id=", "")))
+      .filter(id => id > lastProcessed)
+      .sort((a, b) => a - b) || [];
 
   console.log("📰 New articles found:", ids.length);
 
-  for (let i = 0; i < ids.length; i++) {
-    const id = ids[i];
+  let pdfCount = 0;
+
+  for (const id of ids) {
     console.log("➡ Processing", id);
 
-    let html = "";
+    let html;
     try {
       html = await fetchPage(
         "https://www.prophecynewswatch.com/article.cfm?recent_news_id=" + id
@@ -154,47 +151,42 @@ async function createPdf(title, body, outputPath) {
       continue;
     }
 
-    let body = null;
-
-    const m1 = html.match(/<article[^>]*>([\s\S]*?)<\/article>/i);
-    const m2 = html.match(/class="article-content"[\s\S]*?>([\s\S]*?)<\/div>/i);
-
-    if (m1) body = m1[1];
-    if (!body && m2) body = m2[1];
-
-    if (!body) {
+    const raw = extractArticle(html);
+    if (!raw) {
       fs.writeFileSync(path.join(TMP_DIR, "FAIL-" + id + ".html"), html);
       lastProcessed = id;
       continue;
     }
 
-    const cleanBody = body
-      .replace(/<script[\s\S]*?<\/script>/gi, "")
-      .replace(/<style[\s\S]*?<\/style>/gi, "")
-      .replace(/<\/p>/gi, "\n\n")
-      .replace(/<br\s*\/?>/gi, "\n")
-      .replace(/<[^>]+>/g, "")
-      .replace(/\n{3,}/g, "\n\n")
-      .trim();
+    const textContent = htmlToText(raw);
+    if (textContent.length < 500) {
+      lastProcessed = id;
+      continue;
+    }
 
     const dateMatch = html.match(/(\w+ \d{1,2}, \d{4})/);
     const d = dateMatch ? new Date(dateMatch[1]) : new Date();
 
     const ymd =
-      d.getUTCFullYear().toString() +
+      d.getUTCFullYear() +
       String(d.getUTCMonth() + 1).padStart(2, "0") +
       String(d.getUTCDate()).padStart(2, "0");
 
     const pdfPath = path.join(PDF_DIR, ymd + "-" + id + ".pdf");
 
     try {
-      await createPdf(
-        "Prophecy News Watch – " + id,
-        cleanBody,
-        pdfPath
-      );
+      await generate({
+        filePath: pdfPath,
+        template: {
+          schemas: [[{ name: "content", type: "text" }]],
+        },
+        inputs: [{ content: textContent }],
+        plugins: { text },
+      });
+
+      pdfCount++;
     } catch (e) {
-      console.error("❌ PDF ERROR:", e.message);
+      console.error("⚠ PDF generation failed for", id);
     }
 
     lastProcessed = id;
@@ -205,17 +197,16 @@ async function createPdf(title, body, outputPath) {
     JSON.stringify(
       {
         last_article_number: lastProcessed,
-        updated_utc: new Date().toISOString()
+        updated_utc: new Date().toISOString(),
       },
       null,
       2
     )
   );
 
-  const pdfs = fs.readdirSync(PDF_DIR).filter(f => f.endsWith(".pdf"));
-  if (pdfs.length === 0) {
-    throw new Error("❌ NO PDFs GENERATED — HARD FAIL");
+  if (pdfCount === 0) {
+    throw new Error("❌ NO PDFs GENERATED — CHECK SITE STRUCTURE");
   }
 
-  console.log("✔ DAILY RUN COMPLETE");
+  console.log("✔ DAILY RUN COMPLETE — PDFs:", pdfCount);
 })();
