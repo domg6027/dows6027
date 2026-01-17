@@ -1,7 +1,6 @@
 /**
  * DOWS6027 – DAILY RUN (GREGORIAN)
  * HARDENED wkhtmltopdf VERSION
- * Stable against site DOM changes & cron stalls
  */
 
 import fs from "fs";
@@ -45,16 +44,30 @@ let lastProcessed =
   Number(state.last_article_number) || FALLBACK.last_article_number;
 
 /* ─────────────────────────────────────── */
-/* SAFE FETCH WITH TIMEOUT */
+/* FETCH WITH HEADERS + TIMEOUT */
 /* ─────────────────────────────────────── */
 
-function fetch(url, timeoutMs = 15000) {
+function fetch(url, timeoutMs = 20000) {
   return new Promise((resolve, reject) => {
-    const req = https.get(url, res => {
-      let data = "";
-      res.on("data", d => (data += d));
-      res.on("end", () => resolve(data));
-    });
+    const req = https.get(
+      url,
+      {
+        headers: {
+          "User-Agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) " +
+            "AppleWebKit/537.36 (KHTML, like Gecko) " +
+            "Chrome/120.0.0.0 Safari/537.36",
+          "Accept":
+            "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+          "Accept-Language": "en-US,en;q=0.9"
+        }
+      },
+      res => {
+        let data = "";
+        res.on("data", d => (data += d));
+        res.on("end", () => resolve(data));
+      }
+    );
 
     req.setTimeout(timeoutMs, () => {
       req.destroy();
@@ -66,46 +79,14 @@ function fetch(url, timeoutMs = 15000) {
 }
 
 /* ─────────────────────────────────────── */
-/* ARTICLE BODY EXTRACTION */
-/* ─────────────────────────────────────── */
-
-function extractArticleBody(html) {
-  // Anchor on <article class="post">
-  const articleMatch = html.match(
-    /<article[^>]+class="[^"]*post[^"]*"[^>]*>([\s\S]*?)<\/article>/i
-  );
-  if (!articleMatch) return null;
-
-  // Extract <div class="entry_content">
-  const entryMatch = articleMatch[1].match(
-    /<div[^>]+class="[^"]*entry_content[^"]*"[^>]*>([\s\S]*?)<\/div>/i
-  );
-  if (!entryMatch) return null;
-
-  let body = entryMatch[1];
-
-  // Strip ads / noise
-  body = body
-    .replace(/<script[\s\S]*?<\/script>/gi, "")
-    .replace(/<ins[\s\S]*?<\/ins>/gi, "")
-    .replace(/<iframe[\s\S]*?<\/iframe>/gi, "")
-    .replace(/<form[\s\S]*?<\/form>/gi, "")
-    .replace(/<center[\s\S]*?<\/center>/gi, "")
-    .replace(/<img[^>]*>/gi, "");
-
-  return body.trim();
-}
-
-/* ─────────────────────────────────────── */
 /* FIND NEW IDS */
 /* ─────────────────────────────────────── */
 
-let archive;
+let archive = "";
 try {
   archive = await fetch("https://www.prophecynewswatch.com/archive.cfm");
 } catch (e) {
   console.error("❌ Archive fetch failed:", e.message);
-  archive = "";
 }
 
 const ids = [...new Set(
@@ -116,11 +97,11 @@ const ids = [...new Set(
 
 console.log("📰 New articles found:", ids.length);
 if (!ids.length) {
-  console.log("ℹ️ Nothing new, clean exit");
+  console.log("ℹ️ Nothing new");
 }
 
 /* ─────────────────────────────────────── */
-/* PROCESS ARTICLES */
+/* PROCESS */
 /* ─────────────────────────────────────── */
 
 for (const id of ids) {
@@ -137,9 +118,18 @@ for (const id of ids) {
     continue;
   }
 
-  const body = extractArticleBody(html);
-  if (!body) {
+  let bodyMatch =
+    html.match(/<article[^>]*>([\s\S]*?)<\/article>/i) ||
+    html.match(/<div[^>]+class="[^"]*content[^"]*"[^>]*>([\s\S]*?)<\/div>/i) ||
+    html.match(/<div[^>]+id="[^"]*content[^"]*"[^>]*>([\s\S]*?)<\/div>/i);
+
+  if (!bodyMatch) {
     console.warn("⚠️ Article body not found:", id);
+    fs.writeFileSync(
+      path.join(TMP_DIR, `FAIL-${id}.html`),
+      html,
+      "utf8"
+    );
     lastProcessed = id;
     continue;
   }
@@ -148,9 +138,9 @@ for (const id of ids) {
   const d = dateMatch ? new Date(dateMatch[1]) : new Date();
 
   const ymd =
-    `${d.getUTCFullYear()}${String(d.getUTCMonth() + 1).padStart(2, "0")}${String(
-      d.getUTCDate()
-    ).padStart(2, "0")}`;
+    `${d.getUTCFullYear()}` +
+    `${String(d.getUTCMonth() + 1).padStart(2, "0")}` +
+    `${String(d.getUTCDate()).padStart(2, "0")}`;
 
   const filename = `${ymd}-${id}.pdf`;
 
@@ -166,7 +156,7 @@ a { color:#000; text-decoration:none; }
 </style>
 </head>
 <body>
-${body}
+${bodyMatch[1]}
 </body>
 </html>`;
 
@@ -176,13 +166,15 @@ ${body}
   fs.writeFileSync(tmp, safeHTML, "utf8");
 
   try {
-    execFileSync("wkhtmltopdf", ["--quiet", tmp, pdf], { timeout: 30000 });
+    execFileSync("wkhtmltopdf", ["--quiet", tmp, pdf], {
+      timeout: 45000
+    });
     console.log("✅ PDF created:", filename);
   } catch {
     console.error("❌ PDF failed:", id);
   }
 
-  lastProcessed = id; // ALWAYS advance
+  lastProcessed = id;
 }
 
 /* ─────────────────────────────────────── */
