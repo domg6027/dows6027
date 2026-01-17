@@ -5,7 +5,6 @@ permissions:
 
 on:
   schedule:
-    # Every hour at :15 UTC
     - cron: "15 * * * *"
   workflow_dispatch:
 
@@ -24,6 +23,12 @@ jobs:
         with:
           node-version: "20"
           cache: "npm"
+
+      # ONLY needed if daily.js calls an external PDF binary
+      - name: Install system PDF dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wkhtmltopdf
 
       - name: Install Node dependencies
         run: npm ci
@@ -58,7 +63,7 @@ jobs:
           git config user.name "github-actions"
           git config user.email "actions@github.com"
 
-          git add PDFS tmp data.json .automation
+          git add PDFS tmp data.json .automation || true
 
           if git diff --cached --quiet; then
             echo "ℹ️ No changes to commit"
