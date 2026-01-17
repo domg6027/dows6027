@@ -1,0 +1,36 @@
+name: one-time-remove-deprecated-packages
+
+on:
+  workflow_dispatch:
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Remove deprecated packages
+        run: |
+          npm uninstall intersection-observer || true
+          npm uninstall core-js || true
+          npm install core-js@^3.37.0
+
+      - name: Rebuild lockfile
+        run: |
+          rm -f package-lock.json
+          npm install
+
+      - name: Commit cleanup changes
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add package.json package-lock.json
+          git commit -m "Remove deprecated packages and upgrade core-js" || echo "No changes to commit"
+          git push
