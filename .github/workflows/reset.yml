@@ -1,4 +1,7 @@
-name: RESET DAILY STATE
+name: Reset DOWS6027 State
+
+permissions:
+  contents: write
 
 on:
   workflow_dispatch:
@@ -8,53 +11,45 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
+      - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
         with:
-          node-version: 20
+          fetch-depth: 0
 
-      - name: Clean folders & reset state
+      - name: Reset PDFS and tmp folders
         run: |
-          node <<'EOF'
-          import fs from "fs";
-          import path from "path";
+          echo "🧹 Cleaning PDFS (except .nomedia)"
+          if [ -d "PDFS" ]; then
+            find PDFS -type f ! -name ".nomedia" -delete
+          else
+            mkdir -p PDFS
+          fi
 
-          const ROOT = process.cwd();
-          const PDFS = path.join(ROOT, "PDFS");
-          const TMP = path.join(ROOT, "TMP");
-          const STATE = path.join(ROOT, "data.json");
+          echo "🧹 Cleaning tmp"
+          rm -rf tmp
+          mkdir -p tmp
 
-          function clean(dir) {
-            if (!fs.existsSync(dir)) return;
-            for (const f of fs.readdirSync(dir)) {
-              if (f === ".nomedia") continue;
-              fs.rmSync(path.join(dir, f), { recursive: true, force: true });
-            }
+      - name: Reset data.json
+        run: |
+          cat > data.json << 'EOF'
+          {
+            "last_date_used": "2025-12-11",
+            "last_URL_processed": "https://www.prophecynewswatch.com/article.cfm?recent_news_id=9256",
+            "current_date": "2025-12-11",
+            "last_article_number": 9256
           }
-
-          clean(PDFS);
-          clean(TMP);
-
-          fs.writeFileSync(
-            STATE,
-            JSON.stringify({
-              last_date_used: "2025-12-11",
-              last_URL_processed: "https://www.prophecynewswatch.com/article.cfm?recent_news_id=9256",
-              current_date: "2025-12-11",
-              last_article_number: 9256
-            }, null, 2)
-          );
-
-          console.log("RESET COMPLETE");
           EOF
 
-      - name: Commit reset
+      - name: Commit reset state
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-          git add PDFS TMP data.json
-          git commit -m "Reset PDFs, TMP, and data.json"
-          git push
+
+          git add PDFS tmp data.json || true
+
+          if git diff --cached --quiet; then
+            echo "Nothing to commit"
+          else
+            git commit -m "Reset PDFs, tmp, and data.json"
+            git push
+          fi
