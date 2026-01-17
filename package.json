@@ -1,11 +1,13 @@
 {
   "name": "dows6027-automation",
   "version": "1.0.0",
-  "description": "Automation scripts for DOWS6027",
+  "description": "Automation scripts for Derech Olam Warning Services (DOWS6027)",
   "type": "module",
   "main": "daily.js",
   "scripts": {
-    "daily": "node daily.js"
+    "daily": "node daily.js",
+    "weekly": "node weekly.js",
+    "monthly": "node monthly.js"
   },
   "dependencies": {
     "pdfme": "^5.1.0"
