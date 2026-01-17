@@ -1,6 +1,6 @@
 /**
  * DOWS6027 – DAILY RUN (GREGORIAN)
- * HARDENED wkhtmltopdf VERSION
+ * FULLY HARDENED wkhtmltopdf VERSION
  */
 
 import fs from "fs";
@@ -20,6 +20,7 @@ const PDF_DIR = path.join(ROOT, "PDFS");
 const TMP_DIR = path.join(ROOT, "tmp");
 const STATE_FILE = path.join(ROOT, "data.json");
 
+/* ALWAYS ensure folders exist */
 fs.mkdirSync(PDF_DIR, { recursive: true });
 fs.mkdirSync(TMP_DIR, { recursive: true });
 
@@ -27,16 +28,14 @@ fs.mkdirSync(TMP_DIR, { recursive: true });
 /* STATE */
 /* ─────────────────────────────────────── */
 
-const FALLBACK = {
-  last_article_number: 9256
-};
+const FALLBACK = { last_article_number: 9256 };
 
 let state = FALLBACK;
 if (fs.existsSync(STATE_FILE)) {
   try {
     state = JSON.parse(fs.readFileSync(STATE_FILE, "utf8"));
   } catch {
-    console.warn("⚠️ data.json corrupted, using fallback");
+    console.warn("⚠️ data.json corrupted — using fallback");
   }
 }
 
@@ -44,7 +43,7 @@ let lastProcessed =
   Number(state.last_article_number) || FALLBACK.last_article_number;
 
 /* ─────────────────────────────────────── */
-/* FETCH WITH HEADERS + TIMEOUT */
+/* SAFE FETCH (REAL BROWSER HEADERS) */
 /* ─────────────────────────────────────── */
 
 function fetch(url, timeoutMs = 20000) {
@@ -59,7 +58,8 @@ function fetch(url, timeoutMs = 20000) {
             "Chrome/120.0.0.0 Safari/537.36",
           "Accept":
             "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-          "Accept-Language": "en-US,en;q=0.9"
+          "Accept-Language": "en-US,en;q=0.9",
+          "Cache-Control": "no-cache"
         }
       },
       res => {
@@ -79,7 +79,7 @@ function fetch(url, timeoutMs = 20000) {
 }
 
 /* ─────────────────────────────────────── */
-/* FIND NEW IDS */
+/* FIND NEW ARTICLE IDS */
 /* ─────────────────────────────────────── */
 
 let archive = "";
@@ -97,11 +97,11 @@ const ids = [...new Set(
 
 console.log("📰 New articles found:", ids.length);
 if (!ids.length) {
-  console.log("ℹ️ Nothing new");
+  console.log("ℹ️ Nothing new — exiting cleanly");
 }
 
 /* ─────────────────────────────────────── */
-/* PROCESS */
+/* PROCESS ARTICLES */
 /* ─────────────────────────────────────── */
 
 for (const id of ids) {
@@ -118,6 +118,7 @@ for (const id of ids) {
     continue;
   }
 
+  /* MULTI-FALLBACK BODY EXTRACTION */
   let bodyMatch =
     html.match(/<article[^>]*>([\s\S]*?)<\/article>/i) ||
     html.match(/<div[^>]+class="[^"]*content[^"]*"[^>]*>([\s\S]*?)<\/div>/i) ||
@@ -125,15 +126,19 @@ for (const id of ids) {
 
   if (!bodyMatch) {
     console.warn("⚠️ Article body not found:", id);
+
+    /* forensic dump */
     fs.writeFileSync(
       path.join(TMP_DIR, `FAIL-${id}.html`),
       html,
       "utf8"
     );
+
     lastProcessed = id;
     continue;
   }
 
+  /* DATE */
   const dateMatch = html.match(/(\w+ \d{1,2}, \d{4})/);
   const d = dateMatch ? new Date(dateMatch[1]) : new Date();
 
@@ -144,15 +149,17 @@ for (const id of ids) {
 
   const filename = `${ymd}-${id}.pdf`;
 
+  /* SAFE HTML */
   const safeHTML = `<!DOCTYPE html>
 <html>
 <head>
 <meta charset="utf-8">
 <title>Prophecy News Watch</title>
 <style>
-body { font-family: serif; margin: 2em; }
+body { font-family: serif; margin: 2em; line-height: 1.4; }
 h1,h2,h3 { color:#222; }
 a { color:#000; text-decoration:none; }
+img { max-width: 100%; height: auto; }
 </style>
 </head>
 <body>
@@ -160,38 +167,28 @@ ${bodyMatch[1]}
 </body>
 </html>`;
 
-  const tmp = path.join(TMP_DIR, `${id}.html`);
-  const pdf = path.join(PDF_DIR, filename);
+  const tmpHTML = path.join(TMP_DIR, `${id}.html`);
+  const outPDF = path.join(PDF_DIR, filename);
 
-  fs.writeFileSync(tmp, safeHTML, "utf8");
+  fs.writeFileSync(tmpHTML, safeHTML, "utf8");
+
+  /* ───────────────── wkhtmltopdf ───────────────── */
 
   try {
-    execFileSync("wkhtmltopdf", ["--quiet", tmp, pdf], {
-      timeout: 45000
-    });
-    console.log("✅ PDF created:", filename);
-  } catch {
-    console.error("❌ PDF failed:", id);
-  }
+    execFileSync(
+      "wkhtmltopdf",
+      [
+        "--enable-local-file-access",
+        "--page-size", "A4",
+        "--encoding", "utf-8",
+        "--disable-smart-shrinking",
+        tmpHTML,
+        outPDF
+      ],
+      {
+        stdio: "inherit",
+        timeout: 60000
+      }
+    );
 
-  lastProcessed = id;
-}
-
-/* ─────────────────────────────────────── */
-/* SAVE STATE */
-/* ─────────────────────────────────────── */
-
-fs.writeFileSync(
-  STATE_FILE,
-  JSON.stringify(
-    {
-      last_article_number: lastProcessed,
-      updated_utc: new Date().toISOString()
-    },
-    null,
-    2
-  )
-);
-
-console.log("💾 data.json updated");
-console.log("✔ DAILY RUN COMPLETE");
+    if (!fs.existsSync(outPDF) || fs.sta
