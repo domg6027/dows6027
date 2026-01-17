@@ -1,4 +1,7 @@
-name: one-time-remove-deprecated-packages
+name: Remove deprecated dependencies
+
+permissions:
+  contents: write
 
 on:
   workflow_dispatch:
@@ -11,26 +14,28 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: "20"
 
-      - name: Remove deprecated packages
+      - name: Remove contaminated installs
         run: |
-          npm uninstall intersection-observer || true
-          npm uninstall core-js || true
-          npm install core-js@^3.37.0
-
-      - name: Rebuild lockfile
-        run: |
+          rm -rf node_modules
           rm -f package-lock.json
-          npm install
 
-      - name: Commit cleanup changes
+      - name: Ensure core-js is modern
+        run: |
+          npm install core-js@^3.37.0 --save
+
+      - name: Reinstall clean dependency tree
+        run: npm install
+
+      - name: Commit cleanup
         run: |
           git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
+          git config user.email "actions@github.com"
+
           git add package.json package-lock.json
-          git commit -m "Remove deprecated packages and upgrade core-js" || echo "No changes to commit"
+          git commit -m "Remove deprecated deps and rebuild lockfile"
           git push
