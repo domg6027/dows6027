@@ -13,7 +13,6 @@
     "@pdfme/common": "^5.1.0"
   },
   "overrides": {
-    "intersection-observer": "0.0.0",
     "core-js": "^3.37.0"
   },
   "license": "MIT"
