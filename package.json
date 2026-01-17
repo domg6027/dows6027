@@ -10,5 +10,9 @@
     "monthly": "node monthly.js"
   },
   "author": "Derech Olam Warning Services",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "@pdfme/generator": "^5.0.0",
+    "@pdfme/schemas": "^5.0.0"
+  }
 }
