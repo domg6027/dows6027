@@ -25,34 +25,44 @@ jobs:
           node-version: "20"
           cache: "npm"
 
-      - name: Install system dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y wkhtmltopdf
-
       - name: Install Node dependencies
-        run: npm ci --ignore-scripts
+        run: npm ci
 
       - name: Run daily processor
         run: node daily.js
 
-      # --- SILENT KILLER BLOCKER ---
-      - name: Touch heartbeat (keep repo active)
+      # --- HARD GUARDS ---
+      - name: Verify PDF output exists
+        run: |
+          if [ ! -d "PDFS" ]; then
+            echo "❌ PDFS directory missing"
+            exit 1
+          fi
+
+          COUNT=$(ls -1 PDFS/*.pdf 2>/dev/null | wc -l)
+          if [ "$COUNT" -eq 0 ]; then
+            echo "❌ No PDFs generated"
+            exit 1
+          fi
+
+          echo "✅ PDFs generated: $COUNT"
+
+      # --- HEARTBEAT ---
+      - name: Update automation heartbeat
         run: |
           mkdir -p .automation
           date -u +"%Y-%m-%dT%H:%M:%SZ" > .automation/last-run.txt
 
-      - name: Commit generated files
+      - name: Commit and push changes
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
 
-          # IMPORTANT: adjust case to match repo exactly
-          git add PDFs data.json tmp .automation || true
+          git add PDFS tmp data.json .automation
 
           if git diff --cached --quiet; then
-            echo "No changes to commit (unexpected)"
+            echo "ℹ️ No changes to commit"
           else
-            git commit -m "Daily automation heartbeat"
+            git commit -m "Daily PDFs + state update"
             git push
           fi
