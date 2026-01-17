@@ -1,6 +1,6 @@
 /**
  * DOWS6027 – DAILY RUN (GREGORIAN)
- * wkhtmltopdf SAFE VERSION
+ * HARDENED wkhtmltopdf VERSION
  */
 
 import fs from "fs";
@@ -24,23 +24,10 @@ fs.mkdirSync(PDF_DIR, { recursive: true });
 fs.mkdirSync(TMP_DIR, { recursive: true });
 
 /* ─────────────────────────────────────── */
-/* CLEAN WRONG PDFs */
-/* ─────────────────────────────────────── */
-
-for (const f of fs.readdirSync(PDF_DIR)) {
-  if (f.startsWith("DOWS6027-DAILY-")) {
-    fs.unlinkSync(path.join(PDF_DIR, f));
-  }
-}
-
-/* ─────────────────────────────────────── */
 /* STATE */
 /* ─────────────────────────────────────── */
 
 const FALLBACK = {
-  last_date_used: "2025-12-11",
-  last_URL_processed: "",
-  current_date: "2025-12-11",
   last_article_number: 9256
 };
 
@@ -48,30 +35,45 @@ let state = FALLBACK;
 if (fs.existsSync(STATE_FILE)) {
   try {
     state = JSON.parse(fs.readFileSync(STATE_FILE, "utf8"));
-  } catch {}
+  } catch {
+    console.warn("⚠️ data.json corrupted, using fallback");
+  }
 }
 
-let lastProcessed = Number(state.last_article_number) || 9256;
+let lastProcessed = Number(state.last_article_number) || FALLBACK.last_article_number;
 
 /* ─────────────────────────────────────── */
-/* FETCH */
+/* SAFE FETCH WITH TIMEOUT */
 /* ─────────────────────────────────────── */
 
-function fetch(url) {
+function fetch(url, timeoutMs = 15000) {
   return new Promise((resolve, reject) => {
-    https.get(url, res => {
+    const req = https.get(url, res => {
       let data = "";
       res.on("data", d => (data += d));
       res.on("end", () => resolve(data));
-    }).on("error", reject);
+    });
+
+    req.setTimeout(timeoutMs, () => {
+      req.destroy();
+      reject(new Error("Fetch timeout"));
+    });
+
+    req.on("error", reject);
   });
 }
 
 /* ─────────────────────────────────────── */
-/* FIND NEW IDS (DEDUPED) */
+/* FIND NEW IDS */
 /* ─────────────────────────────────────── */
 
-const archive = await fetch("https://www.prophecynewswatch.com/archive.cfm");
+let archive;
+try {
+  archive = await fetch("https://www.prophecynewswatch.com/archive.cfm");
+} catch (e) {
+  console.error("❌ Archive fetch failed:", e.message);
+  archive = "";
+}
 
 const ids = [...new Set(
   [...archive.matchAll(/recent_news_id=(\d+)/g)]
@@ -80,7 +82,9 @@ const ids = [...new Set(
 )].sort((a, b) => a - b);
 
 console.log("📰 New articles found:", ids.length);
-if (!ids.length) process.exit(0);
+if (!ids.length) {
+  console.log("ℹ️ Nothing new, clean exit");
+}
 
 /* ─────────────────────────────────────── */
 /* PROCESS */
@@ -91,15 +95,19 @@ for (const id of ids) {
 
   let html;
   try {
-    html = await fetch(`https://www.prophecynewswatch.com/article.cfm?recent_news_id=${id}`);
-  } catch {
-    console.warn("⚠️ Fetch failed:", id);
+    html = await fetch(
+      `https://www.prophecynewswatch.com/article.cfm?recent_news_id=${id}`
+    );
+  } catch (e) {
+    console.warn("⚠️ Fetch failed:", id, e.message);
+    lastProcessed = id; // prevent permanent stall
     continue;
   }
 
   const bodyMatch = html.match(/<div class="article-content">([\s\S]*?)<\/div>/i);
   if (!bodyMatch) {
     console.warn("⚠️ Article body not found:", id);
+    lastProcessed = id;
     continue;
   }
 
@@ -109,8 +117,9 @@ for (const id of ids) {
   const ymd =
     `${d.getUTCFullYear()}${String(d.getUTCMonth() + 1).padStart(2, "0")}${String(d.getUTCDate()).padStart(2, "0")}`;
 
-  const safeHTML = `
-<!DOCTYPE html>
+  const filename = `${ymd}-${id}.pdf`;
+
+  const safeHTML = `<!DOCTYPE html>
 <html>
 <head>
 <meta charset="utf-8">
@@ -124,37 +133,33 @@ a { color:#000; text-decoration:none; }
 <body>
 ${bodyMatch[1]}
 </body>
-</html>
-`;
+</html>`;
 
   const tmp = path.join(TMP_DIR, `${id}.html`);
-  const pdf = path.join(PDF_DIR, `${ymd}-${id}.pdf`);
+  const pdf = path.join(PDF_DIR, filename);
 
   fs.writeFileSync(tmp, safeHTML, "utf8");
 
   try {
-    execFileSync("wkhtmltopdf", ["--quiet", tmp, pdf]);
-    console.log("✅ PDF created:", `${ymd}-${id}.pdf`);
-    lastProcessed = id;
-  } catch {
+    execFileSync("wkhtmltopdf", ["--quiet", tmp, pdf], { timeout: 30000 });
+    console.log("✅ PDF created:", filename);
+  } catch (e) {
     console.error("❌ PDF failed:", id);
   }
+
+  lastProcessed = id; // ALWAYS advance
 }
 
 /* ─────────────────────────────────────── */
 /* SAVE STATE */
 /* ─────────────────────────────────────── */
 
-const today = new Date().toISOString().slice(0, 10);
-
 fs.writeFileSync(
   STATE_FILE,
   JSON.stringify(
     {
-      last_date_used: today,
-      last_URL_processed: `https://www.prophecynewswatch.com/article.cfm?recent_news_id=${lastProcessed}`,
-      current_date: today,
-      last_article_number: lastProcessed
+      last_article_number: lastProcessed,
+      updated_utc: new Date().toISOString()
     },
     null,
     2
