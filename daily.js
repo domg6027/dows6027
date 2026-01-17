@@ -1,14 +1,15 @@
 /**
  * DOWS6027 – DAILY RUN (PDFME, NODE-ONLY)
  * ONE ARTICLE = ONE PDF
- * NO HTML RENDERING — TEXT FLOW ONLY
  */
 
 import fs from "fs";
 import path from "path";
 import https from "https";
 import { generate } from "@pdfme/generator";
-import { text } from "@pdfme/common";
+import pdfmeCommon from "@pdfme/common";
+
+const { text } = pdfmeCommon;
 
 console.log("▶ DAILY RUN START");
 console.log("⏱ UTC:", new Date().toISOString());
@@ -152,7 +153,6 @@ async function main() {
       continue;
     }
 
-    /* BODY EXTRACTION (BOTH FORMATS) */
     let bodyHtml = null;
     const m1 = html.match(/<article[^>]*>([\s\S]*?)<\/article>/i);
     const m2 = html.match(/class="article-content"[\s\S]*?>([\s\S]*?)<\/div>/i);
@@ -166,8 +166,8 @@ async function main() {
       continue;
     }
 
-    const textBody = stripHTML(bodyHtml);
-    if (textBody.length < 200) {
+    const bodyText = stripHTML(bodyHtml);
+    if (bodyText.length < 200) {
       lastProcessed = id;
       continue;
     }
@@ -185,17 +185,10 @@ async function main() {
 
     const pdfPath = path.join(PDF_DIR, `${ymd}-${id}.pdf`);
 
-    const inputs = [
-      {
-        title,
-        body: textBody
-      }
-    ];
-
     try {
       const pdf = await generate({
         template,
-        inputs,
+        inputs: [{ title, body: bodyText }],
         plugins: { text }
       });
 
