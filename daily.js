@@ -166,6 +166,7 @@ function stripHtml(html) {
       2
     )
   );
+  
 
   console.log("📄 PDFs generated:", pdfCount);
   console.log("✔ DAILY RUN COMPLETE");
