@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { generate } from "@pdfme/generator";
-import cheerio from "cheerio";
+import * as cheerio from "cheerio";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -20,11 +20,10 @@ if (!fs.existsSync(OUTPUT_DIR)) {
   fs.mkdirSync(OUTPUT_DIR, { recursive: true });
 }
 
-/* ---------- HARD REQUIREMENTS ---------- */
+/* ---------- REQUIRED BUFFERS ---------- */
 const BASE_PDF = fs.readFileSync(BASE_PDF_PATH);
 const SWANSEA_FONT = fs.readFileSync(FONT_PATH);
 
-/* sanity check (leave in) */
 if (!BASE_PDF.slice(0, 4).toString().startsWith("%PDF")) {
   throw new Error("basePdf is NOT a valid PDF");
 }
@@ -47,7 +46,7 @@ for (const file of htmlFiles) {
 
   try {
     const $ = cheerio.load(html);
-    const text = $("body").text().trim();
+    const text = $("body").text().replace(/\s+/g, " ").trim();
 
     if (!text) {
       console.warn(`⚠ Skipped (no body text): ${file}`);
@@ -70,11 +69,7 @@ for (const file of htmlFiles) {
           }
         ]
       },
-      inputs: [
-        {
-          content: text
-        }
-      ],
+      inputs: [{ content: text }],
       options: {
         font: {
           Swansea: {
@@ -91,7 +86,8 @@ for (const file of htmlFiles) {
     generated++;
 
   } catch (err) {
-    console.error(`❌ Failed: ${file} [${err.message}]`);
+    console.error(`❌ Failed: ${file}`);
+    console.error(err);
   }
 }
 
