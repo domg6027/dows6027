@@ -1,127 +1,158 @@
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+
 import * as cheerio from "cheerio";
-import { generate } from "@pdfme/generator";
+import { JSDOM } from "jsdom";
+
+import pkgCommon from "@pdfme/common";
+import pkgGenerator from "@pdfme/generator";
+
+const { generate } = pkgGenerator;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+/* ================= CONFIG ================= */
+
 const ARCHIVE_URL = "https://www.prophecynewswatch.com/archive.cfm";
-const ARTICLE_BASE =
-  "https://www.prophecynewswatch.com/article.cfm?recent_news_id=";
 
 const PDF_DIR = path.join(__dirname, "PDFS");
-const TMP_DIR = path.join(__dirname, "TMP");
 const FONT_PATH = path.join(__dirname, "fonts", "Swansea-q3pd.ttf");
 const BASE_PDF = path.join(__dirname, "TEMPLATES", "blank.pdf");
 
-console.log("▶ DAILY RUN START");
-
-// --- sanity checks ---
-if (!fs.existsSync(PDF_DIR)) fs.mkdirSync(PDF_DIR);
-if (!fs.existsSync(TMP_DIR)) fs.mkdirSync(TMP_DIR);
-
-if (!fs.existsSync(FONT_PATH)) {
-  throw new Error("Missing font: fonts/Swansea-q3pd.ttf");
-}
+/* ================= SANITY ================= */
 
 if (!fs.existsSync(BASE_PDF)) {
   throw new Error("Missing base PDF: TEMPLATES/blank.pdf");
 }
 
-// --- font config (ONE fallback only) ---
-const fonts = {
-  Swansea: {
-    data: fs.readFileSync(FONT_PATH),
-    fallback: true
-  }
-};
+if (!fs.existsSync(FONT_PATH)) {
+  throw new Error("Missing font: fonts/Swansea-q3pd.ttf");
+}
 
-// --- helpers ---
+fs.mkdirSync(PDF_DIR, { recursive: true });
+
+/* ================= HELPERS ================= */
+
 async function fetchText(url) {
   const res = await fetch(url);
   if (!res.ok) throw new Error(`Fetch failed: ${url}`);
-  return res.text();
+  return await res.text();
 }
 
-function extractIds(html) {
-  const $ = cheerio.load(html);
-  const ids = new Set();
-
-  $("a[href*='recent_news_id=']").each((_, el) => {
-    const href = $(el).attr("href");
-    const match = href?.match(/recent_news_id=(\d+)/);
-    if (match) ids.add(match[1]);
-  });
-
-  return [...ids].sort((a, b) => Number(a) - Number(b));
-}
-
+/**
+ * Heuristic extractor:
+ * - works across ALL known PNW article variants
+ * - ignores brittle selectors
+ */
 function extractArticle(html) {
   const $ = cheerio.load(html);
 
-  const article = $("td[width='100%']").first();
-  article.find("script, style, iframe").remove();
+  $("script, style, iframe, nav, form").remove();
 
-  const text = article.text().trim();
-  return text || null;
+  let best = "";
+  let bestLen = 0;
+
+  $("td, div").each((_, el) => {
+    const text = $(el).text().replace(/\s+/g, " ").trim();
+    if (text.length > bestLen && text.length > 1200) {
+      best = text;
+      bestLen = text.length;
+    }
+  });
+
+  return best || null;
 }
 
-// --- main ---
-const archiveHtml = await fetchText(ARCHIVE_URL);
-const articleIds = extractIds(archiveHtml);
+/* ================= MAIN ================= */
 
-console.log(`➡ Found ${articleIds.length} articles in archive`);
+async function run() {
+  console.log("▶ DAILY RUN START");
 
-let generated = 0;
+  const archiveHtml = await fetchText(ARCHIVE_URL);
+  const $ = cheerio.load(archiveHtml);
 
-for (const id of articleIds) {
-  const pdfPath = path.join(PDF_DIR, `${id}.pdf`);
-  if (fs.existsSync(pdfPath)) continue;
+  const articleIds = new Set();
 
-  console.log(`➡ Processing article ${id}`);
+  $("a[href*='article.cfm?recent_news_id=']").each((_, el) => {
+    const href = $(el).attr("href");
+    const match = href.match(/recent_news_id=(\d+)/);
+    if (match) articleIds.add(match[1]);
+  });
 
-  try {
-    const articleHtml = await fetchText(`${ARTICLE_BASE}${id}`);
-    fs.writeFileSync(path.join(TMP_DIR, `${id}.html`), articleHtml);
+  console.log(`➡ Found ${articleIds.size} articles in archive`);
 
-    const content = extractArticle(articleHtml);
-    if (!content) {
-      console.warn(`⚠ Skipped (empty): ${id}`);
+  let generated = 0;
+
+  for (const id of articleIds) {
+    console.log(`➡ Processing article ${id}`);
+
+    const outFile = path.join(PDF_DIR, `${id}.pdf`);
+    if (fs.existsSync(outFile)) {
+      console.log(`ℹ️ Already exists: ${id}`);
       continue;
     }
 
-    const template = {
-      basePdf: fs.readFileSync(BASE_PDF),
-      schemas: [
-        [
-          {
-            name: "body",
-            type: "text",
-            content,
-            position: { x: 20, y: 20 },
-            width: 170,
-            height: 260,
-            fontName: "Swansea",
-            fontSize: 10
-          }
-        ]
-      ]
-    };
+    try {
+      const url = `https://www.prophecynewswatch.com/article.cfm?recent_news_id=${id}`;
+      const html = await fetchText(url);
 
-    const pdf = await generate({
-      template,
-      inputs: [{}],
-      options: { font: fonts }
-    });
+      const articleText = extractArticle(html);
+      if (!articleText) {
+        console.warn(`⚠ Skipped (empty): ${id}`);
+        continue;
+      }
 
-    fs.writeFileSync(pdfPath, pdf);
-    generated++;
-  } catch (err) {
-    console.error(`❌ Failed ${id}:`, err.message);
+      const fontData = fs.readFileSync(FONT_PATH);
+
+      const template = {
+        basePdf: fs.readFileSync(BASE_PDF),
+        schemas: [
+          [
+            {
+              name: "content",
+              type: "text",
+              position: { x: 20, y: 20 },
+              width: 170,
+              height: 250,
+              fontName: "Swansea",
+              fontSize: 11,
+              lineHeight: 1.3,
+            },
+          ],
+        ],
+      };
+
+      const inputs = [{ content: articleText }];
+
+      const pdf = await generate({
+        template,
+        inputs,
+        options: {
+          font: {
+            Swansea: {
+              data: fontData,
+              fallback: true,
+            },
+          },
+        },
+      });
+
+      fs.writeFileSync(outFile, pdf);
+      generated++;
+    } catch (err) {
+      console.error(`❌ Failed: ${id}`);
+      console.error(err.message || err);
+    }
+  }
+
+  console.log(`📄 PDFs generated: ${generated}`);
+
+  if (generated === 0) {
+    console.log("ℹ️ No new articles to process");
+    process.exit(1);
   }
 }
 
-console.log(`📄 PDFs generated: ${generated}`);
-if (generated === 0) console.log("ℹ️ No new articles to process");
+run();
