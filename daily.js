@@ -1,108 +1,103 @@
-/**
- * DOWS6027 – DAILY RUN (FINAL STABLE)
- * pdfme v5.x • Node 20 • ESM • GitHub Actions SAFE
- */
-
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-import { JSDOM } from "jsdom";
-
-import pdfmeGenerator from "@pdfme/generator";
-
-const { generate } = pdfmeGenerator;
-
-/* ---------------- PATHS ---------------- */
+import { generate } from "@pdfme/generator";
+import cheerio from "cheerio";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const ROOT = __dirname;
-const PDF_DIR = path.join(ROOT, "PDFS");
+const HTML_DIR = ROOT;
+const OUTPUT_DIR = path.join(ROOT, "PDFS");
+const TEMPLATE_DIR = path.join(ROOT, "TEMPLATES");
 const FONT_PATH = path.join(ROOT, "fonts", "Swansea-q3pd.ttf");
-
-fs.mkdirSync(PDF_DIR, { recursive: true });
-
-if (!fs.existsSync(FONT_PATH)) {
-  console.error("❌ Font missing:", FONT_PATH);
-  process.exit(1);
-}
-
-/* ---------------- FONT (BUFFER ONLY) ---------------- */
-
-const fonts = {
-  Swansea: fs.readFileSync(FONT_PATH)
-};
-
-/* ---------------- HTML INPUT ---------------- */
-
-const htmlFiles = fs
-  .readdirSync(ROOT)
-  .filter(f => f.endsWith(".html"));
-
-if (!htmlFiles.length) {
-  console.error("❌ No HTML files found");
-  process.exit(1);
-}
+const BASE_PDF_PATH = path.join(TEMPLATE_DIR, "blank.pdf");
 
 console.log("▶ DAILY RUN START");
 
-/* ---------------- MAIN ---------------- */
+if (!fs.existsSync(OUTPUT_DIR)) {
+  fs.mkdirSync(OUTPUT_DIR, { recursive: true });
+}
+
+/* ---------- HARD REQUIREMENTS ---------- */
+const BASE_PDF = fs.readFileSync(BASE_PDF_PATH);
+const SWANSEA_FONT = fs.readFileSync(FONT_PATH);
+
+/* sanity check (leave in) */
+if (!BASE_PDF.slice(0, 4).toString().startsWith("%PDF")) {
+  throw new Error("basePdf is NOT a valid PDF");
+}
+
+/* ---------- HTML FILES ---------- */
+const htmlFiles = fs
+  .readdirSync(HTML_DIR)
+  .filter(f => f.endsWith(".html"));
 
 let generated = 0;
 
 for (const file of htmlFiles) {
-  console.log("➡ Processing", file);
+  console.log(`➡ Processing ${file}`);
+
+  const html = fs.readFileSync(path.join(HTML_DIR, file), "utf8").trim();
+  if (!html) {
+    console.warn(`⚠ Skipped (empty): ${file}`);
+    continue;
+  }
 
   try {
-    const html = fs.readFileSync(path.join(ROOT, file), "utf8");
-    const dom = new JSDOM(html);
-    const text = dom.window.document.body.textContent
-      .replace(/\s+/g, " ")
-      .trim();
+    const $ = cheerio.load(html);
+    const text = $("body").text().trim();
 
-    if (!text || text.length < 100) {
-      console.warn("⚠ Skipped (empty):", file);
+    if (!text) {
+      console.warn(`⚠ Skipped (no body text): ${file}`);
       continue;
     }
 
     const pdf = await generate({
       template: {
-        basePdf: null,
+        basePdf: BASE_PDF,
         schemas: [
           {
-            body: {
+            content: {
               type: "text",
               position: { x: 20, y: 20 },
               width: 170,
               height: 260,
-              fontSize: 11
+              fontSize: 11,
+              fontName: "Swansea"
             }
           }
         ]
       },
-      inputs: [{ body: text }],
+      inputs: [
+        {
+          content: text
+        }
+      ],
       options: {
-        font: fonts
+        font: {
+          Swansea: {
+            data: SWANSEA_FONT
+          }
+        }
       }
     });
 
-    const out = path.join(PDF_DIR, file.replace(".html", ".pdf"));
-    fs.writeFileSync(out, pdf);
+    const outName = file.replace(".html", ".pdf");
+    fs.writeFileSync(path.join(OUTPUT_DIR, outName), pdf);
 
-    console.log("✔ PDF written:", path.basename(out));
+    console.log(`✅ Generated ${outName}`);
     generated++;
 
   } catch (err) {
-    console.error("❌ Failed:", file, err.message);
+    console.error(`❌ Failed: ${file} [${err.message}]`);
   }
 }
 
-console.log("📄 PDFs generated:", generated);
+console.log(`📄 PDFs generated: ${generated}`);
 
-if (!generated) {
+if (generated === 0) {
   console.error("❌ No PDFs generated");
   process.exit(1);
 }
-
-console.log("✔ DAILY RUN COMPLETE");
