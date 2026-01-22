@@ -1,20 +1,20 @@
 /**
- * DOWS6027 – DAILY RUN (Node-only, PDFME)
- * FINAL HARDENED VERSION
+ * DOWS6027 – DAILY RUN (STABLE)
+ * PDFME 5.0+
+ * Linear, failsafe, forensic
  */
 
 import fs from "fs";
 import path from "path";
 import https from "https";
-import { generate } from "@pdfme/generator";
-import common from "@pdfme/common";
+import { createPdf } from "@pdfme/common";
 
-const { createPdf } = common;
+/* ---------------- LOG ---------------- */
 
 console.log("▶ DAILY RUN START");
 console.log("⏱ UTC:", new Date().toISOString());
 
-/* -------------------- PATHS -------------------- */
+/* ---------------- PATHS ---------------- */
 
 const ROOT = process.cwd();
 const PDF_DIR = path.join(ROOT, "PDFS");
@@ -25,71 +25,95 @@ const FONT_PATH = path.join(ROOT, "fonts", "Swansea-q3pd.ttf");
 fs.mkdirSync(PDF_DIR, { recursive: true });
 fs.mkdirSync(TMP_DIR, { recursive: true });
 
-/* -------------------- STATE LOAD -------------------- */
+if (!fs.existsSync(FONT_PATH)) {
+  console.error("❌ Font missing:", FONT_PATH);
+  process.exit(1);
+}
+
+/* ---------------- STATE ---------------- */
 
 if (!fs.existsSync(STATE_FILE)) {
-  console.error("❌ data.json missing — refusing to run");
+  console.error("❌ data.json missing");
   process.exit(1);
 }
 
-let state;
-try {
-  state = JSON.parse(fs.readFileSync(STATE_FILE, "utf8"));
-} catch {
-  console.error("❌ data.json invalid — refusing to run");
+const state = JSON.parse(fs.readFileSync(STATE_FILE, "utf8"));
+let lastProcessed = Number(state.last_article_number);
+
+if (!Number.isInteger(lastProcessed)) {
+  console.error("❌ Invalid last_article_number");
   process.exit(1);
 }
 
-const lastProcessed = Number(state.last_article_number);
-if (!Number.isInteger(lastProcessed) || lastProcessed <= 0) {
-  console.error("❌ INVALID last_article_number — refusing to run");
-  process.exit(1);
-}
+/* ---------------- HELPERS ---------------- */
 
-/* -------------------- DATE HELPERS -------------------- */
-
-const todayUTC = new Date();
-todayUTC.setUTCHours(0, 0, 0, 0);
-
-const yesterdayUTC = new Date(todayUTC);
-yesterdayUTC.setUTCDate(yesterdayUTC.getUTCDate() - 1);
-
-const threeDaysAgoUTC = new Date(todayUTC);
-threeDaysAgoUTC.setUTCDate(threeDaysAgoUTC.getUTCDate() - 3);
-
-/* -------------------- HTTP -------------------- */
-
-function fetchPage(url) {
+function fetch(url) {
   return new Promise((resolve, reject) => {
     https
       .get(url, { headers: { "User-Agent": "Mozilla/5.0" } }, res => {
         let data = "";
         res.on("data", d => (data += d));
-        res.on("end", () => resolve(data));
+        res.on("end", () =>
+          res.statusCode === 200
+            ? resolve(data)
+            : reject(new Error(`HTTP ${res.statusCode}`))
+        );
       })
       .on("error", reject);
   });
 }
 
-/* -------------------- ARTICLE DATE (STRICT) -------------------- */
-
-function extractArticleDate(articleHtml) {
-  const m =
-    articleHtml.match(/class="article-date"[^>]*>([^<]+)/i) ||
-    articleHtml.match(/<span class="date">([^<]+)/i);
-
+function extractDate(html) {
+  const m = html.match(
+    /\b(January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2},\s+\d{4}\b/
+  );
   if (!m) return null;
-
-  const d = new Date(m[1].trim());
+  const d = new Date(m[0]);
   return isNaN(d) ? null : d;
 }
 
-/* -------------------- MAIN -------------------- */
+function stripHtml(html) {
+  return html
+    .replace(/<script[\s\S]*?<\/script>/gi, "")
+    .replace(/<style[\s\S]*?<\/style>/gi, "")
+    .replace(/<[^>]+>/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
 
-(async function main() {
-  const archive = await fetchPage(
-    "https://www.prophecynewswatch.com/archive.cfm"
-  );
+/* ---------------- PDF TEMPLATE ---------------- */
+
+const template = {
+  basePdf: null,
+  schemas: [
+    {
+      body: {
+        type: "text",
+        position: { x: 20, y: 20 },
+        width: 170,
+        height: 260,
+        fontSize: 11,
+        lineHeight: 1.4
+      }
+    }
+  ]
+};
+
+const fonts = {
+  Swansea: fs.readFileSync(FONT_PATH)
+};
+
+/* ---------------- MAIN ---------------- */
+
+(async () => {
+  let archive;
+
+  try {
+    archive = await fetch("https://www.prophecynewswatch.com/archive.cfm");
+  } catch (e) {
+    console.error("❌ Archive fetch failed:", e.message);
+    process.exit(1);
+  }
 
   const ids = Array.from(
     new Set(
@@ -101,108 +125,88 @@ function extractArticleDate(articleHtml) {
     .filter(id => id > lastProcessed)
     .sort((a, b) => a - b);
 
-  let mode = "CATCHUP";
-  const gapDays = Math.floor(
-    (todayUTC - new Date(state.last_date_used || todayUTC)) /
-      (1000 * 60 * 60 * 24)
-  );
-
-  if (gapDays <= 7) mode = "SCRAPE";
-
-  console.log(`ℹ Mode selected: ${mode}`);
-  console.log("📰 Articles to process:", ids.length);
+  console.log("📰 Articles discovered:", ids.length);
 
   let generated = 0;
-  let currentLast = lastProcessed;
+  let lastAttempted = lastProcessed;
 
   for (const id of ids) {
+    lastAttempted = id;
     console.log("➡ Processing", id);
 
-    const html = await fetchPage(
-      `https://www.prophecynewswatch.com/article.cfm?recent_news_id=${id}`
-    );
-
-    const articleMatch = html.match(/<article[^>]*>([\s\S]*?)<\/article>/i);
-    if (!articleMatch) continue;
-
-    const articleHtml = articleMatch[1];
-    const articleDate = extractArticleDate(articleHtml);
-
-    if (!articleDate) continue;
-
-    articleDate.setUTCHours(0, 0, 0, 0);
-
-    if (mode === "CATCHUP" && articleDate >= yesterdayUTC) {
-      console.log("🔁 Reached yesterday — switching to SCRAPE");
-      mode = "SCRAPE";
+    let html;
+    try {
+      html = await fetch(
+        `https://www.prophecynewswatch.com/article.cfm?recent_news_id=${id}`
+      );
+    } catch {
+      console.warn("⚠ Fetch failed:", id);
       continue;
     }
 
-    if (mode === "SCRAPE" && articleDate < threeDaysAgoUTC) continue;
+    const m = html.match(/<article[^>]*>([\s\S]*?)<\/article>/i);
+    if (!m) {
+      console.warn("⚠ No <article>:", id);
+      continue;
+    }
 
-    const cleanText = articleHtml
-      .replace(/<script[\s\S]*?<\/script>/gi, "")
-      .replace(/<style[\s\S]*?<\/style>/gi, "")
-      .replace(/<[^>]+>/g, "")
-      .replace(/\s+/g, " ")
-      .trim();
+    const articleHtml = m[1];
+    const articleDate = extractDate(articleHtml);
 
-    if (cleanText.length < 300) continue;
+    if (!articleDate) {
+      console.warn("⚠ No date:", id);
+      fs.writeFileSync(
+        path.join(TMP_DIR, `NO-DATE-${id}.html`),
+        articleHtml
+      );
+      continue;
+    }
+
+    const text = stripHtml(articleHtml);
+    if (!text) continue;
+
+    fs.writeFileSync(path.join(TMP_DIR, `${id}.txt`), text, "utf8");
 
     const ymd =
-      articleDate.getUTCFullYear().toString() +
+      articleDate.getUTCFullYear() +
       String(articleDate.getUTCMonth() + 1).padStart(2, "0") +
       String(articleDate.getUTCDate()).padStart(2, "0");
 
     const pdfPath = path.join(PDF_DIR, `${ymd}-${id}.pdf`);
 
-    const pdf = await createPdf({
-      template: {
-        schemas: [
-          {
-            body: {
-              type: "text",
-              position: { x: 20, y: 20 },
-              width: 170,
-              height: 260,
-              fontSize: 11
-            }
-          }
-        ]
-      },
-      inputs: [{ body: cleanText }],
-      options: {
-        font: {
-          Swansea: fs.readFileSync(FONT_PATH)
-        }
-      }
-    });
+    try {
+      const pdf = await createPdf({
+        template,
+        inputs: [{ body: text }],
+        options: { font: fonts }
+      }).then(r => r.buffer);
 
-    fs.writeFileSync(pdfPath, pdf);
-    generated++;
-    currentLast = id;
+      if (!pdf?.length) throw new Error("Empty PDF");
+
+      fs.writeFileSync(pdfPath, pdf);
+      console.log("✔ PDF written:", path.basename(pdfPath));
+      generated++;
+    } catch (e) {
+      console.error("❌ PDF failed:", id, e.message);
+    }
   }
 
-  if (generated === 0) {
-    console.log("ℹ No PDFs generated — exiting cleanly");
-    return;
-  }
+  /* ---- ALWAYS UPDATE STATE ---- */
 
   fs.writeFileSync(
     STATE_FILE,
     JSON.stringify(
       {
         ...state,
-        last_article_number: currentLast,
-        last_date_used: todayUTC.toISOString().slice(0, 10),
-        last_URL_processed:
-          "https://www.prophecynewswatch.com/article.cfm?recent_news_id=" +
-          currentLast
+        last_article_number: lastAttempted,
+        last_run_utc: new Date().toISOString()
       },
       null,
       2
     )
   );
 
-  console.log("✔ DAILY RUN COMPLETE — PDFs:", generated);
+  console.log("✔ DAILY RUN COMPLETE");
+  console.log("📄 PDFs generated:", generated);
+  console.log("🔚 Last article attempted:", lastAttempted);
 })();
