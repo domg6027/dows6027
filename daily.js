@@ -7,7 +7,9 @@
 import fs from "fs";
 import path from "path";
 import https from "https";
-import { createPdf } from "@pdfme/common";
+import pdfme from "@pdfme/common";
+
+const { createPdf } = pdfme;
 
 /* ---------------- LOG ---------------- */
 
