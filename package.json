@@ -13,7 +13,8 @@
     "@pdfme/generator": "^5.1.0",
     "cheerio": "^1.1.2",
     "lodash": "^4.17.23",
-    "lodash-es": "^4.17.23"
+    "lodash-es": "^4.17.23",
+    "jsdom": "^22.1.0"
   },
   "overrides": {
     "core-js": "^3.37.0",
