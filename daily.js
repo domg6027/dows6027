@@ -1,139 +1,221 @@
+/**
+ * DOWS6027 – DAILY / CATCH-UP RUNNER
+ * Node-only, PDFME-only
+ * Auto-selects mode based on data.json age
+ */
+
 import fs from "fs";
 import path from "path";
-import process from "process";
+import https from "https";
+import { generate } from "@pdfme/generator";
+import pkg from "@pdfme/common";
 
-import pdfme from "@pdfme/common";
+const { text } = pkg;
 
-const { generate } = pdfme;
+/* -------------------- BOOT -------------------- */
 
-const ROOT = process.cwd();
-const DATA_FILE = path.join(ROOT, "data.json");
-const OUTPUT_DIR = path.join(ROOT, "output");
-const FONT_PATH = path.join(ROOT, "fonts", "Swansea-q3pd.ttf");
-
-console.log("\n▶ DAILY RUN START");
+console.log("▶ DAILY RUN START");
 console.log("⏱ UTC:", new Date().toISOString());
 
-/* -------------------- HARD FAILSAFES -------------------- */
+const ROOT = process.cwd();
+const PDF_DIR = path.join(ROOT, "PDFS");
+const TMP_DIR = path.join(ROOT, "tmp");
+const STATE_FILE = path.join(ROOT, "data.json");
 
-if (!fs.existsSync(DATA_FILE)) {
-  console.error("❌ data.json missing — REFUSING TO RUN");
+fs.mkdirSync(PDF_DIR, { recursive: true });
+fs.mkdirSync(TMP_DIR, { recursive: true });
+
+/* -------------------- STATE LOAD -------------------- */
+
+if (!fs.existsSync(STATE_FILE)) {
+  console.error("❌ data.json missing — refusing to run");
   process.exit(1);
 }
 
-if (!fs.existsSync(FONT_PATH)) {
-  console.error("❌ Swansea font missing — REFUSING TO RUN");
-  process.exit(1);
-}
-
-let data;
+let state;
 try {
-  data = JSON.parse(fs.readFileSync(DATA_FILE, "utf8"));
+  state = JSON.parse(fs.readFileSync(STATE_FILE, "utf8"));
 } catch {
-  console.error("❌ data.json corrupt — REFUSING TO RUN");
+  console.error("❌ data.json invalid — refusing to run");
   process.exit(1);
 }
 
-if (
-  typeof data.last_article_number !== "number" ||
-  !data.last_date_used
-) {
-  console.error("❌ data.json fields invalid — REFUSING TO RUN");
+const lastId = Number(state.last_article_number);
+const lastDate = new Date(state.last_date_used);
+
+if (!Number.isInteger(lastId) || lastId <= 0 || isNaN(lastDate)) {
+  console.error("❌ Invalid state fields — refusing to run");
   process.exit(1);
 }
 
-/* -------------------- FONT REGISTRATION -------------------- */
+/* -------------------- MODE DECISION -------------------- */
 
-const fonts = {
-  Swansea: {
-    data: fs.readFileSync(FONT_PATH),
-    fallback: true
+const DAYS = Math.floor(
+  (Date.now() - lastDate.getTime()) / (1000 * 60 * 60 * 24)
+);
+
+const MODE = DAYS > 7 ? "CATCHUP" : "DAILY";
+
+console.log(`ℹ Mode selected: ${MODE} (${DAYS} days gap)`);
+
+/* -------------------- HTTP -------------------- */
+
+function fetchPage(url) {
+  return new Promise((resolve, reject) => {
+    const req = https.get(
+      url,
+      { headers: { "User-Agent": "Mozilla/5.0" } },
+      res => {
+        let data = "";
+        res.on("data", d => (data += d));
+        res.on("end", () => resolve(data));
+      }
+    );
+    req.setTimeout(20000, () => {
+      req.destroy();
+      reject(new Error("timeout"));
+    });
+    req.on("error", reject);
+  });
+}
+
+/* -------------------- ARTICLE → PDF -------------------- */
+
+async function processArticle(id) {
+  let html;
+  try {
+    html = await fetchPage(
+      `https://www.prophecynewswatch.com/article.cfm?recent_news_id=${id}`
+    );
+  } catch {
+    return false;
   }
-};
 
-/* -------------------- OUTPUT DIR -------------------- */
+  let body = null;
 
-if (!fs.existsSync(OUTPUT_DIR)) {
-  fs.mkdirSync(OUTPUT_DIR, { recursive: true });
-}
+  const a1 = html.match(/<article[^>]*>([\s\S]*?)<\/article>/i);
+  const a2 = html.match(/class="article-content"[\s\S]*?>([\s\S]*?)<\/div>/i);
 
-/* -------------------- ARTICLE IDS (ALREADY DISCOVERED) -------------------- */
-/* NOTE: This script assumes your article discovery logic already ran */
+  if (a1) body = a1[1];
+  if (!body && a2) body = a2[1];
+  if (!body || body.length < 200) return false;
 
-const articleIds = globalThis.NEW_ARTICLE_IDS;
+  const clean = body
+    .replace(/<script[\s\S]*?<\/script>/gi, "")
+    .replace(/<style[\s\S]*?<\/style>/gi, "")
+    .replace(/<[^>]+>/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
 
-if (!Array.isArray(articleIds) || articleIds.length === 0) {
-  console.log("ℹ No new articles — exiting cleanly");
-  process.exit(0);
-}
+  if (clean.length < 300) return false;
 
-console.log(`📰 New articles found: ${articleIds.length}`);
+  const dateMatch = html.match(/(\w+ \d{1,2}, \d{4})/);
+  const d = dateMatch ? new Date(dateMatch[1]) : new Date();
 
-let generatedCount = 0;
-let highestId = data.last_article_number;
+  const ymd =
+    d.getUTCFullYear().toString() +
+    String(d.getUTCMonth() + 1).padStart(2, "0") +
+    String(d.getUTCDate()).padStart(2, "0");
 
-/* -------------------- PDF GENERATION -------------------- */
-
-for (const id of articleIds) {
-  console.log(`➡ Processing ${id}`);
+  const pdfPath = path.join(PDF_DIR, `${ymd}-${id}.pdf`);
 
   const template = {
     basePdf: null,
-    schemas: [[
+    schemas: [
       {
         content: {
           type: "text",
           position: { x: 20, y: 20 },
           width: 170,
           height: 260,
-          fontSize: 12,
-          fontName: "Swansea"
+          fontSize: 11
         }
       }
-    ]]
+    ]
   };
 
-  const inputs = [{
-    content: `Article ${id}`
-  }];
-
-  let pdf;
   try {
-    pdf = await generate({
+    const pdf = await generate({
       template,
-      inputs,
-      options: { font: fonts }
+      inputs: [{ content: clean }]
     });
-  } catch (err) {
-    console.error(`❌ PDF generation failed for ${id}`);
-    continue;
+    fs.writeFileSync(pdfPath, pdf);
+    return true;
+  } catch {
+    return false;
   }
-
-  if (!pdf || pdf.length === 0) {
-    console.error(`❌ Empty PDF buffer for ${id}`);
-    continue;
-  }
-
-  const outPath = path.join(OUTPUT_DIR, `${id}.pdf`);
-  fs.writeFileSync(outPath, pdf);
-
-  generatedCount++;
-  if (id > highestId) highestId = id;
 }
 
-/* -------------------- FINAL VALIDATION -------------------- */
+/* -------------------- MAIN -------------------- */
 
-if (generatedCount === 0) {
-  console.error("❌ NO PDFs GENERATED — HARD FAIL");
-  process.exit(1);
-}
+(async function main() {
+  let ids = [];
 
-/* -------------------- SAFE DATA UPDATE -------------------- */
+  if (MODE === "DAILY") {
+    const archive = await fetchPage(
+      "https://www.prophecynewswatch.com/archive.cfm"
+    );
 
-data.last_article_number = highestId;
-data.current_date = new Date().toISOString().slice(0, 10);
+    ids = Array.from(
+      new Set(
+        (archive.match(/recent_news_id=\d+/g) || []).map(x =>
+          Number(x.replace("recent_news_id=", ""))
+        )
+      )
+    )
+      .filter(id => id > lastId)
+      .sort((a, b) => a - b);
+  } else {
+    for (let i = lastId + 1; i <= lastId + 2000; i++) {
+      ids.push(i);
+    }
+  }
 
-fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
+  if (ids.length === 0) {
+    console.log("ℹ No new articles — exiting cleanly");
+    return;
+  }
 
-console.log(`✅ PDFs generated: ${generatedCount}`);
-console.log("▶ DAILY RUN COMPLETE\n");
+  console.log("📰 Articles to process:", ids.length);
+
+  let generated = 0;
+  let highestId = lastId;
+  let misses = 0;
+
+  for (const id of ids) {
+    console.log("➡ Processing", id);
+    const ok = await processArticle(id);
+
+    if (ok) {
+      generated++;
+      highestId = id;
+      misses = 0;
+    } else {
+      misses++;
+    }
+
+    if (MODE === "CATCHUP" && misses >= 20) break;
+  }
+
+  if (generated === 0) {
+    console.error("❌ NO PDFs GENERATED — exiting without state update");
+    process.exit(1);
+  }
+
+  fs.writeFileSync(
+    STATE_FILE,
+    JSON.stringify(
+      {
+        last_date_used: new Date().toISOString().slice(0, 10),
+        current_date: new Date().toISOString().slice(0, 10),
+        last_URL_processed:
+          `https://www.prophecynewswatch.com/article.cfm?recent_news_id=${highestId}`,
+        last_article_number: highestId
+      },
+      null,
+      2
+    )
+  );
+
+  console.log(`✔ COMPLETE — PDFs generated: ${generated}`);
+})();
