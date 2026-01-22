@@ -1,14 +1,16 @@
 /**
- * DOWS6027 – DAILY PDF GENERATOR
- * Node.js + PDFME (FINAL, WORKING)
+ * DOWS6027 – DAILY RUN
+ * Node-only, PDFME
+ * FINAL STABLE LOGIC
  */
 
 import fs from "fs";
 import path from "path";
 import https from "https";
 import { generate } from "@pdfme/generator";
+import pdfmeCommon from "@pdfme/common";
 
-/* -------------------- BOOT -------------------- */
+const { text } = pdfmeCommon;
 
 console.log("▶ DAILY RUN START");
 console.log("⏱ UTC:", new Date().toISOString());
@@ -17,38 +19,54 @@ const ROOT = process.cwd();
 const PDF_DIR = path.join(ROOT, "PDFS");
 const TMP_DIR = path.join(ROOT, "tmp");
 const STATE_FILE = path.join(ROOT, "data.json");
-const FONT_PATH = path.join(ROOT, "fonts", "Swansea-q3pd.ttf");
 
 fs.mkdirSync(PDF_DIR, { recursive: true });
 fs.mkdirSync(TMP_DIR, { recursive: true });
 
-/* -------------------- STATE -------------------- */
+/* -------------------- LOAD STATE -------------------- */
 
 if (!fs.existsSync(STATE_FILE)) {
   console.error("❌ data.json missing — refusing to run");
   process.exit(1);
 }
 
-const state = JSON.parse(fs.readFileSync(STATE_FILE, "utf8"));
-const lastId = Number(state.last_article_number);
-
-if (!Number.isInteger(lastId) || lastId < 9000) {
-  console.error("❌ INVALID last_article_number — refusing to run");
+let state;
+try {
+  state = JSON.parse(fs.readFileSync(STATE_FILE, "utf8"));
+} catch {
+  console.error("❌ data.json invalid JSON — refusing to run");
   process.exit(1);
 }
 
-/* -------------------- MODE -------------------- */
+const lastId = Number(state.last_article_number);
+const lastDateUsed = new Date(state.last_date_used + "T00:00:00Z");
 
-const lastDate = new Date(state.last_date_used);
+if (!Number.isInteger(lastId) || lastId <= 0) {
+  console.error("❌ Invalid last_article_number — refusing to run");
+  process.exit(1);
+}
+
+/* -------------------- DATE HELPERS -------------------- */
+
 const today = new Date();
-const gapDays = Math.floor((today - lastDate) / 86400000);
-const MODE = gapDays > 7 ? "CATCHUP" : "SCRAPE";
+today.setUTCHours(0, 0, 0, 0);
 
-console.log(`ℹ Mode selected: ${MODE} (${gapDays} days gap)`);
+const yesterday = new Date(today);
+yesterday.setUTCDate(today.getUTCDate() - 1);
 
-/* -------------------- HTTP -------------------- */
+const threeDaysAgo = new Date(today);
+threeDaysAgo.setUTCDate(today.getUTCDate() - 2);
 
-function fetch(url) {
+const gapDays = Math.floor((today - lastDateUsed) / 86400000);
+
+/* -------------------- MODE DECISION -------------------- */
+
+let mode = gapDays > 7 ? "CATCHUP" : "SCRAPE";
+console.log(`ℹ Mode selected: ${mode} (${gapDays} days gap)`);
+
+/* -------------------- FETCH -------------------- */
+
+function fetchPage(url) {
   return new Promise((resolve, reject) => {
     const req = https.get(
       url,
@@ -67,113 +85,107 @@ function fetch(url) {
   });
 }
 
-/* -------------------- ARTICLE IDS -------------------- */
+/* -------------------- EXTRACT DATE -------------------- */
 
-async function getIds() {
-  if (MODE === "CATCHUP") {
-    return Array.from({ length: 2000 }, (_, i) => lastId + i + 1);
+function extractDate(html) {
+  const m = html.match(/(\w+ \d{1,2}, \d{4})/);
+  if (!m) return null;
+  const d = new Date(m[1] + " UTC");
+  d.setUTCHours(0, 0, 0, 0);
+  return d;
+}
+
+/* -------------------- MAIN -------------------- */
+
+(async function main() {
+  let archive;
+  try {
+    archive = await fetchPage("https://www.prophecynewswatch.com/archive.cfm");
+  } catch {
+    console.error("❌ Failed to fetch archive");
+    process.exit(1);
   }
 
-  const archive = await fetch("https://www.prophecynewswatch.com/archive.cfm");
-  return Array.from(
+  const allIds = Array.from(
     new Set(
       (archive.match(/recent_news_id=\d+/g) || []).map(x =>
         Number(x.replace("recent_news_id=", ""))
       )
     )
-  )
-    .filter(id => id > lastId)
-    .sort((a, b) => a - b);
-}
+  ).sort((a, b) => a - b);
 
-/* -------------------- MINIMAL BLANK PDF -------------------- */
-/* A valid one-page A4 PDF (DO NOT TOUCH) */
+  let ids;
 
-const BASE_PDF = Buffer.from(
-  `%PDF-1.4
-1 0 obj << /Type /Catalog /Pages 2 0 R >> endobj
-2 0 obj << /Type /Pages /Kids [3 0 R] /Count 1 >> endobj
-3 0 obj << /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 4 0 R >> endobj
-4 0 obj << /Length 0 >> stream
-endstream
-endobj
-xref
-0 5
-0000000000 65535 f
-0000000010 00000 n
-0000000060 00000 n
-0000000117 00000 n
-0000000210 00000 n
-trailer << /Root 1 0 R /Size 5 >>
-startxref
-260
-%%EOF`
-);
+  if (mode === "CATCHUP") {
+    ids = allIds.filter(id => id > lastId);
+  } else {
+    ids = allIds.slice(-200); // recent window safety
+  }
 
-/* -------------------- MAIN -------------------- */
-
-(async () => {
-  const ids = await getIds();
   console.log("📰 Articles to process:", ids.length);
 
-  const fontData = fs.readFileSync(FONT_PATH);
-
   let generated = 0;
-  let lastSuccess = lastId;
+  let highestWritten = lastId;
 
   for (const id of ids) {
     console.log("➡ Processing", id);
 
     let html;
     try {
-      html = await fetch(
+      html = await fetchPage(
         `https://www.prophecynewswatch.com/article.cfm?recent_news_id=${id}`
       );
     } catch {
       continue;
     }
 
-    const body =
-      html.match(/<article[^>]*>([\s\S]*?)<\/article>/i)?.[1] ||
-      html.match(/class="article-content"[\s\S]*?>([\s\S]*?)<\/div>/i)?.[1];
+    const articleDate = extractDate(html);
+    if (!articleDate) continue;
 
-    if (!body) continue;
+    /* ---- MODE TRANSITION RULE ---- */
+    if (mode === "CATCHUP" && articleDate >= yesterday) {
+      console.log("🔁 Reached yesterday — switching to SCRAPE");
+      break;
+    }
 
-    const text = body
+    if (mode === "SCRAPE" && articleDate < threeDaysAgo) {
+      continue;
+    }
+
+    /* ---- CONTENT EXTRACTION ---- */
+
+    const a1 = html.match(/<article[^>]*>([\s\S]*?)<\/article>/i);
+    const a2 = html.match(/class="article-content"[\s\S]*?>([\s\S]*?)<\/div>/i);
+    const body = a1?.[1] || a2?.[1];
+
+    if (!body || body.length < 300) continue;
+
+    const cleanText = body
       .replace(/<script[\s\S]*?<\/script>/gi, "")
       .replace(/<style[\s\S]*?<\/style>/gi, "")
       .replace(/<[^>]+>/g, "")
       .replace(/\s+/g, " ")
       .trim();
 
-    if (text.length < 400) continue;
-
-    const d =
-      html.match(/(\w+ \d{1,2}, \d{4})/)?.[1]
-        ? new Date(RegExp.$1)
-        : new Date();
+    if (cleanText.length < 500) continue;
 
     const ymd =
-      d.getUTCFullYear().toString() +
-      String(d.getUTCMonth() + 1).padStart(2, "0") +
-      String(d.getUTCDate()).padStart(2, "0");
+      articleDate.getUTCFullYear().toString() +
+      String(articleDate.getUTCMonth() + 1).padStart(2, "0") +
+      String(articleDate.getUTCDate()).padStart(2, "0");
+
+    const pdfPath = path.join(PDF_DIR, `${ymd}-${id}.pdf`);
 
     const template = {
-      basePdf: BASE_PDF,
-      fonts: {
-        Swansea: fontData
-      },
+      basePdf: null,
       schemas: [
         {
-          article: {
+          content: {
             type: "text",
-            position: { x: 20, y: 30 },
+            position: { x: 20, y: 20 },
             width: 170,
-            height: 780,
-            fontSize: 11,
-            fontName: "Swansea",
-            lineHeight: 1.4,
-            wrap: true
+            height: 260,
+            fontSize: 11
           }
         }
       ]
@@ -182,18 +194,13 @@ startxref
     try {
       const pdf = await generate({
         template,
-        inputs: [{ article: text }]
+        inputs: [{ content: cleanText }]
       });
-
-      fs.writeFileSync(
-        path.join(PDF_DIR, `${ymd}-${id}.pdf`),
-        pdf
-      );
-
+      fs.writeFileSync(pdfPath, pdf);
       generated++;
-      lastSuccess = id;
-    } catch (e) {
-      console.error("❌ PDF generation failed for", id);
+      highestWritten = id;
+    } catch {
+      continue;
     }
   }
 
@@ -202,15 +209,17 @@ startxref
     process.exit(1);
   }
 
+  /* -------------------- STATE UPDATE -------------------- */
+
   fs.writeFileSync(
     STATE_FILE,
     JSON.stringify(
       {
-        last_date_used: today.toISOString().slice(0, 10),
+        last_date_used: state.last_date_used,
         current_date: today.toISOString().slice(0, 10),
         last_URL_processed:
-          `https://www.prophecynewswatch.com/article.cfm?recent_news_id=${lastSuccess}`,
-        last_article_number: lastSuccess
+          `https://www.prophecynewswatch.com/article.cfm?recent_news_id=${highestWritten}`,
+        last_article_number: highestWritten
       },
       null,
       2
