@@ -7,7 +7,7 @@
 import fs from "fs";
 import path from "path";
 import https from "https";
-import cheerio from "cheerio";
+import { load } from "cheerio"; // <-- Fixed ESM import
 import pdfme from "@pdfme/common";
 
 const { createPdf } = pdfme;
@@ -131,7 +131,7 @@ try {
       continue;
     }
 
-    const $ = cheerio.load(html);
+    const $ = load(html);
     const articleContainer = $("#content")
       .find("div")
       .filter((_, el) => $(el).text().length > 500)
