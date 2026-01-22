@@ -1,17 +1,18 @@
 /**
- * DOWS6027 – DAILY RUN (STABLE)
- * PDFME 5.0+
- * Linear, failsafe, forensic
+ * DOWS6027 – DAILY RUN (CHEERIO + PDFME 5.x)
+ * ONLINE / GITHUB ACTIONS SAFE
+ * NON-DESTRUCTIVE, FORENSIC, FAIL-SAFE
  */
 
 import fs from "fs";
 import path from "path";
 import https from "https";
+import cheerio from "cheerio";
 import pdfme from "@pdfme/common";
 
 const { createPdf } = pdfme;
 
-/* ---------------- LOG ---------------- */
+/* ---------------- LOG START ---------------- */
 
 console.log("▶ DAILY RUN START");
 console.log("⏱ UTC:", new Date().toISOString());
@@ -20,7 +21,7 @@ console.log("⏱ UTC:", new Date().toISOString());
 
 const ROOT = process.cwd();
 const PDF_DIR = path.join(ROOT, "PDFS");
-const TMP_DIR = path.join(ROOT, "tmp");
+const TMP_DIR = path.join(ROOT, "TMP");
 const STATE_FILE = path.join(ROOT, "data.json");
 const FONT_PATH = path.join(ROOT, "fonts", "Swansea-q3pd.ttf");
 
@@ -32,12 +33,12 @@ if (!fs.existsSync(FONT_PATH)) {
   process.exit(1);
 }
 
-/* ---------------- STATE ---------------- */
-
 if (!fs.existsSync(STATE_FILE)) {
   console.error("❌ data.json missing");
   process.exit(1);
 }
+
+/* ---------------- STATE ---------------- */
 
 const state = JSON.parse(fs.readFileSync(STATE_FILE, "utf8"));
 let lastProcessed = Number(state.last_article_number);
@@ -47,7 +48,7 @@ if (!Number.isInteger(lastProcessed)) {
   process.exit(1);
 }
 
-/* ---------------- HELPERS ---------------- */
+/* ---------------- NETWORK ---------------- */
 
 function fetch(url) {
   return new Promise((resolve, reject) => {
@@ -55,71 +56,33 @@ function fetch(url) {
       .get(url, { headers: { "User-Agent": "Mozilla/5.0" } }, res => {
         let data = "";
         res.on("data", d => (data += d));
-        res.on("end", () =>
-          res.statusCode === 200
-            ? resolve(data)
-            : reject(new Error(`HTTP ${res.statusCode}`))
-        );
+        res.on("end", () => {
+          if (res.statusCode !== 200) {
+            reject(new Error(`HTTP ${res.statusCode}`));
+          } else {
+            resolve(data);
+          }
+        });
       })
       .on("error", reject);
   });
 }
 
-function extractDate(html) {
-  const m = html.match(
-    /\b(January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2},\s+\d{4}\b/
-  );
-  if (!m) return null;
-  const d = new Date(m[0]);
-  return isNaN(d) ? null : d;
-}
-
-function stripHtml(html) {
-  return html
-    .replace(/<script[\s\S]*?<\/script>/gi, "")
-    .replace(/<style[\s\S]*?<\/style>/gi, "")
-    .replace(/<[^>]+>/g, "")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-/* ---------------- PDF TEMPLATE ---------------- */
-
-const template = {
-  basePdf: null,
-  schemas: [
-    {
-      body: {
-        type: "text",
-        position: { x: 20, y: 20 },
-        width: 170,
-        height: 260,
-        fontSize: 11,
-        lineHeight: 1.4
-      }
-    }
-  ]
-};
-
-const fonts = {
-  Swansea: fs.readFileSync(FONT_PATH)
-};
-
 /* ---------------- MAIN ---------------- */
 
 (async () => {
-  let archive;
+  let archiveHtml;
 
   try {
-    archive = await fetch("https://www.prophecynewswatch.com/archive.cfm");
+    archiveHtml = await fetch("https://www.prophecynewswatch.com/archive.cfm");
   } catch (e) {
-    console.error("❌ Archive fetch failed:", e.message);
+    console.error("❌ Failed to fetch archive:", e.message);
     process.exit(1);
   }
 
-  const ids = Array.from(
+  const discoveredIds = Array.from(
     new Set(
-      (archive.match(/recent_news_id=\d+/g) || []).map(x =>
+      (archiveHtml.match(/recent_news_id=\d+/g) || []).map(x =>
         Number(x.replace("recent_news_id=", ""))
       )
     )
@@ -127,12 +90,12 @@ const fonts = {
     .filter(id => id > lastProcessed)
     .sort((a, b) => a - b);
 
-  console.log("📰 Articles discovered:", ids.length);
+  console.log("📰 Articles discovered:", discoveredIds.length);
 
   let generated = 0;
   let lastAttempted = lastProcessed;
 
-  for (const id of ids) {
+  for (const id of discoveredIds) {
     lastAttempted = id;
     console.log("➡ Processing", id);
 
@@ -142,58 +105,83 @@ const fonts = {
         `https://www.prophecynewswatch.com/article.cfm?recent_news_id=${id}`
       );
     } catch {
-      console.warn("⚠ Fetch failed:", id);
+      console.warn("⚠ Article missing (skipped):", id);
       continue;
     }
 
-    const m = html.match(/<article[^>]*>([\s\S]*?)<\/article>/i);
-    if (!m) {
-      console.warn("⚠ No <article>:", id);
+    const $ = cheerio.load(html);
+
+    /* ---- REAL SITE STRUCTURE ---- */
+    const articleContainer =
+      $("#content")
+        .find("div")
+        .filter((_, el) => $(el).text().length > 500)
+        .first();
+
+    if (!articleContainer.length) {
+      console.warn("⚠ No article body:", id);
       continue;
     }
 
-    const articleHtml = m[1];
-    const articleDate = extractDate(articleHtml);
+    const text = articleContainer
+      .text()
+      .replace(/\s+/g, " ")
+      .trim();
 
-    if (!articleDate) {
-      console.warn("⚠ No date:", id);
-      fs.writeFileSync(
-        path.join(TMP_DIR, `NO-DATE-${id}.html`),
-        articleHtml
-      );
+    if (!text) {
+      console.warn("⚠ Empty article text:", id);
       continue;
     }
 
-    const text = stripHtml(articleHtml);
-    if (!text) continue;
+    /* ---- FORENSIC RAW SAVE ---- */
+    fs.writeFileSync(
+      path.join(TMP_DIR, `${id}.txt`),
+      text,
+      "utf8"
+    );
 
-    fs.writeFileSync(path.join(TMP_DIR, `${id}.txt`), text, "utf8");
+    /* ---- PDF ---- */
+    const pdfPath = path.join(PDF_DIR, `${id}.pdf`);
 
-    const ymd =
-      articleDate.getUTCFullYear() +
-      String(articleDate.getUTCMonth() + 1).padStart(2, "0") +
-      String(articleDate.getUTCDate()).padStart(2, "0");
-
-    const pdfPath = path.join(PDF_DIR, `${ymd}-${id}.pdf`);
-
+    let pdf;
     try {
-      const pdf = await createPdf({
-        template,
+      pdf = await createPdf({
+        template: {
+          schemas: [
+            {
+              body: {
+                type: "text",
+                position: { x: 20, y: 20 },
+                width: 170,
+                height: 260,
+                fontSize: 11
+              }
+            }
+          ]
+        },
         inputs: [{ body: text }],
-        options: { font: fonts }
-      }).then(r => r.buffer);
-
-      if (!pdf?.length) throw new Error("Empty PDF");
-
-      fs.writeFileSync(pdfPath, pdf);
-      console.log("✔ PDF written:", path.basename(pdfPath));
-      generated++;
+        options: {
+          font: {
+            Swansea: fs.readFileSync(FONT_PATH)
+          }
+        }
+      }).then(res => res.buffer);
     } catch (e) {
-      console.error("❌ PDF failed:", id, e.message);
+      console.error("❌ PDF generation failed:", id, e.message);
+      continue;
     }
+
+    if (!pdf || !pdf.length) {
+      console.error("❌ Empty PDF buffer:", id);
+      continue;
+    }
+
+    fs.writeFileSync(pdfPath, pdf);
+    console.log("✔ PDF written:", path.basename(pdfPath));
+    generated++;
   }
 
-  /* ---- ALWAYS UPDATE STATE ---- */
+  /* ---------------- STATE WRITE ---------------- */
 
   fs.writeFileSync(
     STATE_FILE,
