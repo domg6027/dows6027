@@ -1,99 +1,125 @@
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-import { generate } from "@pdfme/generator";
-import * as cheerio from "cheerio";
 
+import * as cheerio from "cheerio";
+import { generate } from "@pdfme/generator";
+
+// -------------------------
+// ENV SETUP
+// -------------------------
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const ROOT = __dirname;
-const HTML_DIR = ROOT;
-const OUTPUT_DIR = path.join(ROOT, "PDFS");
-const TEMPLATE_DIR = path.join(ROOT, "TEMPLATES");
+const PDF_DIR = path.join(ROOT, "PDFS");
 const FONT_PATH = path.join(ROOT, "fonts", "Swansea-q3pd.ttf");
-const BASE_PDF_PATH = path.join(TEMPLATE_DIR, "blank.pdf");
+const BASE_PDF_PATH = path.join(ROOT, "blank.pdf");
 
-console.log("▶ DAILY RUN START");
+// -------------------------
+// SAFETY CHECKS
+// -------------------------
+if (!fs.existsSync(PDF_DIR)) fs.mkdirSync(PDF_DIR);
 
-if (!fs.existsSync(OUTPUT_DIR)) {
-  fs.mkdirSync(OUTPUT_DIR, { recursive: true });
+if (!fs.existsSync(FONT_PATH)) {
+  throw new Error("Missing font file: fonts/Swansea-q3pd.ttf");
 }
 
-/* ---------- REQUIRED BUFFERS ---------- */
+if (!fs.existsSync(BASE_PDF_PATH)) {
+  throw new Error("Missing base PDF: blank.pdf");
+}
+
+// -------------------------
+// LOAD ASSETS
+// -------------------------
 const BASE_PDF = fs.readFileSync(BASE_PDF_PATH);
 const SWANSEA_FONT = fs.readFileSync(FONT_PATH);
 
-if (!BASE_PDF.slice(0, 4).toString().startsWith("%PDF")) {
-  throw new Error("basePdf is NOT a valid PDF");
+// -------------------------
+// HTML → TEXT
+// -------------------------
+function extractText(html) {
+  const $ = cheerio.load(html);
+  $("script, style, nav, footer, header").remove();
+  return $("body").text().replace(/\s+/g, " ").trim();
 }
 
-/* ---------- HTML FILES ---------- */
-const htmlFiles = fs
-  .readdirSync(HTML_DIR)
-  .filter(f => f.endsWith(".html"));
-
-let generated = 0;
-
-for (const file of htmlFiles) {
-  console.log(`➡ Processing ${file}`);
-
-  const html = fs.readFileSync(path.join(HTML_DIR, file), "utf8").trim();
-  if (!html) {
-    console.warn(`⚠ Skipped (empty): ${file}`);
-    continue;
-  }
-
-  try {
-    const $ = cheerio.load(html);
-    const text = $("body").text().replace(/\s+/g, " ").trim();
-
-    if (!text) {
-      console.warn(`⚠ Skipped (no body text): ${file}`);
-      continue;
-    }
-
-    const pdf = await generate({
-      template: {
-        basePdf: BASE_PDF,
-        schemas: [
-          {
-            content: {
-              type: "text",
-              position: { x: 20, y: 20 },
-              width: 170,
-              height: 260,
-              fontSize: 11,
-              fontName: "Swansea"
-            }
-          }
-        ]
+// -------------------------
+// HTML → PDF TEMPLATE
+// -------------------------
+function buildTemplate(text) {
+  return {
+    basePdf: BASE_PDF,
+    schemas: [
+      {
+        body: {
+          type: "text",
+          position: { x: 20, y: 20 },
+          width: 170,
+          height: 260,
+          fontSize: 11,
+          fontName: "Swansea",
+        },
       },
-      inputs: [{ content: text }],
-      options: {
-        font: {
-          Swansea: {
-            data: SWANSEA_FONT
-          }
-        }
+    ],
+  };
+}
+
+// -------------------------
+// MAIN
+// -------------------------
+async function run() {
+  console.log("▶ DAILY RUN START");
+
+  const htmlFiles = fs
+    .readdirSync(ROOT)
+    .filter((f) => f.endsWith(".html"));
+
+  let generated = 0;
+
+  for (const file of htmlFiles) {
+    try {
+      console.log(`➡ Processing ${file}`);
+
+      const html = fs.readFileSync(path.join(ROOT, file), "utf8");
+      const text = extractText(html);
+
+      if (!text) {
+        console.warn(`⚠ Skipped (empty): ${file}`);
+        continue;
       }
-    });
 
-    const outName = file.replace(".html", ".pdf");
-    fs.writeFileSync(path.join(OUTPUT_DIR, outName), pdf);
+      const template = buildTemplate(text);
 
-    console.log(`✅ Generated ${outName}`);
-    generated++;
+      const pdf = await generate({
+        template,
+        inputs: [{ body: text }],
+        options: {
+          font: {
+            Swansea: {
+              data: SWANSEA_FONT,
+              fallback: true, // 🔥 REQUIRED
+            },
+          },
+        },
+      });
 
-  } catch (err) {
-    console.error(`❌ Failed: ${file}`);
-    console.error(err);
+      const outName = file.replace(".html", ".pdf");
+      fs.writeFileSync(path.join(PDF_DIR, outName), pdf);
+
+      console.log(`✅ Generated ${outName}`);
+      generated++;
+    } catch (err) {
+      console.error(`❌ Failed: ${file}`);
+      console.error(err.message || err);
+    }
+  }
+
+  console.log(`📄 PDFs generated: ${generated}`);
+
+  if (generated === 0) {
+    throw new Error("No PDFs generated");
   }
 }
 
-console.log(`📄 PDFs generated: ${generated}`);
-
-if (generated === 0) {
-  console.error("❌ No PDFs generated");
-  process.exit(1);
-}
+run();
