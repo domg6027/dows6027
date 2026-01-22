@@ -1,195 +1,125 @@
-/**
- * DOWS6027 – DAILY RUN
- * Node 20 / GitHub Actions / ESM SAFE
- * Cheerio 1.1.x compatible
- */
+// daily.js — FINAL ESM-SAFE VERSION (Node 20+)
 
 import fs from "fs";
 import path from "path";
 import https from "https";
 import * as cheerio from "cheerio";
-import { createPdf } from "@pdfme/common";
+import { fileURLToPath } from "url";
 
-/* ---------------- LOG ---------------- */
+// ---- CommonJS interop (REQUIRED) ----
+import pdfmeCommon from "@pdfme/common";
+const { createPdf } = pdfmeCommon;
 
-console.log("▶ DAILY RUN START");
-console.log("⏱ UTC:", new Date().toISOString());
+// ---- ESM dirname fix ----
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-/* ---------------- PATHS ---------------- */
+// ---- CONFIG ----
+const SOURCE_DIR = path.join(__dirname, "HTML");
+const OUTPUT_DIR = path.join(__dirname, "PDFS");
+const FONT_PATH = path.join(__dirname, "fonts", "Roboto-Regular.ttf");
 
-const ROOT = process.cwd();
-const PDF_DIR = path.join(ROOT, "PDFS");
-const TMP_DIR = path.join(ROOT, "TMP");
-const STATE_FILE = path.join(ROOT, "data.json");
-const FONT_PATH = path.join(ROOT, "fonts", "Swansea-q3pd.ttf");
+// Ensure output dir exists
+fs.mkdirSync(OUTPUT_DIR, { recursive: true });
 
-fs.mkdirSync(PDF_DIR, { recursive: true });
-fs.mkdirSync(TMP_DIR, { recursive: true });
-
-if (!fs.existsSync(FONT_PATH)) {
-  console.error("❌ Font missing:", FONT_PATH);
-  process.exit(1);
+// ---- HELPERS ----
+function readHtml(filePath) {
+  return fs.readFileSync(filePath, "utf8");
 }
 
-if (!fs.existsSync(STATE_FILE)) {
-  console.error("❌ data.json missing");
-  process.exit(1);
-}
-
-/* ---------------- STATE ---------------- */
-
-const state = JSON.parse(fs.readFileSync(STATE_FILE, "utf8"));
-let lastProcessed = Number(state.last_article_number);
-
-if (!Number.isInteger(lastProcessed)) {
-  console.error("❌ Invalid last_article_number");
-  process.exit(1);
-}
-
-/* ---------------- NETWORK ---------------- */
-
-function fetch(url) {
-  return new Promise((resolve, reject) => {
-    https
-      .get(url, { headers: { "User-Agent": "Mozilla/5.0" } }, res => {
-        let data = "";
-        res.on("data", d => (data += d));
-        res.on("end", () => {
-          res.statusCode === 200
-            ? resolve(data)
-            : reject(new Error(`HTTP ${res.statusCode}`));
-        });
-      })
-      .on("error", reject);
-  });
-}
-
-/* ---------------- ARTICLE EXTRACT ---------------- */
-
-function extractArticleText(html) {
+function extractContent(html) {
   const $ = cheerio.load(html);
 
-  const selectors = [
-    "article",
-    "#content article",
-    "#content",
-    ".entry_content",
-    ".post-content"
-  ];
+  // Priority order:
+  // 1. <section data-davar-lechem>
+  // 2. <section>
+  // 3. <article>
+  // 4. <body>
+  // 5. full document fallback
 
-  for (const sel of selectors) {
-    const el = $(sel).first();
-    const text = el.text().replace(/\s+/g, " ").trim();
-    if (text.length > 500) return text;
-  }
+  let container =
+    $("section[data-davar-lechem]").first().html() ||
+    $("section").first().html() ||
+    $("article").first().html() ||
+    $("body").html() ||
+    html;
 
-  return null;
+  return container.trim();
 }
 
-/* ---------------- MAIN ---------------- */
+function htmlToPlainText(html) {
+  const $ = cheerio.load(html);
+  return $.text().replace(/\n\s*\n/g, "\n\n").trim();
+}
 
-(async () => {
-  let archiveHtml;
-
-  try {
-    archiveHtml = await fetch("https://www.prophecynewswatch.com/archive.cfm");
-  } catch (e) {
-    console.error("❌ Failed to fetch archive:", e.message);
-    process.exit(1);
-  }
-
-  const discoveredIds = Array.from(
-    new Set(
-      (archiveHtml.match(/recent_news_id=\d+/g) || []).map(x =>
-        Number(x.replace("recent_news_id=", ""))
-      )
-    )
-  )
-    .filter(id => id > lastProcessed)
-    .sort((a, b) => a - b);
-
-  console.log("📰 Articles discovered:", discoveredIds.length);
-
-  let generated = 0;
-  let lastAttempted = lastProcessed;
-
-  for (const id of discoveredIds) {
-    lastAttempted = id;
-    console.log("➡ Processing", id);
-
-    let html;
-    try {
-      html = await fetch(
-        `https://www.prophecynewswatch.com/article.cfm?recent_news_id=${id}`
-      );
-    } catch {
-      console.warn("⚠ Article missing:", id);
-      continue;
-    }
-
-    const text = extractArticleText(html);
-
-    if (!text) {
-      console.warn("⚠ No article body:", id);
-      continue;
-    }
-
-    fs.writeFileSync(path.join(TMP_DIR, `${id}.txt`), text, "utf8");
-
-    let pdf;
-    try {
-      pdf = (
-        await createPdf({
-          template: {
-            schemas: [
-              {
-                body: {
-                  type: "text",
-                  position: { x: 20, y: 20 },
-                  width: 170,
-                  height: 260,
-                  fontSize: 11
-                }
-              }
-            ]
-          },
-          inputs: [{ body: text }],
-          options: {
-            font: {
-              Swansea: fs.readFileSync(FONT_PATH)
-            }
-          }
-        })
-      ).buffer;
-    } catch (e) {
-      console.error("❌ PDF failed:", id, e.message);
-      continue;
-    }
-
-    fs.writeFileSync(path.join(PDF_DIR, `${id}.pdf`), pdf);
-    console.log("✔ PDF written:", `${id}.pdf`);
-    generated++;
-  }
-
-  fs.writeFileSync(
-    STATE_FILE,
-    JSON.stringify(
+// ---- PDF TEMPLATE ----
+function buildPdfTemplate(text) {
+  return {
+    basePdf: {
+      width: 595,
+      height: 842,
+      padding: [40, 40, 40, 40],
+    },
+    schemas: [
       {
-        ...state,
-        last_article_number: lastAttempted,
-        last_run_utc: new Date().toISOString()
+        content: {
+          type: "text",
+          position: { x: 0, y: 0 },
+          width: 515,
+          height: 760,
+          fontSize: 11,
+          lineHeight: 1.4,
+        },
       },
-      null,
-      2
-    )
-  );
+    ],
+    fonts: {
+      Roboto: {
+        data: fs.readFileSync(FONT_PATH),
+        fallback: true,
+      },
+    },
+  };
+}
 
-  console.log("✔ DAILY RUN COMPLETE");
-  console.log("📄 PDFs generated:", generated);
-  console.log("🔚 Last article attempted:", lastAttempted);
+// ---- MAIN ----
+async function run() {
+  const files = fs
+    .readdirSync(SOURCE_DIR)
+    .filter((f) => f.endsWith(".html"));
 
-  if (generated === 0) {
-    console.error("❌ No PDFs generated");
-    process.exit(1);
+  if (!files.length) {
+    console.log("No HTML files found.");
+    return;
   }
-})();
+
+  for (const file of files) {
+    try {
+      const inputPath = path.join(SOURCE_DIR, file);
+      const rawHtml = readHtml(inputPath);
+
+      const extractedHtml = extractContent(rawHtml);
+      const plainText = htmlToPlainText(extractedHtml);
+
+      const template = buildPdfTemplate(plainText);
+
+      const pdf = await createPdf({
+        template,
+        inputs: [{ content: plainText }],
+      });
+
+      const outName = file.replace(/\.html$/, ".pdf");
+      const outPath = path.join(OUTPUT_DIR, outName);
+
+      fs.writeFileSync(outPath, pdf);
+
+      console.log(`✔ Generated PDF: ${outName}`);
+    } catch (err) {
+      console.error(`✖ Failed processing ${file}`);
+      console.error(err);
+      process.exitCode = 1;
+    }
+  }
+}
+
+// ---- EXECUTE ----
+run();
