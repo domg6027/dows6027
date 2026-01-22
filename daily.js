@@ -1,125 +1,130 @@
-// daily.js — FINAL ESM-SAFE VERSION (Node 20+)
+// daily.js — FINAL WORKFLOW VERSION (Node 20 / ESM)
 
 import fs from "fs";
 import path from "path";
-import https from "https";
 import * as cheerio from "cheerio";
 import { fileURLToPath } from "url";
 
-// ---- CommonJS interop (REQUIRED) ----
-import pdfmeCommon from "@pdfme/common";
-const { createPdf } = pdfmeCommon;
+// ---- pdfme CommonJS interop (CORRECT) ----
+import pdfmePkg from "@pdfme/common";
+const { createPdf } = pdfmePkg;
 
-// ---- ESM dirname fix ----
+// ---- ESM dirname ----
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// ---- CONFIG ----
-const SOURCE_DIR = path.join(__dirname, "HTML");
-const OUTPUT_DIR = path.join(__dirname, "PDFS");
-const FONT_PATH = path.join(__dirname, "fonts", "Roboto-Regular.ttf");
+// ---- PATHS (LOCKED TO YOUR SETUP) ----
+const ROOT = __dirname;
+const OUTPUT_DIR = path.join(ROOT, "PDFS");
+const FONT_PATH = path.join(ROOT, "fonts", "Swansea-q3pd.ttf");
 
-// Ensure output dir exists
+// ---- Ensure PDF output ----
 fs.mkdirSync(OUTPUT_DIR, { recursive: true });
 
-// ---- HELPERS ----
-function readHtml(filePath) {
-  return fs.readFileSync(filePath, "utf8");
+// ---- HTML DETECTION ----
+function findHtmlFiles() {
+  return fs
+    .readdirSync(ROOT)
+    .filter(f => f.endsWith(".html"));
 }
 
+// ---- CONTENT EXTRACTION (ALL 3 VERSIONS) ----
 function extractContent(html) {
   const $ = cheerio.load(html);
 
-  // Priority order:
-  // 1. <section data-davar-lechem>
-  // 2. <section>
-  // 3. <article>
-  // 4. <body>
-  // 5. full document fallback
-
-  let container =
+  return (
     $("section[data-davar-lechem]").first().html() ||
     $("section").first().html() ||
     $("article").first().html() ||
     $("body").html() ||
-    html;
-
-  return container.trim();
+    html
+  ).trim();
 }
 
-function htmlToPlainText(html) {
+// ---- TEXT NORMALIZATION ----
+function htmlToText(html) {
   const $ = cheerio.load(html);
-  return $.text().replace(/\n\s*\n/g, "\n\n").trim();
+  return $.text().replace(/\n\s*\n+/g, "\n\n").trim();
 }
 
 // ---- PDF TEMPLATE ----
-function buildPdfTemplate(text) {
+function buildTemplate(text) {
   return {
-    basePdf: {
-      width: 595,
-      height: 842,
-      padding: [40, 40, 40, 40],
-    },
-    schemas: [
-      {
-        content: {
-          type: "text",
-          position: { x: 0, y: 0 },
-          width: 515,
-          height: 760,
-          fontSize: 11,
-          lineHeight: 1.4,
-        },
-      },
-    ],
+    basePdf: { width: 595, height: 842, padding: [40, 40, 40, 40] },
+    schemas: [{
+      content: {
+        type: "text",
+        position: { x: 0, y: 0 },
+        width: 515,
+        height: 760,
+        fontSize: 11,
+        lineHeight: 1.4,
+      }
+    }],
     fonts: {
-      Roboto: {
+      Swansea: {
         data: fs.readFileSync(FONT_PATH),
-        fallback: true,
-      },
-    },
+        fallback: true
+      }
+    }
   };
 }
 
-// ---- MAIN ----
+// ---- MAIN RUNNER ----
 async function run() {
-  const files = fs
-    .readdirSync(SOURCE_DIR)
-    .filter((f) => f.endsWith(".html"));
+  console.log("▶ DAILY RUN START");
 
-  if (!files.length) {
-    console.log("No HTML files found.");
-    return;
+  const htmlFiles = findHtmlFiles();
+
+  if (!htmlFiles.length) {
+    console.log("⚠ No HTML files found in ROOT");
+    process.exit(0);
   }
 
-  for (const file of files) {
+  let generated = 0;
+
+  for (const file of htmlFiles) {
     try {
-      const inputPath = path.join(SOURCE_DIR, file);
-      const rawHtml = readHtml(inputPath);
+      console.log(`➡ Processing ${file}`);
 
-      const extractedHtml = extractContent(rawHtml);
-      const plainText = htmlToPlainText(extractedHtml);
+      const raw = fs.readFileSync(path.join(ROOT, file), "utf8");
+      const extracted = extractContent(raw);
+      const text = htmlToText(extracted);
 
-      const template = buildPdfTemplate(plainText);
+      if (!text) {
+        console.log(`⚠ No article body: ${file}`);
+        continue;
+      }
+
+      const template = buildTemplate(text);
 
       const pdf = await createPdf({
         template,
-        inputs: [{ content: plainText }],
+        inputs: [{ content: text }]
       });
 
-      const outName = file.replace(/\.html$/, ".pdf");
-      const outPath = path.join(OUTPUT_DIR, outName);
+      const out = file.replace(/\.html$/, ".pdf");
+      fs.writeFileSync(path.join(OUTPUT_DIR, out), pdf);
 
-      fs.writeFileSync(outPath, pdf);
+      console.log(`✔ PDF generated: ${out}`);
+      generated++;
 
-      console.log(`✔ Generated PDF: ${outName}`);
     } catch (err) {
-      console.error(`✖ Failed processing ${file}`);
+      console.error(`❌ Failed: ${file}`);
       console.error(err);
       process.exitCode = 1;
     }
   }
+
+  console.log(`📄 PDFs generated: ${generated}`);
+
+  if (generated === 0) {
+    console.error("❌ No PDFs generated");
+    process.exit(1);
+  }
+
+  console.log("✔ DAILY RUN COMPLETE");
 }
 
-// ---- EXECUTE ----
+// ---- EXEC ----
 run();
