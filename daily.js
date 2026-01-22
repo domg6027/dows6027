@@ -7,7 +7,7 @@
 import fs from "fs";
 import path from "path";
 import https from "https";
-import { load } from "cheerio"; // <-- Fixed ESM import
+import { load } from "cheerio"; // ESM-compatible
 import pdfme from "@pdfme/common";
 
 const { createPdf } = pdfme;
@@ -132,13 +132,20 @@ try {
     }
 
     const $ = load(html);
-    const articleContainer = $("#content")
-      .find("div")
-      .filter((_, el) => $(el).text().length > 500)
-      .first();
+
+    /* ---- UPDATED ARTICLE SELECTION ---- */
+    // Use the main article container: #content > div.article or fallback
+    let articleContainer = $("#content").find("div.article").first();
+    if (!articleContainer.length) {
+      // fallback to the first sizable div
+      articleContainer = $("#content")
+        .find("div")
+        .filter((_, el) => $(el).text().length > 100)
+        .first();
+    }
 
     if (!articleContainer.length) {
-      console.warn("⚠ No article body:", id);
+      console.warn("⚠ No article body found:", id);
       continue;
     }
 
@@ -175,9 +182,7 @@ try {
           ],
         },
         inputs: [{ body: text }],
-        options: {
-          font: { Swansea: fontBuffer },
-        },
+        options: { font: { Swansea: fontBuffer } },
       }).then((res) => res.buffer);
     } catch (e) {
       console.error("❌ PDF generation failed:", id, e.message);
@@ -214,6 +219,11 @@ try {
     );
   } catch (e) {
     console.error("❌ Failed to write state file:", e.message);
+  }
+
+  if (generated === 0) {
+    console.warn("❌ No PDFs generated!");
+    process.exit(1);
   }
 
   console.log("✔ DAILY RUN COMPLETE");
