@@ -1,16 +1,14 @@
 /**
- * DOWS6027 – DAILY RUN (Node-only, PDFME v5)
- * FINAL – hardened, schema-correct, basePdf-correct
+ * DOWS6027 – DAILY RUN
+ * Node.js 20 / PDFME ONLY
+ * FINAL HARDENED VERSION
  */
 
 import fs from "fs";
 import path from "path";
 import https from "https";
 import { generate } from "@pdfme/generator";
-import { createBlankPdf } from "@pdfme/common";
-
-console.log("▶ DAILY RUN START");
-console.log("⏱ UTC:", new Date().toISOString());
+import pdfmeCommon from "@pdfme/common";
 
 const ROOT = process.cwd();
 const PDF_DIR = path.join(ROOT, "PDFS");
@@ -20,7 +18,10 @@ const STATE_FILE = path.join(ROOT, "data.json");
 fs.mkdirSync(PDF_DIR, { recursive: true });
 fs.mkdirSync(TMP_DIR, { recursive: true });
 
-/* -------------------- STATE LOAD -------------------- */
+console.log("▶ DAILY RUN START");
+console.log("⏱ UTC:", new Date().toISOString());
+
+/* ---------------- STATE LOAD (STRICT) ---------------- */
 
 if (!fs.existsSync(STATE_FILE)) {
   console.error("❌ data.json missing — refusing to run");
@@ -42,7 +43,7 @@ if (!Number.isInteger(lastProcessed) || lastProcessed <= 0) {
   process.exit(1);
 }
 
-/* -------------------- HTTP FETCH -------------------- */
+/* ---------------- HTTP FETCH ---------------- */
 
 function fetchPage(url) {
   return new Promise((resolve, reject) => {
@@ -63,12 +64,12 @@ function fetchPage(url) {
   });
 }
 
-/* -------------------- MAIN -------------------- */
+/* ---------------- MAIN ---------------- */
 
 (async function main() {
-  let archive;
+  let archiveHtml;
   try {
-    archive = await fetchPage("https://www.prophecynewswatch.com/archive.cfm");
+    archiveHtml = await fetchPage("https://www.prophecynewswatch.com/archive.cfm");
   } catch {
     console.error("❌ Failed to fetch archive");
     process.exit(1);
@@ -76,7 +77,7 @@ function fetchPage(url) {
 
   const ids = Array.from(
     new Set(
-      (archive.match(/recent_news_id=\d+/g) || []).map(x =>
+      (archiveHtml.match(/recent_news_id=\d+/g) || []).map(x =>
         Number(x.replace("recent_news_id=", ""))
       )
     )
@@ -95,19 +96,24 @@ function fetchPage(url) {
     let html;
     try {
       html = await fetchPage(
-        "https://www.prophecynewswatch.com/article.cfm?recent_news_id=" + id
+        `https://www.prophecynewswatch.com/article.cfm?recent_news_id=${id}`
       );
     } catch {
       currentLast = id;
       continue;
     }
 
-    let body = null;
-    const a1 = html.match(/<article[^>]*>([\s\S]*?)<\/article>/i);
-    const a2 = html.match(/class="article-content"[\s\S]*?>([\s\S]*?)<\/div>/i);
+    /* -------- BODY EXTRACTION (BOTH FORMATS) -------- */
 
-    if (a1) body = a1[1];
-    if (!body && a2) body = a2[1];
+    let body = null;
+
+    const m1 = html.match(/<article[^>]*>([\s\S]*?)<\/article>/i);
+    const m2 = html.match(
+      /class="article-content"[\s\S]*?>([\s\S]*?)<\/div>/i
+    );
+
+    if (m1) body = m1[1];
+    if (!body && m2) body = m2[1];
 
     if (!body || body.trim().length < 200) {
       fs.writeFileSync(path.join(TMP_DIR, `FAIL-${id}.html`), html);
@@ -127,6 +133,8 @@ function fetchPage(url) {
       continue;
     }
 
+    /* -------- DATE -------- */
+
     const dateMatch = html.match(/(\w+ \d{1,2}, \d{4})/);
     const d = dateMatch ? new Date(dateMatch[1]) : new Date();
 
@@ -137,30 +145,28 @@ function fetchPage(url) {
 
     const pdfPath = path.join(PDF_DIR, `${ymd}-${id}.pdf`);
 
+    /* -------- PDF TEMPLATE -------- */
+
     const template = {
-      basePdf: createBlankPdf(),
+      basePdf: null,
       schemas: [
-        [
-          {
-            name: "content",
+        {
+          content: {
             type: "text",
             position: { x: 20, y: 20 },
             width: 170,
-            height: 257,
-            fontSize: 11,
-            lineHeight: 1.4
+            height: 260,
+            fontSize: 11
           }
-        ]
+        }
       ]
     };
 
-    try {
-      const pdf = await generate({
-        template,
-        inputs: [{ content: cleanText }]
-      });
+    const inputs = [{ content: cleanText }];
 
-      fs.writeFileSync(pdfPath, pdf);
+    try {
+      const pdf = await generate({ template, inputs });
+      fs.writeFileSync(pdfPath, Buffer.from(pdf.buffer));
       generated++;
     } catch (e) {
       console.error("❌ PDF generation failed for", id);
@@ -174,6 +180,8 @@ function fetchPage(url) {
     process.exit(1);
   }
 
+  /* ---------------- STATE UPDATE ---------------- */
+
   fs.writeFileSync(
     STATE_FILE,
     JSON.stringify(
@@ -181,8 +189,7 @@ function fetchPage(url) {
         last_date_used: state.last_date_used,
         current_date: new Date().toISOString().slice(0, 10),
         last_URL_processed:
-          "https://www.prophecynewswatch.com/article.cfm?recent_news_id=" +
-          currentLast,
+          `https://www.prophecynewswatch.com/article.cfm?recent_news_id=${currentLast}`,
         last_article_number: currentLast
       },
       null,
