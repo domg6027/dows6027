@@ -1,15 +1,13 @@
 /**
- * DOWS6027 – DAILY RUN (Node-only, PDFME)
- * HARDENED – respects existing data.json schema
+ * DOWS6027 – DAILY RUN (Node-only, PDFME v5)
+ * FINAL – hardened, schema-correct, basePdf-correct
  */
 
 import fs from "fs";
 import path from "path";
 import https from "https";
 import { generate } from "@pdfme/generator";
-import pkg from "@pdfme/common";
-
-const { text } = pkg;
+import { createBlankPdf } from "@pdfme/common";
 
 console.log("▶ DAILY RUN START");
 console.log("⏱ UTC:", new Date().toISOString());
@@ -22,7 +20,7 @@ const STATE_FILE = path.join(ROOT, "data.json");
 fs.mkdirSync(PDF_DIR, { recursive: true });
 fs.mkdirSync(TMP_DIR, { recursive: true });
 
-/* -------------------- STATE LOAD (STRICT) -------------------- */
+/* -------------------- STATE LOAD -------------------- */
 
 if (!fs.existsSync(STATE_FILE)) {
   console.error("❌ data.json missing — refusing to run");
@@ -33,7 +31,7 @@ let state;
 try {
   state = JSON.parse(fs.readFileSync(STATE_FILE, "utf8"));
 } catch {
-  console.error("❌ data.json is invalid JSON — refusing to run");
+  console.error("❌ data.json invalid JSON — refusing to run");
   process.exit(1);
 }
 
@@ -104,13 +102,9 @@ function fetchPage(url) {
       continue;
     }
 
-    // Extract body (both known formats)
     let body = null;
-
     const a1 = html.match(/<article[^>]*>([\s\S]*?)<\/article>/i);
-    const a2 = html.match(
-      /class="article-content"[\s\S]*?>([\s\S]*?)<\/div>/i
-    );
+    const a2 = html.match(/class="article-content"[\s\S]*?>([\s\S]*?)<\/div>/i);
 
     if (a1) body = a1[1];
     if (!body && a2) body = a2[1];
@@ -144,24 +138,28 @@ function fetchPage(url) {
     const pdfPath = path.join(PDF_DIR, `${ymd}-${id}.pdf`);
 
     const template = {
-      basePdf: null,
+      basePdf: createBlankPdf(),
       schemas: [
-        {
-          content: {
+        [
+          {
+            name: "content",
             type: "text",
             position: { x: 20, y: 20 },
             width: 170,
-            height: 260,
-            fontSize: 11
+            height: 257,
+            fontSize: 11,
+            lineHeight: 1.4
           }
-        }
+        ]
       ]
     };
 
-    const inputs = [{ content: cleanText }];
-
     try {
-      const pdf = await generate({ template, inputs });
+      const pdf = await generate({
+        template,
+        inputs: [{ content: cleanText }]
+      });
+
       fs.writeFileSync(pdfPath, pdf);
       generated++;
     } catch (e) {
@@ -175,8 +173,6 @@ function fetchPage(url) {
     console.error("❌ NO PDFs GENERATED — HARD FAIL");
     process.exit(1);
   }
-
-  /* -------------------- STATE UPDATE -------------------- */
 
   fs.writeFileSync(
     STATE_FILE,
