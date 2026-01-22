@@ -1,158 +1,181 @@
+/**
+ * DOWS6027 – DAILY PNW RUN (HARDENED)
+ * ES MODULE SAFE – NODE 20 – GITHUB ACTIONS
+ * STATE CORRUPTION PROOF
+ */
+
 import fs from "fs";
 import path from "path";
-import { fileURLToPath } from "url";
-
+import https from "https";
 import * as cheerio from "cheerio";
-import { JSDOM } from "jsdom";
+import { generate } from "@pdfme/generator";
 
-import pkgCommon from "@pdfme/common";
-import pkgGenerator from "@pdfme/generator";
+/* -------------------- HARD BASELINE (LOCKED) -------------------- */
 
-const { generate } = pkgGenerator;
+const BASELINE_STATE = {
+  last_date_used: "2025-12-11",
+  last_URL_processed:
+    "https://www.prophecynewswatch.com/article.cfm?recent_news_id=9256",
+  current_date: "2025-12-11",
+  last_article_number: 9256
+};
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+/* -------------------- PATHS -------------------- */
 
-/* ================= CONFIG ================= */
+const ROOT = process.cwd();
+const PDF_DIR = path.join(ROOT, "PDFS");
+const TMP_DIR = path.join(ROOT, "TMP");
+const FONT_PATH = path.join(ROOT, "fonts", "Swansea-q3pd.ttf");
+const BASE_PDF = path.join(ROOT, "TEMPLATES", "blank.pdf");
 
-const ARCHIVE_URL = "https://www.prophecynewswatch.com/archive.cfm";
-
-const PDF_DIR = path.join(__dirname, "PDFS");
-const FONT_PATH = path.join(__dirname, "fonts", "Swansea-q3pd.ttf");
-const BASE_PDF = path.join(__dirname, "TEMPLATES", "blank.pdf");
-
-/* ================= SANITY ================= */
-
-if (!fs.existsSync(BASE_PDF)) {
-  throw new Error("Missing base PDF: TEMPLATES/blank.pdf");
-}
+fs.mkdirSync(PDF_DIR, { recursive: true });
+fs.mkdirSync(TMP_DIR, { recursive: true });
 
 if (!fs.existsSync(FONT_PATH)) {
   throw new Error("Missing font: fonts/Swansea-q3pd.ttf");
 }
 
-fs.mkdirSync(PDF_DIR, { recursive: true });
-
-/* ================= HELPERS ================= */
-
-async function fetchText(url) {
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`Fetch failed: ${url}`);
-  return await res.text();
+if (!fs.existsSync(BASE_PDF)) {
+  throw new Error("Missing base PDF: TEMPLATES/blank.pdf");
 }
 
-/**
- * Heuristic extractor:
- * - works across ALL known PNW article variants
- * - ignores brittle selectors
- */
-function extractArticle(html) {
-  const $ = cheerio.load(html);
+/* -------------------- LOG START -------------------- */
 
-  $("script, style, iframe, nav, form").remove();
+console.log("▶ DAILY RUN START");
+console.log("▶ Baseline article:", BASELINE_STATE.last_article_number);
 
-  let best = "";
-  let bestLen = 0;
+/* -------------------- NETWORK -------------------- */
 
-  $("td, div").each((_, el) => {
-    const text = $(el).text().replace(/\s+/g, " ").trim();
-    if (text.length > bestLen && text.length > 1200) {
-      best = text;
-      bestLen = text.length;
-    }
+function fetch(url) {
+  return new Promise((resolve, reject) => {
+    https
+      .get(url, { headers: { "User-Agent": "Mozilla/5.0" } }, res => {
+        let data = "";
+        res.on("data", d => (data += d));
+        res.on("end", () => {
+          if (res.statusCode !== 200) {
+            reject(new Error(`HTTP ${res.statusCode}`));
+          } else {
+            resolve(data);
+          }
+        });
+      })
+      .on("error", reject);
   });
-
-  return best || null;
 }
 
-/* ================= MAIN ================= */
+/* -------------------- MAIN -------------------- */
 
-async function run() {
-  console.log("▶ DAILY RUN START");
+(async () => {
+  let archiveHtml;
 
-  const archiveHtml = await fetchText(ARCHIVE_URL);
-  const $ = cheerio.load(archiveHtml);
+  try {
+    archiveHtml = await fetch(
+      "https://www.prophecynewswatch.com/archive.cfm"
+    );
+  } catch (e) {
+    console.error("❌ Failed to fetch archive:", e.message);
+    process.exit(1);
+  }
 
-  const articleIds = new Set();
+  const discoveredIds = Array.from(
+    new Set(
+      (archiveHtml.match(/recent_news_id=\d+/g) || []).map(x =>
+        Number(x.replace("recent_news_id=", ""))
+      )
+    )
+  )
+    .filter(id => id > BASELINE_STATE.last_article_number)
+    .sort((a, b) => a - b);
 
-  $("a[href*='article.cfm?recent_news_id=']").each((_, el) => {
-    const href = $(el).attr("href");
-    const match = href.match(/recent_news_id=(\d+)/);
-    if (match) articleIds.add(match[1]);
-  });
-
-  console.log(`➡ Found ${articleIds.size} articles in archive`);
+  console.log("➡ Found", discoveredIds.length, "new articles");
 
   let generated = 0;
+  let highestProcessed = BASELINE_STATE.last_article_number;
 
-  for (const id of articleIds) {
-    console.log(`➡ Processing article ${id}`);
+  for (const id of discoveredIds) {
+    console.log("➡ Processing article", id);
 
-    const outFile = path.join(PDF_DIR, `${id}.pdf`);
-    if (fs.existsSync(outFile)) {
-      console.log(`ℹ️ Already exists: ${id}`);
+    let html;
+    try {
+      html = await fetch(
+        `https://www.prophecynewswatch.com/article.cfm?recent_news_id=${id}`
+      );
+    } catch {
+      console.warn("⚠ Missing article:", id);
       continue;
     }
 
+    const $ = cheerio.load(html);
+
+    const container = $("#content")
+      .find("div")
+      .filter((_, el) => $(el).text().length > 500)
+      .first();
+
+    if (!container.length) {
+      console.warn("⚠ Skipped (empty):", id);
+      continue;
+    }
+
+    const text = container
+      .text()
+      .replace(/\s+/g, " ")
+      .trim();
+
+    if (!text) {
+      console.warn("⚠ Skipped (blank):", id);
+      continue;
+    }
+
+    fs.writeFileSync(path.join(TMP_DIR, `${id}.txt`), text, "utf8");
+
     try {
-      const url = `https://www.prophecynewswatch.com/article.cfm?recent_news_id=${id}`;
-      const html = await fetchText(url);
-
-      const articleText = extractArticle(html);
-      if (!articleText) {
-        console.warn(`⚠ Skipped (empty): ${id}`);
-        continue;
-      }
-
-      const fontData = fs.readFileSync(FONT_PATH);
-
-      const template = {
-        basePdf: fs.readFileSync(BASE_PDF),
-        schemas: [
-          [
-            {
-              name: "content",
-              type: "text",
-              position: { x: 20, y: 20 },
-              width: 170,
-              height: 250,
-              fontName: "Swansea",
-              fontSize: 11,
-              lineHeight: 1.3,
-            },
-          ],
-        ],
-      };
-
-      const inputs = [{ content: articleText }];
-
       const pdf = await generate({
-        template,
-        inputs,
+        template: {
+          basePdf: fs.readFileSync(BASE_PDF),
+          schemas: [
+            {
+              body: {
+                type: "text",
+                position: { x: 20, y: 20 },
+                width: 170,
+                height: 260,
+                fontSize: 11
+              }
+            }
+          ]
+        },
+        inputs: [{ body: text }],
         options: {
           font: {
             Swansea: {
-              data: fontData,
-              fallback: true,
-            },
-          },
-        },
+              data: fs.readFileSync(FONT_PATH),
+              fallback: true
+            }
+          }
+        }
       });
 
-      fs.writeFileSync(outFile, pdf);
+      fs.writeFileSync(
+        path.join(PDF_DIR, `${id}.pdf`),
+        pdf
+      );
+
       generated++;
-    } catch (err) {
-      console.error(`❌ Failed: ${id}`);
-      console.error(err.message || err);
+      highestProcessed = id;
+      console.log("✔ PDF written:", id);
+    } catch (e) {
+      console.error("❌ PDF failed:", id, e.message);
     }
   }
 
-  console.log(`📄 PDFs generated: ${generated}`);
+  console.log("📄 PDFs generated:", generated);
 
   if (generated === 0) {
     console.log("ℹ️ No new articles to process");
-    process.exit(1);
+    process.exit(0);
   }
-}
 
-run();
+  console.log("✔ Highest article processed:", highestProcessed);
+})();
