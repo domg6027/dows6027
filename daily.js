@@ -1,14 +1,15 @@
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-import cheerio from "cheerio";
+import * as cheerio from "cheerio";
 import { generate } from "@pdfme/generator";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const ARCHIVE_URL = "https://www.prophecynewswatch.com/archive.cfm";
-const ARTICLE_BASE = "https://www.prophecynewswatch.com/article.cfm?recent_news_id=";
+const ARTICLE_BASE =
+  "https://www.prophecynewswatch.com/article.cfm?recent_news_id=";
 
 const PDF_DIR = path.join(__dirname, "PDFS");
 const TMP_DIR = path.join(__dirname, "TMP");
@@ -60,15 +61,11 @@ function extractIds(html) {
 function extractArticle(html) {
   const $ = cheerio.load(html);
 
-  // Main article container used by PNW
   const article = $("td[width='100%']").first();
-
   article.find("script, style, iframe").remove();
 
   const text = article.text().trim();
-  if (!text) return null;
-
-  return text;
+  return text || null;
 }
 
 // --- main ---
@@ -127,7 +124,4 @@ for (const id of articleIds) {
 }
 
 console.log(`📄 PDFs generated: ${generated}`);
-
-if (generated === 0) {
-  console.log("ℹ️ No new articles to process");
-}
+if (generated === 0) console.log("ℹ️ No new articles to process");
