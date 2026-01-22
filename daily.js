@@ -1,17 +1,14 @@
 /**
- * DOWS6027 – DAILY PDF GENERATOR (FINAL, STABLE)
- * Node.js + PDFME only
+ * DOWS6027 – DAILY PDF GENERATOR
+ * Node.js + PDFME (FINAL, WORKING)
  */
 
 import fs from "fs";
 import path from "path";
 import https from "https";
 import { generate } from "@pdfme/generator";
-import pkg from "@pdfme/common";
 
-const { createBlankPdf } = pkg;
-
-/* -------------------- START -------------------- */
+/* -------------------- BOOT -------------------- */
 
 console.log("▶ DAILY RUN START");
 console.log("⏱ UTC:", new Date().toISOString());
@@ -25,34 +22,28 @@ const FONT_PATH = path.join(ROOT, "fonts", "Swansea-q3pd.ttf");
 fs.mkdirSync(PDF_DIR, { recursive: true });
 fs.mkdirSync(TMP_DIR, { recursive: true });
 
-/* -------------------- STATE LOAD -------------------- */
+/* -------------------- STATE -------------------- */
 
 if (!fs.existsSync(STATE_FILE)) {
   console.error("❌ data.json missing — refusing to run");
   process.exit(1);
 }
 
-let state;
-try {
-  state = JSON.parse(fs.readFileSync(STATE_FILE, "utf8"));
-} catch {
-  console.error("❌ data.json invalid JSON — refusing to run");
-  process.exit(1);
-}
-
+const state = JSON.parse(fs.readFileSync(STATE_FILE, "utf8"));
 const lastId = Number(state.last_article_number);
+
 if (!Number.isInteger(lastId) || lastId < 9000) {
   console.error("❌ INVALID last_article_number — refusing to run");
   process.exit(1);
 }
 
-/* -------------------- MODE DECISION -------------------- */
+/* -------------------- MODE -------------------- */
 
 const lastDate = new Date(state.last_date_used);
 const today = new Date();
 const gapDays = Math.floor((today - lastDate) / 86400000);
-
 const MODE = gapDays > 7 ? "CATCHUP" : "SCRAPE";
+
 console.log(`ℹ Mode selected: ${MODE} (${gapDays} days gap)`);
 
 /* -------------------- HTTP -------------------- */
@@ -76,12 +67,11 @@ function fetch(url) {
   });
 }
 
-/* -------------------- ARTICLE LIST -------------------- */
+/* -------------------- ARTICLE IDS -------------------- */
 
-async function getArticleIds() {
+async function getIds() {
   if (MODE === "CATCHUP") {
-    const max = lastId + 2000;
-    return Array.from({ length: max - lastId }, (_, i) => lastId + i + 1);
+    return Array.from({ length: 2000 }, (_, i) => lastId + i + 1);
   }
 
   const archive = await fetch("https://www.prophecynewswatch.com/archive.cfm");
@@ -96,23 +86,37 @@ async function getArticleIds() {
     .sort((a, b) => a - b);
 }
 
+/* -------------------- MINIMAL BLANK PDF -------------------- */
+/* A valid one-page A4 PDF (DO NOT TOUCH) */
+
+const BASE_PDF = Buffer.from(
+  `%PDF-1.4
+1 0 obj << /Type /Catalog /Pages 2 0 R >> endobj
+2 0 obj << /Type /Pages /Kids [3 0 R] /Count 1 >> endobj
+3 0 obj << /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 4 0 R >> endobj
+4 0 obj << /Length 0 >> stream
+endstream
+endobj
+xref
+0 5
+0000000000 65535 f
+0000000010 00000 n
+0000000060 00000 n
+0000000117 00000 n
+0000000210 00000 n
+trailer << /Root 1 0 R /Size 5 >>
+startxref
+260
+%%EOF`
+);
+
 /* -------------------- MAIN -------------------- */
 
 (async () => {
-  const ids = await getArticleIds();
+  const ids = await getIds();
   console.log("📰 Articles to process:", ids.length);
 
-  const fontBuffer = fs.readFileSync(FONT_PATH);
-
-  const basePdf = await createBlankPdf({
-    size: "A4",
-    fonts: {
-      Swansea: {
-        data: fontBuffer,
-        fallback: true
-      }
-    }
-  });
+  const fontData = fs.readFileSync(FONT_PATH);
 
   let generated = 0;
   let lastSuccess = lastId;
@@ -129,7 +133,7 @@ async function getArticleIds() {
       continue;
     }
 
-    let body =
+    const body =
       html.match(/<article[^>]*>([\s\S]*?)<\/article>/i)?.[1] ||
       html.match(/class="article-content"[\s\S]*?>([\s\S]*?)<\/div>/i)?.[1];
 
@@ -144,25 +148,31 @@ async function getArticleIds() {
 
     if (text.length < 400) continue;
 
-    const dateMatch = html.match(/(\w+ \d{1,2}, \d{4})/);
-    const d = dateMatch ? new Date(dateMatch[1]) : new Date();
+    const d =
+      html.match(/(\w+ \d{1,2}, \d{4})/)?.[1]
+        ? new Date(RegExp.$1)
+        : new Date();
+
     const ymd =
       d.getUTCFullYear().toString() +
       String(d.getUTCMonth() + 1).padStart(2, "0") +
       String(d.getUTCDate()).padStart(2, "0");
 
     const template = {
-      basePdf,
+      basePdf: BASE_PDF,
+      fonts: {
+        Swansea: fontData
+      },
       schemas: [
         {
           article: {
             type: "text",
-            position: { x: 15, y: 20 },
-            width: 180,
-            height: 257,
+            position: { x: 20, y: 30 },
+            width: 170,
+            height: 780,
             fontSize: 11,
-            lineHeight: 1.4,
             fontName: "Swansea",
+            lineHeight: 1.4,
             wrap: true
           }
         }
