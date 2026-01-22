@@ -1,232 +1,129 @@
 /**
- * DOWS6027 – DAILY RUN (CHEERIO + PDFME 5.x)
- * ONLINE / GITHUB ACTIONS SAFE
- * NON-DESTRUCTIVE, FORENSIC, FAIL-SAFE
+ * daily.js — Unified HTML Parser for Multiple Versions
+ * Author: dom6027
+ * Description: Automatically picks from three embedded HTML versions,
+ * merges main article, sidebar widgets, and newsletter sections, and saves as JSON.
  */
 
-import fs from "fs";
-import path from "path";
-import https from "https";
-import { load } from "cheerio"; // ESM-compatible
-import pdfme from "@pdfme/common";
+const fs = require('fs');
+const jsdom = require('jsdom');
+const { JSDOM } = jsdom;
 
-const { createPdf } = pdfme;
+// ----------------------------
+// Embedded HTML Versions
+// ----------------------------
+const htmlVersions = [
+`<!-- Version -2 HTML -->
+<div id="wrapper" class="wide" style="height: auto !important;">
+<header id="header">
+<!-- ...rest of -2 HTML content... -->
+</div>`,
 
-/* ---------------- LOG START ---------------- */
+`<!-- Version -1 HTML -->
+<div id="wrapper" class="wide" style="height: auto !important;">
+<header id="header">
+<!-- ...rest of -1 HTML content... -->
+</div>`,
 
-console.log("▶ DAILY RUN START");
-console.log("⏱ UTC:", new Date().toISOString());
+`<!-- Current Version HTML -->
+<div id="wrapper" class="wide" style="height: auto !important;">
+<header id="header">
+<!-- ...rest of current HTML content... -->
+</div>`
+];
 
-/* ---------------- PATHS ---------------- */
-
-const ROOT = process.cwd();
-const PDF_DIR = path.join(ROOT, "PDFS");
-const TMP_DIR = path.join(ROOT, "TMP");
-const STATE_FILE = path.join(ROOT, "data.json");
-const FONT_PATH = path.join(ROOT, "fonts", "Swansea-q3pd.ttf");
-
-fs.mkdirSync(PDF_DIR, { recursive: true });
-fs.mkdirSync(TMP_DIR, { recursive: true });
-
-if (!fs.existsSync(FONT_PATH)) {
-  console.error("❌ Font missing:", FONT_PATH);
-  process.exit(1);
+// ----------------------------
+// Pick all valid versions
+// ----------------------------
+function pickValidHTML() {
+    return htmlVersions.filter(html => html && html.includes('<article'));
 }
 
-if (!fs.existsSync(STATE_FILE)) {
-  console.error("❌ data.json missing");
-  process.exit(1);
-}
+// ----------------------------
+// Parse HTML content
+// ----------------------------
+function parseHTML(html) {
+    const dom = new JSDOM(html);
+    const document = dom.window.document;
 
-/* ---------------- STATE ---------------- */
+    // Main article
+    const article = document.querySelector('article.post');
+    const title = article?.querySelector('.entry_title')?.textContent || '';
+    const content = article?.querySelector('.entry_content')?.innerHTML || '';
 
-let state;
-try {
-  state = JSON.parse(fs.readFileSync(STATE_FILE, "utf8"));
-} catch (e) {
-  console.error("❌ Failed to read state:", e.message);
-  process.exit(1);
-}
-
-let lastProcessed = Number(state.last_article_number);
-if (!Number.isInteger(lastProcessed)) {
-  console.error("❌ Invalid last_article_number");
-  process.exit(1);
-}
-
-/* ---------------- NETWORK ---------------- */
-
-function fetch(url, timeout = 15000) {
-  return new Promise((resolve, reject) => {
-    const req = https.get(
-      url,
-      { headers: { "User-Agent": "Mozilla/5.0" } },
-      (res) => {
-        let data = "";
-        res.on("data", (chunk) => (data += chunk));
-        res.on("end", () => {
-          if (res.statusCode !== 200) {
-            reject(new Error(`HTTP ${res.statusCode}`));
-          } else {
-            resolve(data);
-          }
+    // Sidebar widgets
+    const sidebar = document.querySelector('.col_3_of_12');
+    const widgets = [];
+    if (sidebar) {
+        sidebar.querySelectorAll('.widget').forEach(widget => {
+            const widgetTitle = widget.querySelector('h3, h4')?.textContent || '';
+            widgets.push({ title: widgetTitle, html: widget.innerHTML });
         });
-      }
-    );
+    }
 
-    req.on("error", reject);
-    req.setTimeout(timeout, () => {
-      req.destroy(new Error("Request timed out"));
+    // Newsletter / Signup sections
+    const newsletterSections = [];
+    document.querySelectorAll('#mc_embed_signup').forEach(section => {
+        newsletterSections.push(section.innerHTML);
     });
-  });
+
+    return { title, content, widgets, newsletterSections };
 }
 
-/* ---------------- FONT PRELOAD ---------------- */
+// ----------------------------
+// Merge all valid versions
+// ----------------------------
+function mergeHTMLVersions(validHTMLArray) {
+    const merged = {
+        title: '',
+        content: '',
+        widgets: [],
+        newsletterSections: []
+    };
 
-let fontBuffer;
+    validHTMLArray.forEach(html => {
+        const parsed = parseHTML(html);
+
+        // Prefer first non-empty title
+        if (!merged.title && parsed.title) merged.title = parsed.title;
+
+        // Merge content
+        if (parsed.content) merged.content += parsed.content + '\n';
+
+        // Merge widgets (avoid duplicates by title)
+        parsed.widgets.forEach(w => {
+            if (!merged.widgets.find(existing => existing.title === w.title)) {
+                merged.widgets.push(w);
+            }
+        });
+
+        // Merge newsletter sections (avoid duplicates)
+        parsed.newsletterSections.forEach(n => {
+            if (!merged.newsletterSections.includes(n)) merged.newsletterSections.push(n);
+        });
+    });
+
+    return merged;
+}
+
+// ----------------------------
+// Save JSON
+// ----------------------------
+function saveJSON(data) {
+    const file = 'article_parsed.json';
+    fs.writeFileSync(file, JSON.stringify(data, null, 2), 'utf-8');
+    console.log(`✅ Parsed and merged content saved to ${file}`);
+}
+
+// ----------------------------
+// Main Run
+// ----------------------------
 try {
-  fontBuffer = fs.readFileSync(FONT_PATH);
-} catch (e) {
-  console.error("❌ Failed to read font:", e.message);
-  process.exit(1);
+    const validHTML = pickValidHTML();
+    if (validHTML.length === 0) throw new Error('No valid HTML version found!');
+
+    const mergedData = mergeHTMLVersions(validHTML);
+    saveJSON(mergedData);
+} catch (err) {
+    console.error('❌ Error:', err.message);
 }
-
-/* ---------------- MAIN ---------------- */
-
-(async () => {
-  let archiveHtml;
-  try {
-    archiveHtml = await fetch("https://www.prophecynewswatch.com/archive.cfm");
-  } catch (e) {
-    console.error("❌ Failed to fetch archive:", e.message);
-    process.exit(1);
-  }
-
-  const discoveredIds = Array.from(
-    new Set(
-      (archiveHtml.match(/recent_news_id=\d+/g) || []).map((x) =>
-        Number(x.replace("recent_news_id=", ""))
-      )
-    )
-  )
-    .filter((id) => id > lastProcessed)
-    .sort((a, b) => a - b);
-
-  console.log("📰 Articles discovered:", discoveredIds.length);
-
-  let generated = 0;
-  let lastAttempted = lastProcessed;
-
-  for (const id of discoveredIds) {
-    lastAttempted = id;
-    console.log("➡ Processing", id);
-
-    let html;
-    try {
-      html = await fetch(
-        `https://www.prophecynewswatch.com/article.cfm?recent_news_id=${id}`
-      );
-    } catch {
-      console.warn("⚠ Article missing (skipped):", id);
-      continue;
-    }
-
-    const $ = load(html);
-
-    /* ---- UPDATED ARTICLE SELECTION ---- */
-    // Use the main article container: #content > div.article or fallback
-    let articleContainer = $("#content").find("div.article").first();
-    if (!articleContainer.length) {
-      // fallback to the first sizable div
-      articleContainer = $("#content")
-        .find("div")
-        .filter((_, el) => $(el).text().length > 100)
-        .first();
-    }
-
-    if (!articleContainer.length) {
-      console.warn("⚠ No article body found:", id);
-      continue;
-    }
-
-    const text = articleContainer.text().replace(/\s+/g, " ").trim();
-    if (!text) {
-      console.warn("⚠ Empty article text:", id);
-      continue;
-    }
-
-    /* ---- FORENSIC RAW SAVE ---- */
-    try {
-      fs.writeFileSync(path.join(TMP_DIR, `${id}.txt`), text, "utf8");
-    } catch (e) {
-      console.error("❌ Failed to write raw text:", e.message);
-      continue;
-    }
-
-    /* ---- PDF ---- */
-    const pdfPath = path.join(PDF_DIR, `${id}.pdf`);
-    let pdf;
-    try {
-      pdf = await createPdf({
-        template: {
-          schemas: [
-            {
-              body: {
-                type: "text",
-                position: { x: 20, y: 20 },
-                width: 170,
-                height: 260,
-                fontSize: 11,
-              },
-            },
-          ],
-        },
-        inputs: [{ body: text }],
-        options: { font: { Swansea: fontBuffer } },
-      }).then((res) => res.buffer);
-    } catch (e) {
-      console.error("❌ PDF generation failed:", id, e.message);
-      continue;
-    }
-
-    if (!pdf || !pdf.length) {
-      console.error("❌ Empty PDF buffer:", id);
-      continue;
-    }
-
-    try {
-      fs.writeFileSync(pdfPath, pdf);
-      console.log("✔ PDF written:", path.basename(pdfPath));
-      generated++;
-    } catch (e) {
-      console.error("❌ Failed to write PDF:", e.message);
-    }
-  }
-
-  /* ---------------- STATE WRITE ---------------- */
-  try {
-    fs.writeFileSync(
-      STATE_FILE,
-      JSON.stringify(
-        {
-          ...state,
-          last_article_number: lastAttempted,
-          last_run_utc: new Date().toISOString(),
-        },
-        null,
-        2
-      )
-    );
-  } catch (e) {
-    console.error("❌ Failed to write state file:", e.message);
-  }
-
-  if (generated === 0) {
-    console.warn("❌ No PDFs generated!");
-    process.exit(1);
-  }
-
-  console.log("✔ DAILY RUN COMPLETE");
-  console.log("📄 PDFs generated:", generated);
-  console.log("🔚 Last article attempted:", lastAttempted);
-})();
