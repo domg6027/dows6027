@@ -11,14 +11,9 @@
   "dependencies": {
     "@pdfme/common": "^5.1.0",
     "@pdfme/generator": "^5.1.0",
-<<<<<<< HEAD
-    "cheerio": "^1.1.2"
-=======
-    "@pdfme/common": "^5.1.0",
     "cheerio": "^1.1.2",
     "lodash": "^4.17.23",
     "lodash-es": "^4.17.23"
->>>>>>> c84dbf1504373865ae9e38d6b6db9df523d42eba
   },
   "overrides": {
     "core-js": "^3.37.0",
