@@ -1,6 +1,6 @@
 /**
- * DOWS6027 – DAILY RUN (FINAL, STABLE)
- * Node 20 • ESM • GitHub Actions SAFE
+ * DOWS6027 – DAILY RUN (FINAL STABLE)
+ * pdfme v5.x • Node 20 • ESM • GitHub Actions SAFE
  */
 
 import fs from "fs";
@@ -9,10 +9,8 @@ import { fileURLToPath } from "url";
 import { JSDOM } from "jsdom";
 
 import pdfmeGenerator from "@pdfme/generator";
-import pdfmeCommon from "@pdfme/common";
 
 const { generate } = pdfmeGenerator;
-const { Font } = pdfmeCommon;
 
 /* ---------------- PATHS ---------------- */
 
@@ -30,11 +28,11 @@ if (!fs.existsSync(FONT_PATH)) {
   process.exit(1);
 }
 
-/* ---------------- FONT ---------------- */
+/* ---------------- FONT (BUFFER ONLY) ---------------- */
 
-const font = new Font({
+const fonts = {
   Swansea: fs.readFileSync(FONT_PATH)
-});
+};
 
 /* ---------------- HTML INPUT ---------------- */
 
@@ -59,9 +57,7 @@ for (const file of htmlFiles) {
   try {
     const html = fs.readFileSync(path.join(ROOT, file), "utf8");
     const dom = new JSDOM(html);
-    const document = dom.window.document;
-
-    const text = document.body.textContent
+    const text = dom.window.document.body.textContent
       .replace(/\s+/g, " ")
       .trim();
 
@@ -86,7 +82,9 @@ for (const file of htmlFiles) {
         ]
       },
       inputs: [{ body: text }],
-      options: { font }
+      options: {
+        font: fonts
+      }
     });
 
     const out = path.join(PDF_DIR, file.replace(".html", ".pdf"));
