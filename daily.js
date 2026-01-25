@@ -20,7 +20,7 @@ if (!fs.existsSync(DATA_FILE)) {
   throw new Error("Missing data.json – cannot determine state");
 }
 
-/* -------------------- HELPERS -------------------- */
+/* -------------------- NETWORK -------------------- */
 
 function fetch(url) {
   return new Promise((resolve, reject) => {
@@ -67,7 +67,6 @@ async function getHighestArchiveId() {
   console.log("▶ DAILY RUN START");
 
   let state = JSON.parse(fs.readFileSync(DATA_FILE, "utf8"));
-
   console.log("▶ Last processed article:", state.last_article_number);
 
   let highestArchiveId;
@@ -85,9 +84,10 @@ async function getHighestArchiveId() {
     process.exit(0);
   }
 
-  /* ---- Controlled sequential loop ---- */
+  /* -------------------- SEQUENTIAL LOOP -------------------- */
 
   while (true) {
+    // ALWAYS reload state from disk
     state = JSON.parse(fs.readFileSync(DATA_FILE, "utf8"));
 
     if (state.last_article_number >= highestArchiveId) {
@@ -96,16 +96,16 @@ async function getHighestArchiveId() {
     }
 
     console.log(
-      `➡ Next article after ${state.last_article_number}`
+      `➡ Processing next article after ${state.last_article_number}`
     );
 
     try {
       execSync("node onepdf.js", {
         stdio: "inherit"
       });
-    } catch (e) {
+    } catch {
       console.error(
-        "❌ onepdf.js failed – stopping to preserve state"
+        "❌ onepdf.js failed – stopping immediately to preserve state"
       );
       process.exit(1);
     }
