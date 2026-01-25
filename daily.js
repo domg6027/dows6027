@@ -1,7 +1,7 @@
 /**
- * DOWS6027 – DAILY PNW RUN (HARDENED)
- * ES MODULE SAFE – NODE 20 – GITHUB ACTIONS
- * STATE CORRUPTION PROOF
+ * DOWS6027 – DAILY PNW RUN (SERIAL + COMMIT SAFE)
+ * Node 20 | ES Modules | GitHub Actions
+ * One article → one PDF → commit → repeat
  */
 
 import fs from "fs";
@@ -9,27 +9,21 @@ import path from "path";
 import https from "https";
 import * as cheerio from "cheerio";
 import { generate } from "@pdfme/generator";
-
-/* -------------------- HARD BASELINE (LOCKED) -------------------- */
-
-const BASELINE_STATE = {
-  last_date_used: "2025-12-11",
-  last_URL_processed:
-    "https://www.prophecynewswatch.com/article.cfm?recent_news_id=9256",
-  current_date: "2025-12-11",
-  last_article_number: 9256
-};
+import { execSync } from "child_process";
 
 /* -------------------- PATHS -------------------- */
 
 const ROOT = process.cwd();
 const PDF_DIR = path.join(ROOT, "PDFS");
 const TMP_DIR = path.join(ROOT, "TMP");
+const DATA_FILE = path.join(ROOT, "data.json");
 const FONT_PATH = path.join(ROOT, "fonts", "Swansea-q3pd.ttf");
 const BASE_PDF = path.join(ROOT, "TEMPLATES", "blank.pdf");
 
 fs.mkdirSync(PDF_DIR, { recursive: true });
 fs.mkdirSync(TMP_DIR, { recursive: true });
+
+/* -------------------- SAFETY CHECKS -------------------- */
 
 if (!fs.existsSync(FONT_PATH)) {
   throw new Error("Missing font: fonts/Swansea-q3pd.ttf");
@@ -39,10 +33,28 @@ if (!fs.existsSync(BASE_PDF)) {
   throw new Error("Missing base PDF: TEMPLATES/blank.pdf");
 }
 
+/* -------------------- STATE (LOCKED BASELINE) -------------------- */
+
+let state = {
+  last_date_used: "2025-12-11",
+  last_URL_processed:
+    "https://www.prophecynewswatch.com/article.cfm?recent_news_id=9256",
+  current_date: "2025-12-11",
+  last_article_number: 9256
+};
+
+if (fs.existsSync(DATA_FILE)) {
+  try {
+    state = JSON.parse(fs.readFileSync(DATA_FILE, "utf8"));
+  } catch {
+    console.warn("⚠ data.json corrupted — using hard baseline");
+  }
+}
+
 /* -------------------- LOG START -------------------- */
 
 console.log("▶ DAILY RUN START");
-console.log("▶ Baseline article:", BASELINE_STATE.last_article_number);
+console.log("▶ Starting from article:", state.last_article_number);
 
 /* -------------------- NETWORK -------------------- */
 
@@ -64,36 +76,31 @@ function fetch(url) {
   });
 }
 
-/* -------------------- MAIN -------------------- */
+/* -------------------- MAIN LOOP -------------------- */
 
 (async () => {
   let archiveHtml;
 
   try {
-    archiveHtml = await fetch(
-      "https://www.prophecynewswatch.com/archive.cfm"
-    );
+    archiveHtml = await fetch("https://www.prophecynewswatch.com/archive.cfm");
   } catch (e) {
     console.error("❌ Failed to fetch archive:", e.message);
     process.exit(1);
   }
 
-  const discoveredIds = Array.from(
+  const articleIds = Array.from(
     new Set(
       (archiveHtml.match(/recent_news_id=\d+/g) || []).map(x =>
         Number(x.replace("recent_news_id=", ""))
       )
     )
   )
-    .filter(id => id > BASELINE_STATE.last_article_number)
+    .filter(id => id > state.last_article_number)
     .sort((a, b) => a - b);
 
-  console.log("➡ Found", discoveredIds.length, "new articles");
+  console.log("➡ Found", articleIds.length, "new articles");
 
-  let generated = 0;
-  let highestProcessed = BASELINE_STATE.last_article_number;
-
-  for (const id of discoveredIds) {
+  for (const id of articleIds) {
     console.log("➡ Processing article", id);
 
     let html;
@@ -102,7 +109,7 @@ function fetch(url) {
         `https://www.prophecynewswatch.com/article.cfm?recent_news_id=${id}`
       );
     } catch {
-      console.warn("⚠ Missing article:", id);
+      console.warn("⚠ Article missing (404):", id);
       continue;
     }
 
@@ -118,11 +125,7 @@ function fetch(url) {
       continue;
     }
 
-    const text = container
-      .text()
-      .replace(/\s+/g, " ")
-      .trim();
-
+    const text = container.text().replace(/\s+/g, " ").trim();
     if (!text) {
       console.warn("⚠ Skipped (blank):", id);
       continue;
@@ -157,25 +160,29 @@ function fetch(url) {
         }
       });
 
-      fs.writeFileSync(
-        path.join(PDF_DIR, `${id}.pdf`),
-        pdf
-      );
+      const pdfPath = path.join(PDF_DIR, `${id}.pdf`);
+      fs.writeFileSync(pdfPath, pdf);
 
-      generated++;
-      highestProcessed = id;
-      console.log("✔ PDF written:", id);
+      /* -------------------- UPDATE STATE -------------------- */
+
+      state.last_article_number = id;
+      state.last_URL_processed =
+        `https://www.prophecynewswatch.com/article.cfm?recent_news_id=${id}`;
+      state.current_date = new Date().toISOString().slice(0, 10);
+
+      fs.writeFileSync(DATA_FILE, JSON.stringify(state, null, 2));
+
+      /* -------------------- COMMIT IMMEDIATELY -------------------- */
+
+      execSync("git add PDFS data.json TMP", { stdio: "ignore" });
+      execSync(`git commit -m "PNW article ${id}"`, { stdio: "ignore" });
+
+      console.log("✔ PDF generated + committed:", id);
     } catch (e) {
-      console.error("❌ PDF failed:", id, e.message);
+      console.error("❌ Failed PDF:", id, e.message);
+      break; // HARD STOP — preserve recovery point
     }
   }
 
-  console.log("📄 PDFs generated:", generated);
-
-  if (generated === 0) {
-    console.log("ℹ️ No new articles to process");
-    process.exit(0);
-  }
-
-  console.log("✔ Highest article processed:", highestProcessed);
+  console.log("✅ DAILY RUN COMPLETE");
 })();
