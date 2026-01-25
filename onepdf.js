@@ -72,7 +72,7 @@ function fetch(url) {
       if (e.skip) {
         console.warn(`⚠ Article ${articleId} missing (${e.message}) – trying next`);
         articleId++;
-        continue; // ✅ ONLY LOOP CONDITION
+        continue; // ✅ ONLY LOOP
       }
       console.error("❌ Network error:", e.message);
       process.exit(1);
@@ -82,7 +82,6 @@ function fetch(url) {
 
     const $ = cheerio.load(html);
 
-    // Full body, ads included (as requested)
     const text = $("body")
       .text()
       .replace(/\s+/g, " ")
@@ -133,7 +132,7 @@ function fetch(url) {
       process.exit(1);
     }
 
-    /* -------- ATOMIC STATE UPDATE -------- */
+    /* -------- UPDATE STATE -------- */
 
     const newState = {
       ...state,
@@ -144,6 +143,13 @@ function fetch(url) {
 
     fs.writeFileSync(DATA_FILE, JSON.stringify(newState, null, 2));
 
+    /* -------- GIT IDENTITY (FIX) -------- */
+
+    execSync('git config user.name "github-actions"', { stdio: "inherit" });
+    execSync('git config user.email "github-actions@github.com"', {
+      stdio: "inherit"
+    });
+
     /* -------- COMMIT -------- */
 
     execSync(`git add "${pdfPath}" data.json`, { stdio: "inherit" });
@@ -152,6 +158,6 @@ function fetch(url) {
     });
 
     console.log(`✔ Article ${articleId} committed`);
-    process.exit(0); // 🚨 EXIT AFTER ONE SUCCESS
+    process.exit(0); // 🔒 EXACTLY ONE
   }
 })();
