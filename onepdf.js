@@ -1,189 +1,133 @@
-/**
- * DOWS6027 – ONEPDF WORKER
- * Processes EXACTLY ONE valid PNW article per run
- * Order: FETCH → PDF → COMMIT PDF → UPDATE data.json → EXIT
- * Node 20 – ES Module
- */
-
 import fs from "fs";
 import path from "path";
 import https from "https";
 import { execSync } from "child_process";
 import { generate } from "@pdfme/generator";
-
-/* -------------------- PATHS -------------------- */
+import { text } from "@pdfme/common";
 
 const ROOT = process.cwd();
 const PDF_DIR = path.join(ROOT, "PDFS");
 const DATA_FILE = path.join(ROOT, "data.json");
-const BASE_PDF = path.join(ROOT, "TEMPLATES", "blank.pdf");
-const FONT_FILE = path.join(ROOT, "fonts", "Swansea-q3pd.ttf");
 
-fs.mkdirSync(PDF_DIR, { recursive: true });
+if (!fs.existsSync(PDF_DIR)) fs.mkdirSync(PDF_DIR);
 
-/* -------------------- GUARDS -------------------- */
+// ---- Git identity (CI-safe) ----
+try {
+  execSync(`git config user.email "actions@github.com"`);
+  execSync(`git config user.name "GitHub Actions"`);
+} catch {}
 
-if (!fs.existsSync(DATA_FILE)) throw new Error("Missing data.json");
-if (!fs.existsSync(BASE_PDF)) throw new Error("Missing TEMPLATES/blank.pdf");
-if (!fs.existsSync(FONT_FILE)) throw new Error("Missing font file");
-
-/* -------------------- HELPERS -------------------- */
-
-function fetch(url) {
+// ---- Helpers ----
+function fetchArticle(id) {
   return new Promise((resolve, reject) => {
-    https
-      .get(url, { headers: { "User-Agent": "Mozilla/5.0" } }, res => {
-        let data = "";
-        res.on("data", d => (data += d));
-        res.on("end", () => {
-          if (res.statusCode === 404 || res.statusCode === 302) {
-            resolve({ status: res.statusCode });
-          } else if (res.statusCode !== 200) {
-            reject(new Error(`HTTP ${res.statusCode}`));
-          } else {
-            resolve({ status: 200, html: data });
-          }
-        });
-      })
-      .on("error", reject);
+    const url = `https://pnw.org.za/?p=${id}`;
+
+    https.get(url, res => {
+      if (res.statusCode === 302 || res.statusCode === 404) {
+        resolve(null); // LOOP trigger
+        return;
+      }
+
+      if (res.statusCode !== 200) {
+        reject(new Error(`HTTP ${res.statusCode}`));
+        return;
+      }
+
+      let data = "";
+      res.on("data", d => data += d);
+      res.on("end", () => resolve(data));
+    }).on("error", reject);
   });
 }
 
-function splitText(text, size = 2000) {
+// ---- Split into 1800–2200 char chunks ----
+function chunkText(text, min = 1800, max = 2200) {
   const chunks = [];
-  for (let i = 0; i < text.length; i += size) {
-    chunks.push(text.slice(i, i + size));
+  let pos = 0;
+
+  while (pos < text.length) {
+    let size = Math.min(max, text.length - pos);
+    let slice = text.slice(pos, pos + size);
+
+    // avoid mid-word breaks
+    let lastSpace = slice.lastIndexOf(" ");
+    if (slice.length > min && lastSpace > min) {
+      slice = slice.slice(0, lastSpace);
+      size = slice.length;
+    }
+
+    chunks.push(slice.trim());
+    pos += size;
   }
+
   return chunks;
 }
 
-/* -------------------- MAIN -------------------- */
-
-(async () => {
-  console.log("▶ onepdf.js start");
-
-  const state = JSON.parse(fs.readFileSync(DATA_FILE, "utf8"));
-  let id = state.last_article_number + 1;
+// ---- MAIN ----
+export async function runOnePdf(startId) {
+  let articleId = startId;
 
   while (true) {
-    console.log("➡ Trying article", id);
+    console.log(`➡ Trying article ${articleId}`);
+    const html = await fetchArticle(articleId);
 
-    const url =
-      `https://www.prophecynewswatch.com/article.cfm?recent_news_id=${id}`;
-
-    let response;
-    try {
-      response = await fetch(url);
-    } catch (e) {
-      console.error("❌ Network error:", e.message);
-      process.exit(1);
-    }
-
-    /* ---- Skip deleted / redirected articles ---- */
-    if (response.status === 404 || response.status === 302) {
-      console.warn("⚠ Skipped (HTTP " + response.status + "):", id);
-      id++;
+    // ONLY place where looping happens
+    if (!html) {
+      articleId++;
       continue;
     }
 
-    const html = response.html;
-
-    if (!html || html.length < 500) {
-      console.warn("⚠ Skipped (empty HTML):", id);
-      id++;
-      continue;
-    }
-
-    /* ---- Convert FULL HTML (ads included) ---- */
-
-    const cleanHtml = html
-      .replace(/<script[\s\S]*?<\/script>/gi, "")
-      .replace(/<style[\s\S]*?<\/style>/gi, "")
+    const cleanText = html
+      .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
+      .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
+      .replace(/<[^>]+>/g, "")
       .replace(/\s+/g, " ")
       .trim();
 
-    const chunks = splitText(cleanHtml, 2000);
+    const chunks = chunkText(cleanText);
 
-    if (!chunks.length) {
-      console.warn("⚠ Skipped (no chunks):", id);
-      id++;
-      continue;
-    }
+    const pdfPath = path.join(PDF_DIR, `PNW-${articleId}.pdf`);
 
-    /* ---- PDF GENERATION ---- */
-
-    let pdf;
-    try {
-      pdf = await generate({
-        template: {
-          basePdf: fs.readFileSync(BASE_PDF),
-          schemas: chunks.map((_, i) => ({
-            [`p${i}`]: {
-              type: "text",
-              position: { x: 20, y: 20 },
-              width: 170,
-              height: 260,
-              fontSize: 10
-            }
-          }))
-        },
-        inputs: [
-          Object.fromEntries(
-            chunks.map((t, i) => [`p${i}`, t])
-          )
-        ],
-        options: {
-          font: {
-            Swansea: {
-              data: fs.readFileSync(FONT_FILE),
-              fallback: true
-            }
-          }
+    const template = {
+      basePdf: { width: 595, height: 842 },
+      schemas: [{
+        body: {
+          type: text,
+          position: { x: 40, y: 40 },
+          width: 515,
+          height: 760,
+          fontSize: 11
         }
-      });
-    } catch (e) {
-      console.error("❌ PDF generation failed:", e.message);
-      process.exit(1);
-    }
+      }]
+    };
 
-    const pdfPath = path.join(PDF_DIR, `${id}.pdf`);
-    fs.writeFileSync(pdfPath, pdf);
+    await generate({
+      template,
+      inputs: chunks.map(c => ({ body: c }))
+    }).then(buf => fs.writeFileSync(pdfPath, buf));
 
-    if (!fs.existsSync(pdfPath)) {
-      console.error("❌ PDF not written:", id);
-      process.exit(1);
-    }
-
-    /* ---- GIT COMMIT PDF FIRST ---- */
-
+    // ---- Git commit PDF FIRST ----
     try {
-      execSync(`git add PDFS/${id}.pdf`, { stdio: "ignore" });
-      execSync(`git commit -m "Add PNW article ${id}"`, {
-        stdio: "ignore"
-      });
+      execSync(`git add "${pdfPath}"`);
+      execSync(`git commit -m "Add PNW article ${articleId}"`);
     } catch (e) {
-      console.error("❌ Git commit failed for PDF:", id);
-      process.exit(1);
+      console.error("❌ Git commit failed for PDF:", articleId);
+      throw e;
     }
 
-    /* ---- UPDATE data.json ONLY AFTER PDF EXISTS & COMMITTED ---- */
-
-    state.last_article_number = id;
-    state.last_URL_processed = url;
-
-    fs.writeFileSync(DATA_FILE, JSON.stringify(state, null, 2));
-
-    try {
-      execSync(`git add data.json`, { stdio: "ignore" });
-      execSync(`git commit -m "Update state after article ${id}"`, {
-        stdio: "ignore"
-      });
-    } catch (e) {
-      console.error("❌ Git commit failed for data.json");
-      process.exit(1);
+    // ---- Update data.json ONLY NOW ----
+    let data = {};
+    if (fs.existsSync(DATA_FILE)) {
+      data = JSON.parse(fs.readFileSync(DATA_FILE, "utf8"));
     }
 
-    console.log(`✔ Article ${id} committed`);
-    process.exit(0); // ONE ARTICLE PER RUN
+    data.lastProcessed = articleId;
+    fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
+
+    execSync(`git add "${DATA_FILE}"`);
+    execSync(`git commit -m "Update lastProcessed to ${articleId}"`);
+
+    console.log(`✔ Article ${articleId} committed`);
+    return articleId;
   }
-})();
+}
