@@ -1,0 +1,526 @@
+<body aria-hidden="false" style="padding: 0px;">
+
+<div id="wrapper" class="wide" style="height: auto !important;">
+<header id="header"> 
+
+<!-- Header main -->
+<div class="header_main-parent" style="height: 70px;"><div id="header_main" class="sticky header_main" rel="0">
+<div class="container">
+<!-- Logo -->
+<div class="site_brand">
+<a href="https://www.prophecynewswatch.com"><img src="images/website/logo_top_2023.gif" width="152"></a>
+</div>
+<!-- End Logo -->
+<!-- Top menu -->
+<nav class="top_navigation" role="navigation">
+<span class="top_navigation_toggle"><i class="fa fa-reorder"></i></span>
+
+<ul class="menu" style="">
+<li><a href="shop.cfm"><i class="fa fa-shopping-cart"> Movie &amp; Book Store</i></a></li>
+<li><a href="archive.cfm">News Archive</a></li>
+<li><a href="https://secure.prophecynewswatch.com/cart/donate.cfm">Donate / Go Ad-Free</a></li>
+<li><a href="#contact">Contact</a></li>
+<li><a href="https://www.facebook.com/ProphecyNewsWatch" target="facebook"><i class="fa fa-facebook"> Facebook</i></a>
+</li></ul>
+</nav>
+<!-- End Top menu -->
+	
+</div>
+</div></div>
+<!-- End Header main -->
+</header>
+
+<!-- End Header -->
+
+<div id="mc_embed_signup">
+<label for="mce-EMAIL"><h3>Join over <strong>350,000</strong> PNW subscribers.</h3></label>
+  
+
+
+<form action="email_submit_sendy.cfm" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" novalidate="" accept-charset="utf-8" autocomplete="off">
+  <input type="hidden" name="referring_script" value="article.cfm" autocomplete="off">
+	<input style="display:none;" name="primary_email" type="text" maxlength="35" autocomplete="off">	
+  <div id="mc_embed_signup_scroll">
+	<div class="mc-field-group"><input type="email" placeholder="Enter Your Email" name="email_address" id="mce-EMAIL" autocomplete="off"></div>
+	<div class="clear"><input type="submit" value="Subscribe to PNW" name="submit" id="mc-embedded-subscribe" class="button"></div>
+  </div>
+</form>
+
+
+</div>
+
+<hr>
+
+<!-- RANDOM BANNER AD MODULE ------------------------------------------------->
+<div class="google-auto-placed" style="width: 100%; height: auto; clear: both; text-align: center;"><ins data-ad-format="auto" class="adsbygoogle adsbygoogle-noablate" data-ad-client="ca-pub-1737229961003235" data-adsbygoogle-status="done" style="display: block; margin: 10px auto 20px; background-color: transparent; height: 280px;" data-ad-status="filled"><div id="aswift_7_host" style="border: none; height: 280px; width: 1185px; margin: 0px; padding: 0px; position: relative; visibility: visible; background-color: transparent; display: inline-block; overflow: visible;"><iframe id="aswift_7" name="aswift_7" style="left:0;position:absolute;top:0;border:0;width:1185px;height:280px;min-height:auto;max-height:none;min-width:auto;max-width:none;" sandbox="allow-forms allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts allow-top-navigation-by-user-activation" width="1185" height="280" frameborder="0" marginwidth="0" marginheight="0" vspace="0" hspace="0" allowtransparency="true" scrolling="no" allow="attribution-reporting; run-ad-auction" src="https://googleads.g.doubleclick.net/pagead/ads?client=ca-pub-1737229961003235&amp;output=html&amp;h=280&amp;adk=226637904&amp;adf=3869674065&amp;pi=t.aa~a.4173115302~rp.1&amp;w=1185&amp;fwrn=4&amp;fwrnh=100&amp;lmt=1769348397&amp;rafmt=1&amp;to=qs&amp;pwprc=6514679433&amp;format=1185x280&amp;url=https%3A%2F%2Fwww.prophecynewswatch.com%2Farticle.cfm%3Frecent_news_id%3D9103&amp;fwr=0&amp;pra=3&amp;rpe=1&amp;resp_fmts=3&amp;fa=40&amp;uach=WyJXaW5kb3dzIiwiMTAuMC4wIiwieDg2IiwiIiwiMTQ0LjAuNzU1OS42MSIsbnVsbCwwLG51bGwsIjY0IixbWyJOb3QoQTpCcmFuZCIsIjguMC4wLjAiXSxbIkNocm9taXVtIiwiMTQ0LjAuNzU1OS42MSJdLFsiR29vZ2xlIENocm9tZSIsIjE0NC4wLjc1NTkuNjEiXV0sMF0.&amp;abgtt=6&amp;dt=1769348396609&amp;bpp=1&amp;bdt=1769&amp;idt=510&amp;shv=r20260121&amp;mjsv=m202601200101&amp;ptt=9&amp;saldr=aa&amp;abxe=1&amp;cookie=ID%3Dd8e9fce08d2f3446%3AT%3D1767593137%3ART%3D1769076008%3AS%3DALNI_MZkdBEyhy-vxNgDOInn97M-MHD26A&amp;gpic=UID%3D000012e0a5cbb316%3AT%3D1767593137%3ART%3D1769076008%3AS%3DALNI_Ma8oaRkrh35UvuLQJ2dZeSItRVL5Q&amp;eo_id_str=ID%3Ddd888d15c00f39d0%3AT%3D1767593137%3ART%3D1769076008%3AS%3DAA-AfjbtbUX6yFexrCs_besoRBL-&amp;prev_fmts=0x0%2C698x280&amp;nras=2&amp;correlator=8583556762265&amp;frm=20&amp;pv=1&amp;u_tz=120&amp;u_his=1&amp;u_h=750&amp;u_w=1200&amp;u_ah=683&amp;u_aw=1200&amp;u_cd=24&amp;u_sd=1.2&amp;dmc=8&amp;adx=0&amp;ady=243&amp;biw=1185&amp;bih=562&amp;scr_x=0&amp;scr_y=0&amp;eid=95378427%2C95379481%2C95380937&amp;oid=2&amp;pvsid=3182631878438653&amp;tmod=970263393&amp;uas=0&amp;nvt=1&amp;ref=https%3A%2F%2Fwww.prophecynewswatch.com%2Farchive.cfm%3Fsearch_string%3D%26row_start%3D161&amp;fc=1920&amp;brdim=0%2C0%2C0%2C0%2C1200%2C0%2C1200%2C683%2C1200%2C562&amp;vis=1&amp;rsz=%7C%7Cs%7C&amp;abl=NS&amp;fu=128&amp;bc=31&amp;bz=1&amp;ifi=8&amp;uci=a!8&amp;fsb=1&amp;dtd=513" data-google-container-id="a!8" tabindex="0" title="Advertisement" aria-label="Advertisement" data-google-query-id="CM36jrXoppIDFdEmiAkd1D8lfA" data-load-complete="true"></iframe></div></ins></div><div class="google-auto-placed" style="width: 100%; height: auto; clear: both; text-align: center;"><ins data-ad-format="auto" class="adsbygoogle adsbygoogle-noablate" data-ad-client="ca-pub-1737229961003235" data-adsbygoogle-status="done" style="display: block; margin: 10px auto 20px; background-color: transparent; height: 100px;" data-ad-status="filled"><div id="aswift_8_host" style="border: none; height: 100px; width: 631px; margin: 0px; padding: 0px; position: relative; visibility: visible; background-color: transparent; display: inline-block; overflow: visible;"><iframe id="aswift_8" name="aswift_8" style="left:0;position:absolute;top:0;border:0;width:631px;height:100px;min-height:auto;max-height:none;min-width:auto;max-width:none;" sandbox="allow-forms allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts allow-top-navigation-by-user-activation" width="631" height="100" frameborder="0" marginwidth="0" marginheight="0" vspace="0" hspace="0" allowtransparency="true" scrolling="no" allow="attribution-reporting; run-ad-auction" src="https://googleads.g.doubleclick.net/pagead/ads?gdpr=0&amp;client=ca-pub-1737229961003235&amp;output=html&amp;h=100&amp;adk=2102613928&amp;adf=3594046531&amp;pi=t.aa~a.4173115302~rp.1&amp;w=631&amp;fwrn=4&amp;fwrnh=100&amp;lmt=1769348400&amp;rafmt=1&amp;to=qs&amp;pwprc=6514679433&amp;format=631x100&amp;url=https%3A%2F%2Fwww.prophecynewswatch.com%2Farticle.cfm%3Frecent_news_id%3D9103&amp;fwr=0&amp;pra=3&amp;rpe=1&amp;resp_fmts=3&amp;fa=40&amp;uach=WyJXaW5kb3dzIiwiMTAuMC4wIiwieDg2IiwiIiwiMTQ0LjAuNzU1OS42MSIsbnVsbCwwLG51bGwsIjY0IixbWyJOb3QoQTpCcmFuZCIsIjguMC4wLjAiXSxbIkNocm9taXVtIiwiMTQ0LjAuNzU1OS42MSJdLFsiR29vZ2xlIENocm9tZSIsIjE0NC4wLjc1NTkuNjEiXV0sMF0.&amp;abgtt=6&amp;dt=1769348400214&amp;bpp=1&amp;bdt=5375&amp;idt=-M&amp;shv=r20260121&amp;mjsv=m202601200101&amp;ptt=9&amp;saldr=aa&amp;abxe=1&amp;cookie=ID%3Dd8e9fce08d2f3446%3AT%3D1767593137%3ART%3D1769348396%3AS%3DALNI_MZkdBEyhy-vxNgDOInn97M-MHD26A&amp;gpic=UID%3D000012e0a5cbb316%3AT%3D1767593137%3ART%3D1769348396%3AS%3DALNI_Ma8oaRkrh35UvuLQJ2dZeSItRVL5Q&amp;eo_id_str=ID%3Ddd888d15c00f39d0%3AT%3D1767593137%3ART%3D1769348396%3AS%3DAA-AfjbtbUX6yFexrCs_besoRBL-&amp;prev_fmts=0x0%2C698x280%2C1185x280&amp;nras=3&amp;correlator=8583556762265&amp;frm=20&amp;pv=1&amp;u_tz=120&amp;u_his=1&amp;u_h=750&amp;u_w=1200&amp;u_ah=683&amp;u_aw=1200&amp;u_cd=24&amp;u_sd=1.2&amp;dmc=8&amp;adx=0&amp;ady=590&amp;biw=631&amp;bih=547&amp;scr_x=0&amp;scr_y=0&amp;eid=95378427%2C95379481%2C95380937&amp;oid=2&amp;psts=AOrYGsm9czLlWE-u4ay5j6eX0oLbTqpBSfr7tWBswUyDXvJMNosPRjMdzCexolq94NSRvA7BDGESMc_rCPtJ4cq6CO3ZrKB5DItwpOleWli6CPeQ3g%2CAOrYGsmee6QZKqxuRfnEwRe0_bUxn5_vg4Q3A_SoyiC05pb1lU_VeTgrL5H6Fz1BzBJHTTsBJWtA7hosTTsAGeLKBm6Lv_FU2pW9wNYOPjbCNU1ugQ&amp;pvsid=3182631878438653&amp;tmod=970263393&amp;uas=3&amp;nvt=1&amp;ref=https%3A%2F%2Fwww.prophecynewswatch.com%2Farchive.cfm%3Fsearch_string%3D%26row_start%3D161&amp;fc=1920&amp;brdim=0%2C0%2C0%2C0%2C1200%2C0%2C1200%2C683%2C646%2C562&amp;vis=1&amp;rsz=%7C%7Cs%7C&amp;abl=NS&amp;fu=1152&amp;bc=31&amp;bz=1.86&amp;ifi=9&amp;uci=a!9&amp;btvi=2&amp;fsb=1&amp;dtd=72" data-google-container-id="a!9" tabindex="0" title="Advertisement" aria-label="Advertisement" data-google-query-id="CLe80LboppIDFaksiAkd4awQMw" data-load-complete="true"></iframe></div></ins></div><div id="mc_embed_signup">
+<label for="mce-EMAIL"><h3>
+<script type="text/javascript">
+var images = [],
+index = 0;
+images[0] = "<a href = 'https://www.prophecynewswatch.com/product.cfm?product_id=76'><img src='https://www.prophecynewswatch.com/images/shop/World-Banner-1140-V1.jpg'></a>";	
+images[1] = "<a href = 'https://www.prophecynewswatch.com/product.cfm?product_id=77'><img src='https://www.prophecynewswatch.com/images/shop/American-Banner-1140-V1.jpg'></a>";	
+images[2] = "<a href = 'https://www.prophecynewswatch.com/product.cfm?product_id=78'><img src='https://www.prophecynewswatch.com/images/shop/Israel-Banner-1140-V1.jpg'></a>";
+images[3] = "<a href = 'https://prophecynewswatch.com/shop.cfm'><img src='https://www.prophecynewswatch.com/images/shop/PNW-Movies-V1.jpg'></a>";	
+index = Math.floor(Math.random() * images.length);
+document.write(images[index]);
+//done
+</script><a href="https://www.prophecynewswatch.com/product.cfm?product_id=78"><img src="https://www.prophecynewswatch.com/images/shop/Israel-Banner-1140-V1.jpg"></a>
+</h3></label>
+</div>
+<!-- RANDOM BANNER AD MODULE ------------------------------------------------->
+	
+
+<!-- Section -->
+<section style="height: auto !important;">
+<div class="container" style="height: auto !important;">
+<div class="row" style="height: auto !important;">
+<!-- Main content -->
+<div class="col col_9_of_12" style="height: auto !important; min-height: 0px !important;">
+
+<!-- Title ----------------------------------------------------------------------->
+<div class="panel_title"><div>
+<h4>ARTICLE</h4>
+</div>
+</div>
+<!-- Title ----------------------------------------------------------------------->
+
+<article class="post" style="height: auto !important;">
+<!-- Media -->
+<div class="entry_media">
+
+<!-- Entry title --> 
+<h1 class="entry_title">The Collapse of Economic Confidence &amp; Affordability Is Fueling Socialism</h1>
+<!-- End Entry title -->
+
+<img src="images/recent/piggyoct162020.jpg" alt="News Image" border="0">
+<span class="format" jquery="">By Rob Bluey/Daily Signal</span>&nbsp;<span class="format" jquery="">November 12, 2025</span>
+</div>
+<!-- End Media -->
+                   
+<!-- Entry content -->
+<div class="entry_content" style="height: auto !important;">
+
+
+
+<font face="verdana, sans serif" size="2">Share this article:</font>
+<script type="text/javascript" src="https://platform-api.sharethis.com/js/sharethis.js#property=5dfc32716b428e00127a9e13&amp;product=inline-share-buttons" async="async"></script>
+<div class="sharethis-inline-share-buttons st-left st-has-labels  st-inline-share-buttons st-animated" id="st-1"><div class="st-btn st-first" data-network="facebook" style="display: inline-block;">
+  <img alt="facebook sharing button" src="https://platform-cdn.sharethis.com/img/facebook.svg">
+  <span class="st-label">Share</span>
+</div><div class="st-btn" data-network="twitter" style="display: inline-block;">
+  <img alt="twitter sharing button" src="https://platform-cdn.sharethis.com/img/twitter.svg">
+  <span class="st-label">Tweet</span>
+</div><div class="st-btn" data-network="email" style="display: inline-block;">
+  <img alt="email sharing button" src="https://platform-cdn.sharethis.com/img/email.svg">
+  <span class="st-label">Email</span>
+</div><div class="st-btn" data-network="sms" style="display: inline-block;">
+  <img alt="sms sharing button" src="https://platform-cdn.sharethis.com/img/sms.svg">
+  <span class="st-label">Share</span>
+</div><div class="st-btn st-last st-remove-label" data-network="print" style="display: inline-block;">
+  <img alt="print sharing button" src="https://platform-cdn.sharethis.com/img/print.svg">
+  <span class="st-label">Print</span>
+</div></div>
+
+<hr>
+
+
+
+
+
+
+
+
+
+
+
+<div>During the 2024 presidential campaign, pollster Scott Rasmussen predicted that voters would pick their preferred candidate based on how they perceived their personal finances.&nbsp;</div><div><br></div><div>Needless to say, it didn't go well for Kamala Harris.&nbsp;</div><div><br></div><div>Four years of rising prices and record-high inflation doomed the Democrat ticket--even though Joe Biden wasn't on the ballot. Harris didn't help herself when she flubbed a softball question from Sunny Hostin and couldn't come up with anything she'd do differently from Biden. Voters responded by handing President Donald Trump a commanding victory.</div><div><br></div><div>At the time, only 24% of voters said their personal finances were improving, according to RMG Research's polling for the Napolitan Institute. Conversely, 41% said their personal finances were getting worse.&nbsp;</div><div style="height: auto !important;">
+
+
+<div id="top-id"></div>
+
+
+
+
+<center>
+<p></p>
+<script async="" src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1737229961003235" crossorigin="anonymous" data-checked-head="true"></script>
+<ins class="adsbygoogle" style="display: block; text-align: center; height: 280px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1737229961003235" data-ad-slot="5976189179" data-adsbygoogle-status="done" data-ad-status="filled"><div id="aswift_1_host" style="border: none; height: 280px; width: 698px; margin: 0px; padding: 0px; position: relative; visibility: visible; background-color: transparent; display: inline-block; overflow: visible;"><iframe id="aswift_1" name="aswift_1" style="left:0;position:absolute;top:0;border:0;width:698px;height:280px;min-height:auto;max-height:none;min-width:auto;max-width:none;" sandbox="allow-forms allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts allow-top-navigation-by-user-activation" width="698" height="280" frameborder="0" marginwidth="0" marginheight="0" vspace="0" hspace="0" allowtransparency="true" scrolling="no" allow="attribution-reporting; run-ad-auction" src="https://googleads.g.doubleclick.net/pagead/ads?client=ca-pub-1737229961003235&amp;output=html&amp;h=280&amp;slotname=5976189179&amp;adk=2816273528&amp;adf=3129570938&amp;pi=t.ma~as.5976189179&amp;w=698&amp;fwrn=4&amp;fwrnh=0&amp;lmt=1769348397&amp;rafmt=1&amp;armr=3&amp;format=698x280&amp;url=https%3A%2F%2Fwww.prophecynewswatch.com%2Farticle.cfm%3Frecent_news_id%3D9103&amp;fwr=0&amp;rpe=1&amp;resp_fmts=3&amp;uach=WyJXaW5kb3dzIiwiMTAuMC4wIiwieDg2IiwiIiwiMTQ0LjAuNzU1OS42MSIsbnVsbCwwLG51bGwsIjY0IixbWyJOb3QoQTpCcmFuZCIsIjguMC4wLjAiXSxbIkNocm9taXVtIiwiMTQ0LjAuNzU1OS42MSJdLFsiR29vZ2xlIENocm9tZSIsIjE0NC4wLjc1NTkuNjEiXV0sMF0.&amp;abgtt=6&amp;dt=1769348396602&amp;bpp=3&amp;bdt=1763&amp;idt=458&amp;shv=r20260121&amp;mjsv=m202601200101&amp;ptt=9&amp;saldr=aa&amp;abxe=1&amp;cookie=ID%3Dd8e9fce08d2f3446%3AT%3D1767593137%3ART%3D1769076008%3AS%3DALNI_MZkdBEyhy-vxNgDOInn97M-MHD26A&amp;gpic=UID%3D000012e0a5cbb316%3AT%3D1767593137%3ART%3D1769076008%3AS%3DALNI_Ma8oaRkrh35UvuLQJ2dZeSItRVL5Q&amp;eo_id_str=ID%3Ddd888d15c00f39d0%3AT%3D1767593137%3ART%3D1769076008%3AS%3DAA-AfjbtbUX6yFexrCs_besoRBL-&amp;prev_fmts=0x0&amp;nras=1&amp;correlator=8583556762265&amp;frm=20&amp;pv=1&amp;rplot=4&amp;u_tz=120&amp;u_his=1&amp;u_h=750&amp;u_w=1200&amp;u_ah=683&amp;u_aw=1200&amp;u_cd=24&amp;u_sd=1.2&amp;dmc=8&amp;adx=123&amp;ady=2118&amp;biw=1185&amp;bih=562&amp;scr_x=0&amp;scr_y=0&amp;eid=95378427%2C95379481%2C95380937&amp;oid=2&amp;pvsid=3182631878438653&amp;tmod=970263393&amp;uas=0&amp;nvt=1&amp;ref=https%3A%2F%2Fwww.prophecynewswatch.com%2Farchive.cfm%3Fsearch_string%3D%26row_start%3D161&amp;fc=1920&amp;brdim=0%2C0%2C0%2C0%2C1200%2C0%2C1200%2C683%2C1200%2C562&amp;vis=1&amp;rsz=%7C%7CoEebr%7C&amp;abl=CS&amp;pfx=0&amp;fu=128&amp;bc=31&amp;bz=1&amp;ifi=2&amp;uci=a!2&amp;btvi=1&amp;fsb=1&amp;dtd=466" data-google-container-id="a!2" tabindex="0" title="Advertisement" aria-label="Advertisement" data-google-query-id="CPyqjLXoppIDFUoDVgUdDY0azw" data-load-complete="true"></iframe></div></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script> 
+</center>
+<br></div><div>"People's perception of whether their personal finances are improving is the single most important indicator of how they will vote," Rasmussen told me last year, shortly before Election Day.</div><div><br></div><div>Fast forward to 2025 and it's now Trump who is facing his own challenges on the economy, which remains the single most important issue on the minds of Americans. Rasmussen asked the question again last week and found that just 26% of respondents think their personal finances are improving compared to 39% who say they're getting worse.</div><div><br></div><div>Americans haven't been this pessimistic since they elected Trump to clean up the Biden-Harris mess.</div><div><br></div><div>If these poll numbers aren't already a warning sign for Trump and Republicans in Congress, they need to recognize the threat. The window will quickly close on the GOP's governing agenda, putting their political prospects in peril ahead of next year's midterms.&nbsp;</div><div>  
+	
+	<div align="center">
+
+
+
+
+
+<br>
+<script type="text/javascript">
+var images = [],
+index = 0;
+images[0] = "<a href = 'https://www.prophecynewswatch.com/product.cfm?product_id=76'><img src='https://www.prophecynewswatch.com/images/shop/World-Banner-1140-V1.jpg' width='800'></a>";	
+images[1] = "<a href = 'https://www.prophecynewswatch.com/product.cfm?product_id=77'><img src='https://www.prophecynewswatch.com/images/shop/American-Banner-1140-V1.jpg' width='800'></a>";	
+images[2] = "<a href = 'https://www.prophecynewswatch.com/product.cfm?product_id=78'><img src='https://www.prophecynewswatch.com/images/shop/Israel-Banner-1140-V1.jpg' width='800'></a>";
+images[3] = "<a href = 'https://prophecynewswatch.com/shop.cfm'><img src='https://www.prophecynewswatch.com/images/shop/PNW-Movies-V1.jpg' width='800'></a>";		
+index = Math.floor(Math.random() * images.length);
+document.write(images[index]);
+//done
+</script><a href="https://www.prophecynewswatch.com/product.cfm?product_id=77"><img src="https://www.prophecynewswatch.com/images/shop/American-Banner-1140-V1.jpg" width="800"></a></div>
+<br></div><div>Democrats are already salivating at the prospect of turning Trump's economic advantage into a liability. Look no further than last week's elections in New Jersey and Virginia, where Democrats Mikie Sherrill and Abigail Spanberger used voters' economic anxiety against their Republican rivals--and won decisive victories as a result. The outcome was even worse for Republicans in the Virginia House of Delegates, where Democrats will have at least 64 of the 100 seats in January.</div><div><br></div><div>Even more alarming, New York City voters elected an unabashed socialist who promised to make affordability the centerpiece of his agenda as mayor. When have socialists ever made anything affordable? It didn't matter.</div><div><br></div><div>In response to Zohran Mamdani's win, Ohio gubernatorial candidate Vivek Ramaswamy warned his fellow Republicans to take notice.&nbsp;</div><div><br></div><div>"Our side needs to focus on affordability," Ramaswamy said in a viral social media video. "Make the American dream affordable. Bring down costs--electric costs, grocery costs, health care costs and housing costs--and lay out how we're going to do it."</div><div> 
+
+<center>
+<p></p>
+<script async="" src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1737229961003235" crossorigin="anonymous"></script>
+<ins class="adsbygoogle" style="display: block; text-align: center; height: 280px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1737229961003235" data-ad-slot="5976189179" data-adsbygoogle-status="done"><div id="aswift_2_host" style="border: none; height: 280px; width: 698px; margin: 0px; padding: 0px; position: relative; visibility: visible; background-color: transparent; display: inline-block;"></div></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script> 
+</center>
+<br></div><div>Rasmussen attributed some of voters' economic anxiety to the government shutdown, which began Oct. 1 and is nearing an end this week.</div><div><br></div><div>"This is a stunning collapse in confidence, coming as more and more people feel the impact of the government shutdown," Rasmussen told The Daily Signal. "We have been tracking this measure of economic confidence for years because it is the most important political indicator for any election cycle. People were very pessimistic throughout the Biden era, but pessimism began to decline as soon as Trump won the election. Now, all of those gains have been wiped out and voters are just as pessimistic about their finances as they were on the even of the 2024 election."</div><div><br></div><div>Trump, to his credit, has turned his attention to the economy in recent days. But he'll need more than the president's bully pulpit to convince Americans that things are improving. Another poll from the Napolitan Institute this week found voter sentiment heading in the wrong direction with 39% believing we're already in a recession.</div><div><br></div><div>Originally published at <a href="https://www.dailysignal.com/2025/11/11/the-poll-number-that-should-worry-trump-most/" target="_blank" title="Economy">The Daily Signal</a></div> 
+
+<center>
+<p></p>
+<script async="" src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1737229961003235" crossorigin="anonymous"></script>
+<ins class="adsbygoogle" style="display: block; text-align: center; height: 280px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1737229961003235" data-ad-slot="5976189179" data-adsbygoogle-status="done"><div id="aswift_3_host" style="border: none; height: 280px; width: 698px; margin: 0px; padding: 0px; position: relative; visibility: visible; background-color: transparent; display: inline-block;"></div></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script> 
+</center>
+
+<p></p>
+
+<!-- Content slider ------------------------------------>
+<div style="background-color:#666666">
+<p><br>
+</p><div id="mc_embed_signup">
+<label for="mce-EMAIL"><h3><strong><font color="ffffff">Liked this article? Don't miss an urgent PNW update.</font></strong></h3></label>
+
+
+
+<form action="email_submit_sendy.cfm" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" novalidate="" accept-charset="utf-8" autocomplete="off">
+  <input type="hidden" name="referring_script" value="article.cfm" autocomplete="off">
+	<input style="display:none;" name="primary_email" type="text" maxlength="35" autocomplete="off">	
+  <div id="mc_embed_signup_scroll">
+	<div class="mc-field-group"><input type="email" placeholder="Enter Your Email" name="email_address" id="mce-EMAIL" autocomplete="off"></div>
+	<div class="clear"><input type="submit" value="Subscribe to PNW" name="submit" id="mc-embedded-subscribe" class="button"></div>
+  </div>
+</form>
+
+
+</div>
+<p><br>
+</p></div>
+<!-- Content slider ------------------------------------>
+
+
+<div class="item_meta clearfix"><a class="btn btn_red" href="https://www.prophecynewswatch.com">Back to home page</a></div><hr>
+
+
+<script async="" src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1737229961003235" crossorigin="anonymous"></script>
+<ins class="adsbygoogle" style="display: block; height: 418px;" data-ad-format="autorelaxed" data-ad-client="ca-pub-1737229961003235" data-ad-slot="5579311503" data-adsbygoogle-status="done"><div id="aswift_4_host" style="border: none; height: 418px; width: 698px; margin: 0px; padding: 0px; position: relative; visibility: visible; background-color: transparent; display: inline-block;"></div></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script> <script async="" src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1737229961003235" crossorigin="anonymous"></script>
+<!-- Large Rectangle -->
+<ins class="adsbygoogle" style="display: block; height: 280px;" data-ad-client="ca-pub-1737229961003235" data-ad-slot="7112583909" data-ad-format="auto" data-adsbygoogle-status="done"><div id="aswift_5_host" style="border: none; height: 280px; width: 698px; margin: 0px; padding: 0px; position: relative; visibility: visible; background-color: transparent; display: inline-block;"></div></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script> 
+
+
+
+
+
+
+
+
+
+</div><!-- End Layout post 2 -->
+</article></div><!-- End Main content -->
+
+<!-- Sidebar --------------------------------------------------------------------->
+<div class="col col_3_of_12">
+
+<!-- Widget top rated -->
+<div class="widget">
+
+<!-- Title ----------------------------------------------------------------------->
+<div class="panel_title"><div>
+<h4>PNW SHOP</h4>
+</div>
+</div>
+<!-- Title ----------------------------------------------------------------------->
+
+<div class="tb_widget_top_rated clearfix">
+
+
+<!-- Post item -->
+<div class="item clearfix">
+<div class="item_thumb clearfix">
+<a href="https://prophecynewswatch.com/product.cfm?product_id=88"><img src="images/website/World-Poster-200x285.jpg"></a>
+</div>
+<div class="item_content">
+<div class="item_meta clearfix">
+</div>
+<h4><a href="https://prophecynewswatch.com/product.cfm?product_id=88">Standing Against the World</a></h4>
+</div>
+<div class="order">1</div>
+</div>
+<!-- End Post item -->
+
+
+<!-- Post item -->
+<div class="item clearfix">
+<div class="item_thumb clearfix">
+<a href="https://prophecynewswatch.com/product.cfm?product_id=78"><img src="images/website/Israel-Poster-200x285.jpg"></a>
+</div>
+<div class="item_content">
+<div class="item_meta clearfix">
+</div>
+<h4><a href="https://prophecynewswatch.com/product.cfm?product_id=78">The Israel Delemma</a></h4>
+</div>
+<div class="order">2</div>
+</div>
+<!-- End Post item -->
+
+
+<!-- Post item -->
+<div class="item clearfix">
+<div class="item_thumb clearfix">
+<a href="https://prophecynewswatch.com/product.cfm?product_id=77"><img src="images/website/American-Poster-200x285.jpg"></a>
+</div>
+<div class="item_content">
+<div class="item_meta clearfix">
+</div>
+<h4><a href="https://prophecynewswatch.com/product.cfm?product_id=77">The American Miracle</a></h4>
+</div>
+<div class="order">3</div>
+</div>
+<!-- End Post item -->
+
+
+<!-- Post item -->
+<div class="item clearfix">
+<div class="item_thumb clearfix">
+<a href="https://prophecynewswatch.com/product.cfm?product_id=67"><img src="images/website/Wrath-Poster-200x285.jpg"></a>
+</div>
+<div class="item_content">
+<div class="item_meta clearfix">
+</div>
+<h4><a href="https://prophecynewswatch.com/product.cfm?product_id=67">Before the Wrath</a></h4>
+</div>
+<div class="order">4</div>
+</div>
+<!-- End Post item -->
+
+
+
+<!-- Post item -->
+<div class="item clearfix">
+<div class="item_thumb clearfix">
+<a href="https://prophecynewswatch.com/product.cfm?product_id=87"><img src="images/website/Exodus-Poster-200x285.jpg"></a>
+</div>
+<div class="item_content">
+<div class="item_meta clearfix">
+</div>
+<h4><a href="https://prophecynewswatch.com/product.cfm?product_id=87">Patterns of Evidence: Exodus</a></h4>
+</div>
+<div class="order">5</div>
+</div>
+<!-- End Post item -->
+
+
+</div>
+</div>
+<!-- End Widget top rated -->
+
+
+<!-- Widget posts -->
+<div class="widget">
+
+<!-- Title ----------------------------------------------------------------------->
+<div class="widget">
+<div class="widget_title"><h3>Other News</h3></div>
+<!-- Title ----------------------------------------------------------------------->
+                            
+             
+<div class="tb_widget_posts_big clearfix">
+
+<!-- Other News Columb -------------------------------------------------->
+
+<div class="item clearfix">
+<div class="item_content">
+<h4><a href="article.cfm?recent_news_id=9436"><span class="format" jquery="">January 22, 2026</span>Are Americans Being Radicalized Online And Converting To Islam?</a></h4>
+<p>
+Radicalization increasingly requires no physical community, no visit to a mosque, no face-to-face recruitment. Screens alone suffice as on...</p>
+<div class="item_meta clearfix">
+<span><i class="fa fa-newspaper-o"></i> <a href="article.cfm?recent_news_id=9436"><strong>Read Full Story</strong></a></span>
+</div>
+</div>
+</div> 
+<div class="item clearfix">
+<div class="item_content">
+<h4><a href="article.cfm?recent_news_id=9435"><span class="format" jquery="">January 22, 2026</span>Faith At The 50-Yard Line:The Quiet Revival In Football Your Not Supposed To See</a></h4>
+<p>
+As January football reaches its thunderous crescendo, the calendar is packed with some of the most watched and emotionally charged games o...</p>
+<div class="item_meta clearfix">
+<span><i class="fa fa-newspaper-o"></i> <a href="article.cfm?recent_news_id=9435"><strong>Read Full Story</strong></a></span>
+</div>
+</div>
+</div> 
+<div class="item clearfix">
+<div class="item_content">
+<h4><a href="article.cfm?recent_news_id=9434"><span class="format" jquery="">January 22, 2026</span>The Architecture Of Obsession: How Media Coverage Warps Israel's Reality</a></h4>
+<p>
+This is how media distortion always works--not by inventing the facts but by shrinking and enlarging them selectively. A small story is ma...</p>
+<div class="item_meta clearfix">
+<span><i class="fa fa-newspaper-o"></i> <a href="article.cfm?recent_news_id=9434"><strong>Read Full Story</strong></a></span>
+</div>
+</div>
+</div> 
+<div class="item clearfix">
+<div class="item_content">
+<h4><a href="article.cfm?recent_news_id=9433"><span class="format" jquery="">January 22, 2026</span>South Korea's Dangerous Descent Into Restricting Freedom Of Religion</a></h4>
+<p>
+It may be that Pastor Son, in his zeal to speak out against the current administration's progressive, socialist, and pro-LGBTQ platform, v...</p>
+<div class="item_meta clearfix">
+<span><i class="fa fa-newspaper-o"></i> <a href="article.cfm?recent_news_id=9433"><strong>Read Full Story</strong></a></span>
+</div>
+</div>
+</div> 
+<div class="item clearfix">
+<div class="item_content">
+<h4><a href="article.cfm?recent_news_id=9430"><span class="format" jquery="">January 21, 2026</span>Trump vs. Davos: A Temporary Disruption To A Long-Term Global Plan</a></h4>
+<p>
+For nearly five decades, the World Economic Forum has positioned itself not merely as a conference, but as a convener of global power -- a...</p>
+<div class="item_meta clearfix">
+<span><i class="fa fa-newspaper-o"></i> <a href="article.cfm?recent_news_id=9430"><strong>Read Full Story</strong></a></span>
+</div>
+</div>
+</div> 
+<div class="item clearfix">
+<div class="item_content">
+<h4><a href="article.cfm?recent_news_id=9429"><span class="format" jquery="">January 21, 2026</span>Woke Clergy In Rainbow Sashes Gather Inside Target HQ To Protest ICE</a></h4>
+<p>
+We do not have to abandon justice to show mercy. We do not have to surrender borders to love our neighbor. And we certainly do not need cl...</p>
+<div class="item_meta clearfix">
+<span><i class="fa fa-newspaper-o"></i> <a href="article.cfm?recent_news_id=9429"><strong>Read Full Story</strong></a></span>
+</div>
+</div>
+</div> 
+<div class="item clearfix">
+<div class="item_content">
+<h4><a href="article.cfm?recent_news_id=9428"><span class="format" jquery="">January 21, 2026</span>Americans' Trust In Pastors Hits Historic Low</a></h4>
+<p>
+Pastors in the United States face a culture that no longer gives them the benefit of the doubt. Public levels of trust in pastors continue...</p>
+<div class="item_meta clearfix">
+<span><i class="fa fa-newspaper-o"></i> <a href="article.cfm?recent_news_id=9428"><strong>Read Full Story</strong></a></span>
+</div>
+</div>
+</div>
+<!-- Other News Columb -------------------------------------------------->
+
+                                                  
+</div>
+</div>
+<!-- End Widget posts -->
+
+
+<!-- Start Enter Email on Right Side -->
+<div class="widget">
+<div class="widget_title"><h3>Get Breaking News</h3></div>
+  
+
+
+
+
+<div class="tb_widget_search">
+
+  
+  
+  
+  
+  <form action="email_submit_sendy.cfm" method="POST" accept-charset="utf-8" novalidateaccept-charset="utf-8" autocomplete="off">
+    <input type="hidden" name="referring_script" value="article.cfm" autocomplete="off">
+	  <input style="display:none;" name="primary_email" type="text" maxlength="35" autocomplete="off">			
+    <input type="text" placeholder="Enter Your Email" name="email_address" autocomplete="off">
+    <input type="submit" value="Submit" name="submit">	  
+  </form>
+  
+</div>
+
+</div>
+<!-- End Enter Email on Right Side -->
+
+
+
+<script async="" src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1737229961003235" crossorigin="anonymous"></script>
+<!-- 160x600 -->
+<ins class="adsbygoogle" style="display: block; height: 600px;" data-ad-client="ca-pub-1737229961003235" data-ad-slot="4403850306" data-ad-format="auto" data-adsbygoogle-status="done"><div id="aswift_6_host" style="border: none; height: 600px; width: 212px; margin: 0px; padding: 0px; position: relative; visibility: visible; background-color: transparent; display: inline-block;"></div></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+
+
+
+<div id="om-zby2zeg9syyjptsccsq6-holder"></div>
+
+
+</div>
+</div><!-- End Widget top authors -->
+</div><!-- End Sidebar -->
+</div>
+</section></div>
+
+<!-- End Section -->
+
+
+
+
+<script type="text/javascript">
+!function(){var geq=window.geq=window.geq||[];if(geq.initialize) return;if (geq.invoked){if (window.console && console.error) {console.error("GE snippet included twice.");}return;}geq.invoked = true;geq.methods = ["page", "suppress", "trackOrder", "identify", "addToCart", "callBack", "event"];geq.factory = function(method){return function(){var args = Array.prototype.slice.call(arguments);args.unshift(method);geq.push(args);return geq;};};for (var i = 0; i < geq.methods.length; i++) {var key = geq.methods[i];geq[key] = geq.factory(key);}geq.load = function(key){var script = document.createElement("script");script.type = "text/javascript";script.async = true;if (location.href.includes("vge=true")) {script.src = "https://s3-us-west-2.amazonaws.com/jsstore/a/" + key + "/ge.js?v=" + Math.random();} else {script.src = "https://s3-us-west-2.amazonaws.com/jsstore/a/" + key + "/ge.js";}var first = document.getElementsByTagName("script")[0];first.parentNode.insertBefore(script, first);};geq.SNIPPET_VERSION = "1.6.1";
+geq.load("V3VH78E");}();
+</script>
+<script>geq.page()</script>
+
+
+<!-- Copyright ---------------------------------------------------------------------->
+<div id="copyright" role="contentinfo">
+<div class="container">
+
+<font color="ffffff">
+&nbsp;<br>
+<img src="images/website/logo_top_2023.gif" width="200">
+&nbsp;<br><br>
+	
+© 2026 Prophecy News Watch. All Rights Reserved.<br>
+Located in Coeur D Alene, Idaho - USA.<br>
+Call Toll Free: 1-877-561-4442<br>
+Email: Info@ProphecyNewsWatch.com<br>
+&nbsp;<br>
+Visit us on social media.	
+&nbsp;<br><br>
+<a href="https://www.facebook.com/ProphecyNewsWatch" target="facebook"><img src="images/website/facebook.png" width="50" height="90" border="0"></a>
+&nbsp;<br>
+&nbsp;<br>
+<a name="contact">&nbsp;<br></a>
+</font>
+
+</div>
+</div>
+<!-- Copyright ---------------------------------------------------------------------->
+
+
+<!-- End Wrapper -->
+        
+<script type="text/javascript" src="js/jqueryscript.min.js"></script>        
+<script type="text/javascript" src="js/jqueryuiscript.min.js"></script>            
+<script type="text/javascript" src="js/init.js"></script> 
+
+
+
+<iframe height="0" width="0" style="display: none; visibility: hidden;"></iframe><ins class="adsbygoogle adsbygoogle-noablate" data-adsbygoogle-status="done" style="display: none !important;" data-ad-status="unfilled"><div id="aswift_0_host" style="border: none; height: 0px; width: 0px; margin: 0px; padding: 0px; position: relative; visibility: visible; background-color: transparent; display: inline-block;"><iframe id="aswift_0" name="aswift_0" style="left:0;position:absolute;top:0;border:0;width:undefinedpx;height:undefinedpx;min-height:auto;max-height:none;min-width:auto;max-width:none;" sandbox="allow-forms allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts allow-top-navigation-by-user-activation" frameborder="0" marginwidth="0" marginheight="0" vspace="0" hspace="0" allowtransparency="true" scrolling="no" allow="attribution-reporting; run-ad-auction" src="https://googleads.g.doubleclick.net/pagead/ads?client=ca-pub-1737229961003235&amp;output=html&amp;adk=1812271804&amp;adf=3025194257&amp;lmt=1769348397&amp;plat=3%3A2097152%2C4%3A2097152%2C9%3A32776%2C16%3A8388608%2C17%3A32%2C24%3A32%2C25%3A32%2C30%3A34603008%2C32%3A32%2C41%3A32%2C42%3A32%2C43%3A32&amp;format=0x0&amp;url=https%3A%2F%2Fwww.prophecynewswatch.com%2Farticle.cfm%3Frecent_news_id%3D9103&amp;pra=5&amp;asro=0&amp;aiapm=0.1542&amp;aiapmd=0.1423&amp;aiapmi=0.16&amp;aiapmid=1&amp;aiact=0.5423&amp;aiactd=0.7&amp;aicct=0.7&amp;aicctd=0.5799&amp;ailct=0.5849&amp;ailctd=0.65&amp;aimart=4&amp;aimartd=4&amp;uach=WyJXaW5kb3dzIiwiMTAuMC4wIiwieDg2IiwiIiwiMTQ0LjAuNzU1OS42MSIsbnVsbCwwLG51bGwsIjY0IixbWyJOb3QoQTpCcmFuZCIsIjguMC4wLjAiXSxbIkNocm9taXVtIiwiMTQ0LjAuNzU1OS42MSJdLFsiR29vZ2xlIENocm9tZSIsIjE0NC4wLjc1NTkuNjEiXV0sMF0.&amp;abgtt=6&amp;dt=1769348396594&amp;bpp=8&amp;bdt=1755&amp;idt=435&amp;shv=r20260121&amp;mjsv=m202601200101&amp;ptt=9&amp;saldr=aa&amp;abxe=1&amp;cookie=ID%3Dd8e9fce08d2f3446%3AT%3D1767593137%3ART%3D1769076008%3AS%3DALNI_MZkdBEyhy-vxNgDOInn97M-MHD26A&amp;gpic=UID%3D000012e0a5cbb316%3AT%3D1767593137%3ART%3D1769076008%3AS%3DALNI_Ma8oaRkrh35UvuLQJ2dZeSItRVL5Q&amp;eo_id_str=ID%3Ddd888d15c00f39d0%3AT%3D1767593137%3ART%3D1769076008%3AS%3DAA-AfjbtbUX6yFexrCs_besoRBL-&amp;nras=1&amp;correlator=8583556762265&amp;frm=20&amp;pv=2&amp;u_tz=120&amp;u_his=1&amp;u_h=750&amp;u_w=1200&amp;u_ah=683&amp;u_aw=1200&amp;u_cd=24&amp;u_sd=1.2&amp;dmc=8&amp;adx=-12245933&amp;ady=-12245933&amp;biw=1185&amp;bih=562&amp;scr_x=0&amp;scr_y=0&amp;eid=95378427%2C95379481%2C95380937&amp;oid=2&amp;pvsid=3182631878438653&amp;tmod=970263393&amp;uas=0&amp;nvt=1&amp;fsapi=1&amp;ref=https%3A%2F%2Fwww.prophecynewswatch.com%2Farchive.cfm%3Fsearch_string%3D%26row_start%3D161&amp;fc=1920&amp;brdim=0%2C0%2C0%2C0%2C1200%2C0%2C1200%2C683%2C1200%2C562&amp;vis=1&amp;rsz=%7C%7Cs%7C&amp;abl=NS&amp;fu=32768&amp;bc=31&amp;bz=1&amp;ifi=1&amp;uci=a!1&amp;fsb=1&amp;dtd=458" data-google-container-id="a!1" tabindex="0" title="Advertisement" aria-label="Advertisement" data-load-complete="true"></iframe></div></ins><iframe name="googlefcPresent" style="display: none; width: 0px; height: 0px; border: none; z-index: -1000; left: -1000px; top: -1000px;"></iframe><ins class="adsbygoogle adsbygoogle-noablate" data-adsbygoogle-status="done" data-anchor-status="ready-to-display" style="display: none;" data-ad-status="filled"><div class="grippy-host"></div><div id="aswift_10_host" style="border: none; height: 124px; width: 1005px; margin: 0px; padding: 0px; position: relative; visibility: visible; background-color: transparent; display: inline-block;"><iframe id="aswift_10" name="aswift_10" style="width:1005px !IMPORTANT;height:124px !IMPORTANT;min-height:auto;max-height:none;min-width:auto;max-width:none;" sandbox="allow-forms allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts allow-top-navigation-by-user-activation" width="1005" height="124" frameborder="0" marginwidth="0" marginheight="0" vspace="0" hspace="0" allowtransparency="true" scrolling="no" allow="attribution-reporting; run-ad-auction" src="https://googleads.g.doubleclick.net/pagead/html/r20260121/r20190131/zrt_lookup_fy2021.html#RS-1-&amp;adk=1812271801&amp;client=ca-pub-1737229961003235&amp;fa=1&amp;ifi=11&amp;uci=a!b&amp;btvi=3" data-google-container-id="a!b" tabindex="0" title="Advertisement" aria-label="Advertisement" data-google-query-id="CIfzi7XoppIDFS0MVgUdSHs1bg" data-load-complete="true"></iframe></div></ins><iframe name="__tcfapiLocator" src="about:blank" style="display: none; width: 0px; height: 0px; border: none; z-index: -1000; left: -1000px; top: -1000px;"></iframe><iframe name="googlefcInactive" src="about:blank" style="display: none; width: 0px; height: 0px; border: none; z-index: -1000; left: -1000px; top: -1000px;"></iframe><iframe name="googlefcLoaded" src="about:blank" style="display: none; width: 0px; height: 0px; border: none; z-index: -1000; left: -1000px; top: -1000px;"></iframe><iframe src="https://www.google.com/recaptcha/api2/aframe" width="0" height="0" style="display: none;"></iframe></body>
