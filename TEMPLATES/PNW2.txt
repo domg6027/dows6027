@@ -1,0 +1,526 @@
+<body style="padding: 0px;">
+
+<div id="wrapper" class="wide" style="height: auto !important;">
+<header id="header"> 
+
+<!-- Header main -->
+<div class="header_main-parent" style="height: 70px;"><div id="header_main" class="sticky header_main" rel="0">
+<div class="container">
+<!-- Logo -->
+<div class="site_brand">
+<a href="https://www.prophecynewswatch.com"><img src="images/website/logo_top_2023.gif" width="152"></a>
+</div>
+<!-- End Logo -->
+<!-- Top menu -->
+<nav class="top_navigation" role="navigation">
+<span class="top_navigation_toggle"><i class="fa fa-reorder"></i></span>
+
+<ul class="menu" style="">
+<li><a href="shop.cfm"><i class="fa fa-shopping-cart"> Movie &amp; Book Store</i></a></li>
+<li><a href="archive.cfm">News Archive</a></li>
+<li><a href="https://secure.prophecynewswatch.com/cart/donate.cfm">Donate / Go Ad-Free</a></li>
+<li><a href="#contact">Contact</a></li>
+<li><a href="https://www.facebook.com/ProphecyNewsWatch" target="facebook"><i class="fa fa-facebook"> Facebook</i></a>
+</li></ul>
+</nav>
+<!-- End Top menu -->
+	
+</div>
+</div></div>
+<!-- End Header main -->
+</header>
+
+<!-- End Header -->
+
+<div id="mc_embed_signup">
+<label for="mce-EMAIL"><h3>Join over <strong>350,000</strong> PNW subscribers.</h3></label>
+  
+
+
+<form action="email_submit_sendy.cfm" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" novalidate="" accept-charset="utf-8" autocomplete="off">
+  <input type="hidden" name="referring_script" value="article.cfm" autocomplete="off">
+	<input style="display:none;" name="primary_email" type="text" maxlength="35" autocomplete="off">	
+  <div id="mc_embed_signup_scroll">
+	<div class="mc-field-group"><input type="email" placeholder="Enter Your Email" name="email_address" id="mce-EMAIL" autocomplete="off"></div>
+	<div class="clear"><input type="submit" value="Subscribe to PNW" name="submit" id="mc-embedded-subscribe" class="button"></div>
+  </div>
+</form>
+
+
+</div>
+
+<hr>
+
+<!-- RANDOM BANNER AD MODULE ------------------------------------------------->
+<div class="google-auto-placed" style="width: 100%; height: auto; clear: both; text-align: center;"><ins data-ad-format="auto" class="adsbygoogle adsbygoogle-noablate" data-ad-client="ca-pub-1737229961003235" data-adsbygoogle-status="done" style="display: block; margin: 10px auto 20px; background-color: transparent; height: 280px;" data-ad-status="filled"><div id="aswift_7_host" style="border: none; height: 280px; width: 1185px; margin: 0px; padding: 0px; position: relative; visibility: visible; background-color: transparent; display: inline-block; overflow: visible;"><iframe id="aswift_7" name="aswift_7" style="left:0;position:absolute;top:0;border:0;width:1185px;height:280px;min-height:auto;max-height:none;min-width:auto;max-width:none;" sandbox="allow-forms allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts allow-top-navigation-by-user-activation" width="1185" height="280" frameborder="0" marginwidth="0" marginheight="0" vspace="0" hspace="0" allowtransparency="true" scrolling="no" allow="attribution-reporting; run-ad-auction" src="https://googleads.g.doubleclick.net/pagead/ads?client=ca-pub-1737229961003235&amp;output=html&amp;h=280&amp;adk=226637904&amp;adf=3869674065&amp;pi=t.aa~a.4173115302~rp.1&amp;w=1185&amp;fwrn=4&amp;fwrnh=100&amp;lmt=1769348503&amp;rafmt=1&amp;to=qs&amp;pwprc=6514679433&amp;format=1185x280&amp;url=https%3A%2F%2Fwww.prophecynewswatch.com%2Farticle.cfm%3Frecent_news_id%3D9244&amp;fwr=0&amp;pra=3&amp;rpe=1&amp;resp_fmts=3&amp;aieuf=1&amp;aicrs=1&amp;fa=40&amp;uach=WyJXaW5kb3dzIiwiMTAuMC4wIiwieDg2IiwiIiwiMTQ0LjAuNzU1OS42MSIsbnVsbCwwLG51bGwsIjY0IixbWyJOb3QoQTpCcmFuZCIsIjguMC4wLjAiXSxbIkNocm9taXVtIiwiMTQ0LjAuNzU1OS42MSJdLFsiR29vZ2xlIENocm9tZSIsIjE0NC4wLjc1NTkuNjEiXV0sMF0.&amp;abgtt=6&amp;dt=1769348503619&amp;bpp=1&amp;bdt=1310&amp;idt=189&amp;shv=r20260121&amp;mjsv=m202601200101&amp;ptt=9&amp;saldr=aa&amp;abxe=1&amp;cookie=ID%3Dd8e9fce08d2f3446%3AT%3D1767593137%3ART%3D1769348396%3AS%3DALNI_MZkdBEyhy-vxNgDOInn97M-MHD26A&amp;gpic=UID%3D000012e0a5cbb316%3AT%3D1767593137%3ART%3D1769348396%3AS%3DALNI_Ma8oaRkrh35UvuLQJ2dZeSItRVL5Q&amp;eo_id_str=ID%3Ddd888d15c00f39d0%3AT%3D1767593137%3ART%3D1769348396%3AS%3DAA-AfjbtbUX6yFexrCs_besoRBL-&amp;prev_fmts=0x0%2C698x280&amp;nras=2&amp;correlator=2801701947855&amp;frm=20&amp;pv=1&amp;u_tz=120&amp;u_his=1&amp;u_h=750&amp;u_w=1200&amp;u_ah=683&amp;u_aw=1200&amp;u_cd=24&amp;u_sd=1.2&amp;dmc=8&amp;adx=0&amp;ady=243&amp;biw=1185&amp;bih=562&amp;scr_x=0&amp;scr_y=0&amp;eid=95381490%2C42533294%2C44801779&amp;oid=2&amp;pvsid=3848020443794711&amp;tmod=970263393&amp;uas=0&amp;nvt=1&amp;ref=https%3A%2F%2Fwww.prophecynewswatch.com%2Farchive.cfm%3Fsearch_string%3D%26row_start%3D101&amp;fc=1920&amp;brdim=0%2C0%2C0%2C0%2C1200%2C0%2C1200%2C683%2C1200%2C562&amp;vis=1&amp;rsz=%7C%7Cs%7C&amp;abl=NS&amp;fu=128&amp;bc=31&amp;bz=1&amp;ifi=8&amp;uci=a!8&amp;fsb=1&amp;dtd=193" data-google-container-id="a!8" tabindex="0" title="Advertisement" aria-label="Advertisement" data-google-query-id="CIzGgujoppIDFe2H7gEdNnQTRg" data-load-complete="true"></iframe></div></ins></div><div id="mc_embed_signup">
+<label for="mce-EMAIL"><h3>
+<script type="text/javascript">
+var images = [],
+index = 0;
+images[0] = "<a href = 'https://www.prophecynewswatch.com/product.cfm?product_id=76'><img src='https://www.prophecynewswatch.com/images/shop/World-Banner-1140-V1.jpg'></a>";	
+images[1] = "<a href = 'https://www.prophecynewswatch.com/product.cfm?product_id=77'><img src='https://www.prophecynewswatch.com/images/shop/American-Banner-1140-V1.jpg'></a>";	
+images[2] = "<a href = 'https://www.prophecynewswatch.com/product.cfm?product_id=78'><img src='https://www.prophecynewswatch.com/images/shop/Israel-Banner-1140-V1.jpg'></a>";
+images[3] = "<a href = 'https://prophecynewswatch.com/shop.cfm'><img src='https://www.prophecynewswatch.com/images/shop/PNW-Movies-V1.jpg'></a>";	
+index = Math.floor(Math.random() * images.length);
+document.write(images[index]);
+//done
+</script><a href="https://www.prophecynewswatch.com/product.cfm?product_id=78"><img src="https://www.prophecynewswatch.com/images/shop/Israel-Banner-1140-V1.jpg"></a>
+</h3></label>
+</div>
+<!-- RANDOM BANNER AD MODULE ------------------------------------------------->
+	
+
+<!-- Section -->
+<section style="height: auto !important;">
+<div class="container" style="height: auto !important;">
+<div class="row" style="height: auto !important;">
+<!-- Main content -->
+<div class="col col_9_of_12" style="height: auto !important; min-height: 0px !important;">
+
+<!-- Title ----------------------------------------------------------------------->
+<div class="panel_title"><div>
+<h4>ARTICLE</h4>
+</div>
+</div>
+<!-- Title ----------------------------------------------------------------------->
+
+<article class="post" style="height: auto !important;">
+<!-- Media -->
+<div class="entry_media">
+
+<!-- Entry title --> 
+<h1 class="entry_title">11 Signs That Our World Is Rapidly Becoming A Lot More Orwellian</h1>
+<!-- End Entry title -->
+
+<img src="images/recent/globalwatch1.jpg" alt="News Image" border="0">
+<span class="format" jquery="">By Michael Snyder/Economic Collapse Blog</span>&nbsp;<span class="format" jquery="">December 09, 2025</span>
+</div>
+<!-- End Media -->
+                   
+<!-- Entry content -->
+<div class="entry_content" style="height: auto !important;">
+
+
+
+<font face="verdana, sans serif" size="2">Share this article:</font>
+<script type="text/javascript" src="https://platform-api.sharethis.com/js/sharethis.js#property=5dfc32716b428e00127a9e13&amp;product=inline-share-buttons" async="async"></script>
+<div class="sharethis-inline-share-buttons st-left st-has-labels  st-inline-share-buttons st-animated" id="st-1"><div class="st-btn st-first" data-network="facebook" style="display: inline-block;">
+  <img alt="facebook sharing button" src="https://platform-cdn.sharethis.com/img/facebook.svg">
+  <span class="st-label">Share</span>
+</div><div class="st-btn" data-network="twitter" style="display: inline-block;">
+  <img alt="twitter sharing button" src="https://platform-cdn.sharethis.com/img/twitter.svg">
+  <span class="st-label">Tweet</span>
+</div><div class="st-btn" data-network="email" style="display: inline-block;">
+  <img alt="email sharing button" src="https://platform-cdn.sharethis.com/img/email.svg">
+  <span class="st-label">Email</span>
+</div><div class="st-btn" data-network="sms" style="display: inline-block;">
+  <img alt="sms sharing button" src="https://platform-cdn.sharethis.com/img/sms.svg">
+  <span class="st-label">Share</span>
+</div><div class="st-btn st-last st-remove-label" data-network="print" style="display: inline-block;">
+  <img alt="print sharing button" src="https://platform-cdn.sharethis.com/img/print.svg">
+  <span class="st-label">Print</span>
+</div></div>
+
+<hr>
+
+
+
+
+
+
+
+
+
+
+
+<div>All over the globe, the digital control grid that we are all living in just continues to get even tighter. They are using facial recognition technology to scan our faces, they are using license plate readers to track where we travel, they are systematically monitoring the conversations that we are having on our phones, and they are watching literally everything that we post on social media.&nbsp;</div><div><br></div><div>At this stage, many of us just assume that nothing that we do or say is ever truly private. We really do live in a "Big Brother society", and the potential for tyranny is off the charts. In fact, people are already getting arrested for "thought crimes" all over the world. If we do not take a stand now, someday soon we could wake up in a world where there is essentially no freedom left at all.</div><div><br></div><div>The exponential growth of AI technology is allowing authorities to watch, track, monitor and control us like never before.&nbsp; If you are not alarmed by this, you might want to check if you are still alive.&nbsp; The following are 11 signs that our world is rapidly becoming a lot more Orwellian...</div><div><br></div><div>#1 UK authorities are rolling out "a country-wide facial recognition system" that will use AI facial recognition cameras to watch the entire population...</div><div><br></div><div><i>On Thursday, officials in the UK pledged to roll out a country-wide facial recognition system to help police track down criminals. The country's ministers have launched a 10-week consultation to analyze the regulatory and privacy framework of their AI-powered surveillance panopticon -- but one way or another, the all-seeing eye is on its way.</i></div><div><i><br></i></div><div><i>There's just one tiny wrinkle: the AI facial recognition cameras have a tendency to misidentify non-white people.</i></div><div><i><br></i></div><div><i>New reporting by The Guardian notes that testing of the AI tech conducted by the National Physical Laboratory (NPL) found that it's "more likely to incorrectly include some demographic groups in its search results" -- specifically Black and Asian people.</i></div><div style="height: auto !important;">
+
+
+<div id="top-id"></div>
+
+
+
+
+<center>
+<p></p>
+<script async="" src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1737229961003235" crossorigin="anonymous" data-checked-head="true"></script>
+<ins class="adsbygoogle" style="display: block; text-align: center; height: 280px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1737229961003235" data-ad-slot="5976189179" data-adsbygoogle-status="done" data-ad-status="filled"><div id="aswift_1_host" style="border: none; height: 280px; width: 698px; margin: 0px; padding: 0px; position: relative; visibility: visible; background-color: transparent; display: inline-block; overflow: visible;"><iframe id="aswift_1" name="aswift_1" style="left:0;position:absolute;top:0;border:0;width:698px;height:280px;min-height:auto;max-height:none;min-width:auto;max-width:none;" sandbox="allow-forms allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts allow-top-navigation-by-user-activation" width="698" height="280" frameborder="0" marginwidth="0" marginheight="0" vspace="0" hspace="0" allowtransparency="true" scrolling="no" allow="attribution-reporting; run-ad-auction" src="https://googleads.g.doubleclick.net/pagead/ads?client=ca-pub-1737229961003235&amp;output=html&amp;h=280&amp;slotname=5976189179&amp;adk=2816273528&amp;adf=1726022338&amp;pi=t.ma~as.5976189179&amp;w=698&amp;fwrn=4&amp;fwrnh=0&amp;lmt=1769348503&amp;rafmt=1&amp;armr=3&amp;format=698x280&amp;url=https%3A%2F%2Fwww.prophecynewswatch.com%2Farticle.cfm%3Frecent_news_id%3D9244&amp;fwr=0&amp;rpe=1&amp;resp_fmts=3&amp;aieuf=1&amp;aicrs=1&amp;uach=WyJXaW5kb3dzIiwiMTAuMC4wIiwieDg2IiwiIiwiMTQ0LjAuNzU1OS42MSIsbnVsbCwwLG51bGwsIjY0IixbWyJOb3QoQTpCcmFuZCIsIjguMC4wLjAiXSxbIkNocm9taXVtIiwiMTQ0LjAuNzU1OS42MSJdLFsiR29vZ2xlIENocm9tZSIsIjE0NC4wLjc1NTkuNjEiXV0sMF0.&amp;abgtt=6&amp;dt=1769348503613&amp;bpp=1&amp;bdt=1305&amp;idt=104&amp;shv=r20260121&amp;mjsv=m202601200101&amp;ptt=9&amp;saldr=aa&amp;abxe=1&amp;cookie=ID%3Dd8e9fce08d2f3446%3AT%3D1767593137%3ART%3D1769348396%3AS%3DALNI_MZkdBEyhy-vxNgDOInn97M-MHD26A&amp;gpic=UID%3D000012e0a5cbb316%3AT%3D1767593137%3ART%3D1769348396%3AS%3DALNI_Ma8oaRkrh35UvuLQJ2dZeSItRVL5Q&amp;eo_id_str=ID%3Ddd888d15c00f39d0%3AT%3D1767593137%3ART%3D1769348396%3AS%3DAA-AfjbtbUX6yFexrCs_besoRBL-&amp;prev_fmts=0x0&amp;nras=1&amp;correlator=2801701947855&amp;frm=20&amp;pv=1&amp;rplot=4&amp;u_tz=120&amp;u_his=1&amp;u_h=750&amp;u_w=1200&amp;u_ah=683&amp;u_aw=1200&amp;u_cd=24&amp;u_sd=1.2&amp;dmc=8&amp;adx=123&amp;ady=2131&amp;biw=1185&amp;bih=562&amp;scr_x=0&amp;scr_y=0&amp;eid=95381490%2C42533294%2C44801779&amp;oid=2&amp;pvsid=3848020443794711&amp;tmod=970263393&amp;uas=0&amp;nvt=1&amp;ref=https%3A%2F%2Fwww.prophecynewswatch.com%2Farchive.cfm%3Fsearch_string%3D%26row_start%3D101&amp;fc=1920&amp;brdim=0%2C0%2C0%2C0%2C1200%2C0%2C1200%2C683%2C1200%2C562&amp;vis=1&amp;rsz=%7C%7CoEebr%7C&amp;abl=CS&amp;pfx=0&amp;fu=128&amp;bc=31&amp;bz=1&amp;ifi=2&amp;uci=a!2&amp;btvi=1&amp;fsb=1&amp;dtd=114" data-google-container-id="a!2" tabindex="0" title="Advertisement" aria-label="Advertisement" data-google-query-id="CLrygujoppIDFQGJ7gEdtsUXJA" data-load-complete="true"></iframe></div></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script> 
+</center>
+<br></div><div>#2 Of course the control freaks in the UK also monitor everything that gets posted on social media.&nbsp; One British man recently found this out the hard way when he was arrested for posing with a legally-owned gun in the United States...</div><div><br></div><div><i>A Yorkshire man was arrested over a photo he posted on social media featuring him holding a legally owned gun in the US.</i></div><div><i><br></i></div><div><i>Jon Richelieu-Booth posted a photo of himself in August holding a gun on LinkedIn while he was on a holiday in Florida.</i></div><div><i><br></i></div><div><i>He said he held the firearm lawfully, on private land and with full permission from its owner.</i></div><div><br></div><div>#3 If you do not believe that "thought crime" is real, just consider this next example.&nbsp; 11 police officers recently barged in and arrested a 34-year-old woman that was sitting naked in her own bathtub because she used offensive words while texting another woman on her phone...</div><div><br></div><div><i>The United Kingdom has become an authoritarian nightmare, and the United States must remain vigilant if it does not want to go down the same course.</i></div><div><i><br></i></div><div><i>Elizabeth Kinney, a 34-year-old care assistant, was naked in the bathtub when 11 police officers barged into her home to arrest her.</i></div><div><i><br></i></div><div><i>Her crime was sending insults to another woman via text.</i></div><div><br></div><div>How would you feel if 11 police officers were staring at you while you were naked?</div><div><br></div><div>As she was being informed that she had engaged in "malicious communications", tears started flowing from Kinney's eyes...</div><div><br></div><div><i>Kinney burst into tears as male officers denied her any privacy, and a female officer informed her that she was being arrested for "malicious communications and hate crime." "The Crown place this offense in the highest category of its type due to the effect related to sexual orientation and the greater harm because it had moderate impact," prosecutors insisted. Kinney faced ten years in prison, but her attorney begged for leniency. She has been ordered to perform seventy-two hours of community service, attend ten days of rehabilitation, and pay a fine of several hundred pounds.</i></div><div>  
+	
+	<div align="center">
+
+
+
+
+
+<br>
+<script type="text/javascript">
+var images = [],
+index = 0;
+images[0] = "<a href = 'https://www.prophecynewswatch.com/product.cfm?product_id=76'><img src='https://www.prophecynewswatch.com/images/shop/World-Banner-1140-V1.jpg' width='800'></a>";	
+images[1] = "<a href = 'https://www.prophecynewswatch.com/product.cfm?product_id=77'><img src='https://www.prophecynewswatch.com/images/shop/American-Banner-1140-V1.jpg' width='800'></a>";	
+images[2] = "<a href = 'https://www.prophecynewswatch.com/product.cfm?product_id=78'><img src='https://www.prophecynewswatch.com/images/shop/Israel-Banner-1140-V1.jpg' width='800'></a>";
+images[3] = "<a href = 'https://prophecynewswatch.com/shop.cfm'><img src='https://www.prophecynewswatch.com/images/shop/PNW-Movies-V1.jpg' width='800'></a>";		
+index = Math.floor(Math.random() * images.length);
+document.write(images[index]);
+//done
+</script><a href="https://www.prophecynewswatch.com/product.cfm?product_id=77"><img src="https://www.prophecynewswatch.com/images/shop/American-Banner-1140-V1.jpg" width="800"></a></div>
+<br></div><div>#4 French President Emmanuel Macron wants the power to determine which media outlets will be allowed to speak to the public and which media outlets will be silenced...</div><div><br></div><div><i>Macron has in the last weeks intensified warnings on the risks of disinformation, on Friday calling for changes to French legislation that would allow "false information" online to be urgently blocked.</i></div><div class="google-auto-placed ap_container" style="width: 100%; height: auto; clear: both; text-align: center;"><ins data-ad-format="auto" class="adsbygoogle adsbygoogle-noablate" data-ad-client="ca-pub-1737229961003235" data-adsbygoogle-status="done" style="display: block; margin: auto; background-color: transparent; height: 280px;"><div id="aswift_8_host" style="border: none; height: 280px; width: 601px; margin: 0px; padding: 0px; position: relative; visibility: visible; background-color: transparent; display: inline-block;"></div></ins></div><div><i><br></i></div><div><i>He has also called for "professional certification" of outlets to distinguish sites and networks that provide reliable information according to ethical rules from others that do not.</i></div><div><i><br></i></div><div><i>But at the weekend, the Journal du Dimanche Sunday newspaper, part of the influential media stable of right-wing tycoon Vincent Bollore, accused Macron in a front-page story of a "totalitarian drift" on the issue.</i></div><div><br></div><div>#5 Because he is a champion of free speech, the EU has been coming after Elon Musk for years.&nbsp; So it shouldn't surprise any of us that the European Commission just fined his company 140 million dollars for supposed violations of the Digital Services Act...</div><div><br></div><div><i>The European Commission has issued a $140 million fine to Elon Musk's X for violating the EU's controversial Digital Services Act (DSA). The fine is likely to escalate tensions between the EU and America over free speech online.</i></div><div><i><br></i></div><div><i>Bloomberg reports that the European Commission has imposed a €120 million ($140 million) fine on X, Elon Musk's social media platform, for breaching the EU's Digital Services Act (DSA). This marks the first penalty issued under the new censorship law, which aims to regulate online platforms and "protect" users from illegal content and disinformation.</i></div><div><br></div><div>#6 In recent years, we have seen so many controversial voices suddenly have their bank accounts shut down.&nbsp; Shockingly, JPMorgan Chase CEO Jamie Dimon is now publicly admitting that his company does "debank" people...</div><div><br></div><div>As JPMorgan Chase Bank is under investigation by the state of Florida for alleged coordination with the Biden Department of Justice and Operation Arctic Frost, the chairman of the company is admitting to debanking certain customers, but says it has nothing to do with their political or religious affiliations.</div><div><br></div><div><i>"We do debank them," said JPMorgan Chase CEO Jamie Dimon who appeared on "Sunday Morning Futures" with Maria Bartiromo on the Fox News Channel.</i></div><div><i><br></i></div><div><i>"People have to grow up here and stop making up things and stuff like that. I can't talk about an individual account.</i></div><div> 
+
+<center>
+<p></p>
+<script async="" src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1737229961003235" crossorigin="anonymous"></script>
+<ins class="adsbygoogle" style="display: block; text-align: center; height: 280px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1737229961003235" data-ad-slot="5976189179" data-adsbygoogle-status="done"><div id="aswift_2_host" style="border: none; height: 280px; width: 698px; margin: 0px; padding: 0px; position: relative; visibility: visible; background-color: transparent; display: inline-block;"></div></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script> 
+</center>
+<br></div><div>#7 India wants to require that phone location services are always on so that the government can track people through their phones wherever they go...</div><div><br></div><div><i>You know what they say: If at first you don't succeed at mass government surveillance, try, try again. Only two days after India backpedaled on its plan to force smartphone makers to preinstall a state-run "cybersecurity" app, Reuters reports that the country is back at it. It's said to be considering a telecom industry proposal with another draconian requirement. This one would require smartphone makers to enable always-on satellite-based location tracking (Assisted GPS).</i></div><div><i><br></i></div><div><i>The measure would require location services to remain on at all times, with no option to switch them off. The telecom industry also wants phone makers to disable notifications that alert users when their carriers have accessed their location. According to Reuters, India's home ministry was set to meet with smartphone industry executives on Friday, but the meeting was postponed.</i></div><div><br></div><div>#8 A journalist in the Netherlands has tested AI-powered glasses "that can instantly identify strangers on the street"...</div><div><br></div><div><i>A Dutch journalist just tested a pair of AI-powered glasses that can instantly identify strangers on the street.</i></div><div><i><br></i></div><div><i>No government database. No police system. Just public data and off-the-shelf AI.</i></div><div><i><br></i></div><div><i>You look at someone and in seconds, their name, LinkedIn, and background appear before your eyes.</i></div><div><i><br></i></div><div><i>The scariest part? You can't really stop it.</i></div><div><i><br></i></div><div><i>You can ban it, regulate it, add blinking red lights... but once tech like this exists, someone will always find a way to use it.</i></div><div><br></div><div>Once these sorts of devices become widely available, there will be nowhere to run and nowhere to hide.</div><div><br></div><div>#9 A nationwide digital ID is being introduced in the UK, and soon you will not be able to get a new job without one...</div><div><br></div><div><i>Once introduced, digital ID will be used to verify a person's right to live and work in the UK.</i></div><div><i><br></i></div><div><i>It will take the form of an app-based system, stored on smartphones in a similar way to the NHS App or digital bank cards.</i></div><div><i><br></i></div><div><i>The ID will include information on the holders' residency status, name, date of birth, nationality and their photo.</i></div><div><i><br></i></div><div><i>When he first announced the scheme, Sir Keir said: "You will not be able to work in the United Kingdom if you do not have digital ID. It's as simple as that."</i></div><div><br></div><div>#10 The digital ID program in France "is moving from pilot to scale"...</div><div><br></div><div><i>France's national digital identity app, France Identité, has enabled the creation of more than 3.2 million digital IDs, according to new figures.</i></div><div><i><br></i></div><div><i>Among these, approximately 525,000 identities have been fully certified, meaning that users have completed an in-person verification process at their local town halls. This means that more than half a million French digital IDs are ready for the EU Digital Identity (EUDI) Wallet, according to Joerg Lenz, head of marketing at Namirial Group.</i></div><div><i><br></i></div><div><i>"France Identité is moving from pilot to scale," Lenz wrote on LinkedIn, following the TRUSTECH Event held in Paris on Wednesday.</i></div><div><br></div><div>#11 In Illinois, there is such overwhelming demand for digital IDs that some people are being forced to wait...</div><div><br></div><div><i>Mobile IDs became available in Illinois on Wednesday, but due to the high demand, some residents are finding themselves waiting a little bit longer.</i></div><div><i><br></i></div><div><i>A number of residents trying to download the digital ID to their Apple wallet received the following message: "Due to the high volume, your state's service is currently busy."</i></div><div><i><br></i></div><div><i>Users can then answer the question, "Do you want to be notified when it becomes available?"</i></div><div><br></div><div>This is where the entire world is heading.</div><div><br></div><div>As the Big Brother control grid gets tighter and tighter, the stage is being set for unprecedented tyranny on a global scale.</div><div><br></div><div>Tyrants of the past could only dream of having the sort of AI-powered tools that we possess today.</div><div><br></div><div>If you do not submit to the digital gulag that is being constructed all around us, eventually you may not be able to buy, sell, get a job or open a bank account without proper digital identification.</div><div><br></div><div>What would you do then?</div><div><br></div><div>You might want to start thinking about that, because things are only going to get crazier from here.</div><div><br></div><div>Originally published at <a href="https://theeconomiccollapseblog.com/11-signs-that-our-world-is-rapidly-becoming-a-lot-more-orwellian/" target="_blank" title="Big Brother">The Economic Collapse Blog</a></div><div><br></div> 
+
+<center>
+<p></p>
+<script async="" src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1737229961003235" crossorigin="anonymous"></script>
+<ins class="adsbygoogle" style="display: block; text-align: center; height: 280px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1737229961003235" data-ad-slot="5976189179" data-adsbygoogle-status="done"><div id="aswift_3_host" style="border: none; height: 280px; width: 698px; margin: 0px; padding: 0px; position: relative; visibility: visible; background-color: transparent; display: inline-block;"></div></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script> 
+</center>
+
+<p></p>
+
+<!-- Content slider ------------------------------------>
+<div style="background-color:#666666">
+<p><br>
+</p><div id="mc_embed_signup">
+<label for="mce-EMAIL"><h3><strong><font color="ffffff">Liked this article? Don't miss an urgent PNW update.</font></strong></h3></label>
+
+
+
+<form action="email_submit_sendy.cfm" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" novalidate="" accept-charset="utf-8" autocomplete="off">
+  <input type="hidden" name="referring_script" value="article.cfm" autocomplete="off">
+	<input style="display:none;" name="primary_email" type="text" maxlength="35" autocomplete="off">	
+  <div id="mc_embed_signup_scroll">
+	<div class="mc-field-group"><input type="email" placeholder="Enter Your Email" name="email_address" id="mce-EMAIL" autocomplete="off"></div>
+	<div class="clear"><input type="submit" value="Subscribe to PNW" name="submit" id="mc-embedded-subscribe" class="button"></div>
+  </div>
+</form>
+
+
+</div>
+<p><br>
+</p></div>
+<!-- Content slider ------------------------------------>
+
+
+<div class="item_meta clearfix"><a class="btn btn_red" href="https://www.prophecynewswatch.com">Back to home page</a></div><hr>
+
+
+<script async="" src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1737229961003235" crossorigin="anonymous"></script>
+<ins class="adsbygoogle" style="display: block; height: 418px;" data-ad-format="autorelaxed" data-ad-client="ca-pub-1737229961003235" data-ad-slot="5579311503" data-adsbygoogle-status="done"><div id="aswift_4_host" style="border: none; height: 418px; width: 698px; margin: 0px; padding: 0px; position: relative; visibility: visible; background-color: transparent; display: inline-block;"></div></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script> <script async="" src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1737229961003235" crossorigin="anonymous"></script>
+<!-- Large Rectangle -->
+<ins class="adsbygoogle" style="display: block; height: 280px;" data-ad-client="ca-pub-1737229961003235" data-ad-slot="7112583909" data-ad-format="auto" data-adsbygoogle-status="done"><div id="aswift_5_host" style="border: none; height: 280px; width: 698px; margin: 0px; padding: 0px; position: relative; visibility: visible; background-color: transparent; display: inline-block;"></div></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script> 
+
+
+
+
+
+
+
+
+
+</div><!-- End Layout post 2 -->
+</article></div><!-- End Main content -->
+
+<!-- Sidebar --------------------------------------------------------------------->
+<div class="col col_3_of_12">
+
+<!-- Widget top rated -->
+<div class="widget">
+
+<!-- Title ----------------------------------------------------------------------->
+<div class="panel_title"><div>
+<h4>PNW SHOP</h4>
+</div>
+</div>
+<!-- Title ----------------------------------------------------------------------->
+
+<div class="tb_widget_top_rated clearfix">
+
+
+<!-- Post item -->
+<div class="item clearfix">
+<div class="item_thumb clearfix">
+<a href="https://prophecynewswatch.com/product.cfm?product_id=88"><img src="images/website/World-Poster-200x285.jpg"></a>
+</div>
+<div class="item_content">
+<div class="item_meta clearfix">
+</div>
+<h4><a href="https://prophecynewswatch.com/product.cfm?product_id=88">Standing Against the World</a></h4>
+</div>
+<div class="order">1</div>
+</div>
+<!-- End Post item -->
+
+
+<!-- Post item -->
+<div class="item clearfix">
+<div class="item_thumb clearfix">
+<a href="https://prophecynewswatch.com/product.cfm?product_id=78"><img src="images/website/Israel-Poster-200x285.jpg"></a>
+</div>
+<div class="item_content">
+<div class="item_meta clearfix">
+</div>
+<h4><a href="https://prophecynewswatch.com/product.cfm?product_id=78">The Israel Delemma</a></h4>
+</div>
+<div class="order">2</div>
+</div>
+<!-- End Post item -->
+
+
+<!-- Post item -->
+<div class="item clearfix">
+<div class="item_thumb clearfix">
+<a href="https://prophecynewswatch.com/product.cfm?product_id=77"><img src="images/website/American-Poster-200x285.jpg"></a>
+</div>
+<div class="item_content">
+<div class="item_meta clearfix">
+</div>
+<h4><a href="https://prophecynewswatch.com/product.cfm?product_id=77">The American Miracle</a></h4>
+</div>
+<div class="order">3</div>
+</div>
+<!-- End Post item -->
+
+
+<!-- Post item -->
+<div class="item clearfix">
+<div class="item_thumb clearfix">
+<a href="https://prophecynewswatch.com/product.cfm?product_id=67"><img src="images/website/Wrath-Poster-200x285.jpg"></a>
+</div>
+<div class="item_content">
+<div class="item_meta clearfix">
+</div>
+<h4><a href="https://prophecynewswatch.com/product.cfm?product_id=67">Before the Wrath</a></h4>
+</div>
+<div class="order">4</div>
+</div>
+<!-- End Post item -->
+
+
+
+<!-- Post item -->
+<div class="item clearfix">
+<div class="item_thumb clearfix">
+<a href="https://prophecynewswatch.com/product.cfm?product_id=87"><img src="images/website/Exodus-Poster-200x285.jpg"></a>
+</div>
+<div class="item_content">
+<div class="item_meta clearfix">
+</div>
+<h4><a href="https://prophecynewswatch.com/product.cfm?product_id=87">Patterns of Evidence: Exodus</a></h4>
+</div>
+<div class="order">5</div>
+</div>
+<!-- End Post item -->
+
+
+</div>
+</div>
+<!-- End Widget top rated -->
+
+
+<!-- Widget posts -->
+<div class="widget">
+
+<!-- Title ----------------------------------------------------------------------->
+<div class="widget">
+<div class="widget_title"><h3>Other News</h3></div>
+<!-- Title ----------------------------------------------------------------------->
+                            
+             
+<div class="tb_widget_posts_big clearfix">
+
+<!-- Other News Columb -------------------------------------------------->
+
+<div class="item clearfix">
+<div class="item_content">
+<h4><a href="article.cfm?recent_news_id=9436"><span class="format" jquery="">January 22, 2026</span>Are Americans Being Radicalized Online And Converting To Islam?</a></h4>
+<p>
+Radicalization increasingly requires no physical community, no visit to a mosque, no face-to-face recruitment. Screens alone suffice as on...</p>
+<div class="item_meta clearfix">
+<span><i class="fa fa-newspaper-o"></i> <a href="article.cfm?recent_news_id=9436"><strong>Read Full Story</strong></a></span>
+</div>
+</div>
+</div> 
+<div class="item clearfix">
+<div class="item_content">
+<h4><a href="article.cfm?recent_news_id=9435"><span class="format" jquery="">January 22, 2026</span>Faith At The 50-Yard Line:The Quiet Revival In Football Your Not Supposed To See</a></h4>
+<p>
+As January football reaches its thunderous crescendo, the calendar is packed with some of the most watched and emotionally charged games o...</p>
+<div class="item_meta clearfix">
+<span><i class="fa fa-newspaper-o"></i> <a href="article.cfm?recent_news_id=9435"><strong>Read Full Story</strong></a></span>
+</div>
+</div>
+</div> 
+<div class="item clearfix">
+<div class="item_content">
+<h4><a href="article.cfm?recent_news_id=9434"><span class="format" jquery="">January 22, 2026</span>The Architecture Of Obsession: How Media Coverage Warps Israel's Reality</a></h4>
+<p>
+This is how media distortion always works--not by inventing the facts but by shrinking and enlarging them selectively. A small story is ma...</p>
+<div class="item_meta clearfix">
+<span><i class="fa fa-newspaper-o"></i> <a href="article.cfm?recent_news_id=9434"><strong>Read Full Story</strong></a></span>
+</div>
+</div>
+</div> 
+<div class="item clearfix">
+<div class="item_content">
+<h4><a href="article.cfm?recent_news_id=9433"><span class="format" jquery="">January 22, 2026</span>South Korea's Dangerous Descent Into Restricting Freedom Of Religion</a></h4>
+<p>
+It may be that Pastor Son, in his zeal to speak out against the current administration's progressive, socialist, and pro-LGBTQ platform, v...</p>
+<div class="item_meta clearfix">
+<span><i class="fa fa-newspaper-o"></i> <a href="article.cfm?recent_news_id=9433"><strong>Read Full Story</strong></a></span>
+</div>
+</div>
+</div> 
+<div class="item clearfix">
+<div class="item_content">
+<h4><a href="article.cfm?recent_news_id=9430"><span class="format" jquery="">January 21, 2026</span>Trump vs. Davos: A Temporary Disruption To A Long-Term Global Plan</a></h4>
+<p>
+For nearly five decades, the World Economic Forum has positioned itself not merely as a conference, but as a convener of global power -- a...</p>
+<div class="item_meta clearfix">
+<span><i class="fa fa-newspaper-o"></i> <a href="article.cfm?recent_news_id=9430"><strong>Read Full Story</strong></a></span>
+</div>
+</div>
+</div> 
+<div class="item clearfix">
+<div class="item_content">
+<h4><a href="article.cfm?recent_news_id=9429"><span class="format" jquery="">January 21, 2026</span>Woke Clergy In Rainbow Sashes Gather Inside Target HQ To Protest ICE</a></h4>
+<p>
+We do not have to abandon justice to show mercy. We do not have to surrender borders to love our neighbor. And we certainly do not need cl...</p>
+<div class="item_meta clearfix">
+<span><i class="fa fa-newspaper-o"></i> <a href="article.cfm?recent_news_id=9429"><strong>Read Full Story</strong></a></span>
+</div>
+</div>
+</div> 
+<div class="item clearfix">
+<div class="item_content">
+<h4><a href="article.cfm?recent_news_id=9428"><span class="format" jquery="">January 21, 2026</span>Americans' Trust In Pastors Hits Historic Low</a></h4>
+<p>
+Pastors in the United States face a culture that no longer gives them the benefit of the doubt. Public levels of trust in pastors continue...</p>
+<div class="item_meta clearfix">
+<span><i class="fa fa-newspaper-o"></i> <a href="article.cfm?recent_news_id=9428"><strong>Read Full Story</strong></a></span>
+</div>
+</div>
+</div>
+<!-- Other News Columb -------------------------------------------------->
+
+                                                  
+</div>
+</div>
+<!-- End Widget posts -->
+
+
+<!-- Start Enter Email on Right Side -->
+<div class="widget">
+<div class="widget_title"><h3>Get Breaking News</h3></div>
+  
+
+
+
+
+<div class="tb_widget_search">
+
+  
+  
+  
+  
+  <form action="email_submit_sendy.cfm" method="POST" accept-charset="utf-8" novalidateaccept-charset="utf-8" autocomplete="off">
+    <input type="hidden" name="referring_script" value="article.cfm" autocomplete="off">
+	  <input style="display:none;" name="primary_email" type="text" maxlength="35" autocomplete="off">			
+    <input type="text" placeholder="Enter Your Email" name="email_address" autocomplete="off">
+    <input type="submit" value="Submit" name="submit">	  
+  </form>
+  
+</div>
+
+</div>
+<!-- End Enter Email on Right Side -->
+
+
+
+<script async="" src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1737229961003235" crossorigin="anonymous"></script>
+<!-- 160x600 -->
+<ins class="adsbygoogle" style="display: block; height: 600px;" data-ad-client="ca-pub-1737229961003235" data-ad-slot="4403850306" data-ad-format="auto" data-adsbygoogle-status="done"><div id="aswift_6_host" style="border: none; height: 600px; width: 212px; margin: 0px; padding: 0px; position: relative; visibility: visible; background-color: transparent; display: inline-block;"></div></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+
+
+
+<div id="om-zby2zeg9syyjptsccsq6-holder"></div>
+
+
+</div>
+</div><!-- End Widget top authors -->
+</div><!-- End Sidebar -->
+</div>
+</section></div>
+
+<!-- End Section -->
+
+
+
+
+<script type="text/javascript">
+!function(){var geq=window.geq=window.geq||[];if(geq.initialize) return;if (geq.invoked){if (window.console && console.error) {console.error("GE snippet included twice.");}return;}geq.invoked = true;geq.methods = ["page", "suppress", "trackOrder", "identify", "addToCart", "callBack", "event"];geq.factory = function(method){return function(){var args = Array.prototype.slice.call(arguments);args.unshift(method);geq.push(args);return geq;};};for (var i = 0; i < geq.methods.length; i++) {var key = geq.methods[i];geq[key] = geq.factory(key);}geq.load = function(key){var script = document.createElement("script");script.type = "text/javascript";script.async = true;if (location.href.includes("vge=true")) {script.src = "https://s3-us-west-2.amazonaws.com/jsstore/a/" + key + "/ge.js?v=" + Math.random();} else {script.src = "https://s3-us-west-2.amazonaws.com/jsstore/a/" + key + "/ge.js";}var first = document.getElementsByTagName("script")[0];first.parentNode.insertBefore(script, first);};geq.SNIPPET_VERSION = "1.6.1";
+geq.load("V3VH78E");}();
+</script>
+<script>geq.page()</script>
+
+
+<!-- Copyright ---------------------------------------------------------------------->
+<div id="copyright" role="contentinfo">
+<div class="container">
+
+<font color="ffffff">
+&nbsp;<br>
+<img src="images/website/logo_top_2023.gif" width="200">
+&nbsp;<br><br>
+	
+© 2026 Prophecy News Watch. All Rights Reserved.<br>
+Located in Coeur D Alene, Idaho - USA.<br>
+Call Toll Free: 1-877-561-4442<br>
+Email: Info@ProphecyNewsWatch.com<br>
+&nbsp;<br>
+Visit us on social media.	
+&nbsp;<br><br>
+<a href="https://www.facebook.com/ProphecyNewsWatch" target="facebook"><img src="images/website/facebook.png" width="50" height="90" border="0"></a>
+&nbsp;<br>
+&nbsp;<br>
+<a name="contact">&nbsp;<br></a>
+</font>
+
+</div>
+</div>
+<!-- Copyright ---------------------------------------------------------------------->
+
+
+<!-- End Wrapper -->
+        
+<script type="text/javascript" src="js/jqueryscript.min.js"></script><ins class="adsbygoogle adsbygoogle-noablate" data-adsbygoogle-status="done" style="display: none !important;" data-ad-status="unfilled"><div id="aswift_0_host" style="border: none; height: 0px; width: 0px; margin: 0px; padding: 0px; position: relative; visibility: visible; background-color: transparent; display: inline-block;"><iframe id="aswift_0" name="aswift_0" style="left:0;position:absolute;top:0;border:0;width:undefinedpx;height:undefinedpx;min-height:auto;max-height:none;min-width:auto;max-width:none;" sandbox="allow-forms allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts allow-top-navigation-by-user-activation" frameborder="0" marginwidth="0" marginheight="0" vspace="0" hspace="0" allowtransparency="true" scrolling="no" allow="attribution-reporting; run-ad-auction" src="https://googleads.g.doubleclick.net/pagead/ads?client=ca-pub-1737229961003235&amp;output=html&amp;adk=1812271804&amp;adf=3025194257&amp;lmt=1769348503&amp;plat=3%3A2097152%2C4%3A2097152%2C9%3A134250504%2C16%3A8388608%2C17%3A32%2C24%3A32%2C25%3A32%2C30%3A34603008%2C32%3A32%2C41%3A32%2C42%3A32%2C43%3A32&amp;format=0x0&amp;url=https%3A%2F%2Fwww.prophecynewswatch.com%2Farticle.cfm%3Frecent_news_id%3D9244&amp;pra=5&amp;asro=1&amp;itsi=1&amp;aiapm=0.1542&amp;aiapmd=0.1423&amp;aiapmi=0.16&amp;aiapmid=1&amp;aiact=0.5423&amp;aiactd=0.7&amp;aicct=0.7&amp;aicctd=0.5799&amp;ailct=0.5849&amp;ailctd=0.65&amp;aimart=4&amp;aimartd=4&amp;aieuf=1&amp;aicrs=1&amp;uach=WyJXaW5kb3dzIiwiMTAuMC4wIiwieDg2IiwiIiwiMTQ0LjAuNzU1OS42MSIsbnVsbCwwLG51bGwsIjY0IixbWyJOb3QoQTpCcmFuZCIsIjguMC4wLjAiXSxbIkNocm9taXVtIiwiMTQ0LjAuNzU1OS42MSJdLFsiR29vZ2xlIENocm9tZSIsIjE0NC4wLjc1NTkuNjEiXV0sMF0.&amp;abgtt=6&amp;dt=1769348503599&amp;bpp=14&amp;bdt=1291&amp;idt=62&amp;shv=r20260121&amp;mjsv=m202601200101&amp;ptt=9&amp;saldr=aa&amp;abxe=1&amp;cookie=ID%3Dd8e9fce08d2f3446%3AT%3D1767593137%3ART%3D1769348396%3AS%3DALNI_MZkdBEyhy-vxNgDOInn97M-MHD26A&amp;gpic=UID%3D000012e0a5cbb316%3AT%3D1767593137%3ART%3D1769348396%3AS%3DALNI_Ma8oaRkrh35UvuLQJ2dZeSItRVL5Q&amp;eo_id_str=ID%3Ddd888d15c00f39d0%3AT%3D1767593137%3ART%3D1769348396%3AS%3DAA-AfjbtbUX6yFexrCs_besoRBL-&amp;nras=1&amp;correlator=2801701947855&amp;frm=20&amp;pv=2&amp;u_tz=120&amp;u_his=1&amp;u_h=750&amp;u_w=1200&amp;u_ah=683&amp;u_aw=1200&amp;u_cd=24&amp;u_sd=1.2&amp;dmc=8&amp;adx=-12245933&amp;ady=-12245933&amp;biw=1185&amp;bih=562&amp;scr_x=0&amp;scr_y=0&amp;eid=95381490%2C42533294%2C44801779&amp;oid=2&amp;pvsid=3848020443794711&amp;tmod=970263393&amp;uas=0&amp;nvt=1&amp;fsapi=1&amp;ref=https%3A%2F%2Fwww.prophecynewswatch.com%2Farchive.cfm%3Fsearch_string%3D%26row_start%3D101&amp;fc=1920&amp;brdim=0%2C0%2C0%2C0%2C1200%2C0%2C1200%2C683%2C1200%2C562&amp;vis=1&amp;rsz=%7C%7Cs%7C&amp;abl=NS&amp;fu=32768&amp;bc=31&amp;bz=1&amp;ifi=1&amp;uci=a!1&amp;fsb=1&amp;dtd=95" data-google-container-id="a!1" tabindex="0" title="Advertisement" aria-label="Advertisement" data-load-complete="true"></iframe></div></ins>        
+<script type="text/javascript" src="js/jqueryuiscript.min.js"></script>            
+<script type="text/javascript" src="js/init.js"></script><iframe height="0" width="0" style="display: none; visibility: hidden;"></iframe> 
+
+
+
+<iframe name="googlefcPresent" style="display: none; width: 0px; height: 0px; border: none; z-index: -1000; left: -1000px; top: -1000px;"></iframe><ins class="adsbygoogle adsbygoogle-noablate" data-adsbygoogle-status="done" data-anchor-status="ready-to-display" style="display: none;" data-ad-status="filled"><div class="grippy-host"></div><div id="aswift_9_host" style="border: none; height: 124px; width: 1005px; margin: 0px; padding: 0px; position: relative; visibility: visible; background-color: transparent; display: inline-block;"><iframe id="aswift_9" name="aswift_9" style="width:1005px !IMPORTANT;height:124px !IMPORTANT;min-height:auto;max-height:none;min-width:auto;max-width:none;" sandbox="allow-forms allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts allow-top-navigation-by-user-activation" width="1005" height="124" frameborder="0" marginwidth="0" marginheight="0" vspace="0" hspace="0" allowtransparency="true" scrolling="no" allow="attribution-reporting; run-ad-auction" src="https://googleads.g.doubleclick.net/pagead/html/r20260121/r20190131/zrt_lookup_fy2021.html#RS-0-&amp;adk=1812271801&amp;client=ca-pub-1737229961003235&amp;fa=1&amp;ifi=10&amp;uci=a!a&amp;btvi=2" data-google-container-id="a!a" tabindex="0" title="Advertisement" aria-label="Advertisement" data-google-query-id="CPyCgejoppIDFTAvaAgd2oAgXA" data-load-complete="true"></iframe></div></ins><iframe name="__tcfapiLocator" src="about:blank" style="display: none; width: 0px; height: 0px; border: none; z-index: -1000; left: -1000px; top: -1000px;"></iframe><iframe name="googlefcInactive" src="about:blank" style="display: none; width: 0px; height: 0px; border: none; z-index: -1000; left: -1000px; top: -1000px;"></iframe><iframe name="googlefcLoaded" src="about:blank" style="display: none; width: 0px; height: 0px; border: none; z-index: -1000; left: -1000px; top: -1000px;"></iframe><iframe src="https://www.google.com/recaptcha/api2/aframe" width="0" height="0" style="display: none;"></iframe></body>
