@@ -1,7 +1,6 @@
 /**
  * onepdf.js
- * Fetch ONE valid PNW article, convert to PDF, commit, then update data.json
- * Node 20 · ES Module · GitHub Actions safe
+ * One-article PDF generator (robust, CI-safe)
  */
 
 import fs from "fs";
@@ -13,61 +12,64 @@ import pkg from "@pdfme/common";
 
 const { text } = pkg;
 
-/* -------------------- PATHS -------------------- */
+/* ---------------- PATHS ---------------- */
 
 const ROOT = process.cwd();
 const PDF_DIR = path.join(ROOT, "PDFS");
 const DATA_FILE = path.join(ROOT, "data.json");
 const BASE_PDF = path.join(ROOT, "TEMPLATES", "blank.pdf");
 
-/* -------------------- GUARDS -------------------- */
+/* ---------------- GUARDS ---------------- */
 
 if (!fs.existsSync(BASE_PDF)) {
   throw new Error("blank.pdf missing in TEMPLATES folder");
 }
-
+if (!fs.existsSync(DATA_FILE)) {
+  throw new Error("data.json missing in repository root");
+}
 if (!fs.existsSync(PDF_DIR)) {
   fs.mkdirSync(PDF_DIR);
 }
 
-if (!fs.existsSync(DATA_FILE)) {
-  throw new Error("data.json missing in repository root");
-}
-
-/* -------------------- GIT IDENTITY (CI SAFE) -------------------- */
+/* ---------------- GIT IDENTITY ---------------- */
 
 try {
   execSync(`git config user.email "actions@github.com"`);
   execSync(`git config user.name "GitHub Actions"`);
 } catch {}
 
-/* -------------------- HELPERS -------------------- */
+/* ---------------- FETCH ---------------- */
 
 function fetchArticle(id) {
-  return new Promise((resolve, reject) => {
-    const url = `https://pnw.org.za/?p=${id}`;
+  return new Promise(resolve => {
+    const url = `https://www.prophecynewswatch.com/?p=${id}`;
 
-    https
-      .get(url, { headers: { "User-Agent": "Mozilla/5.0" } }, res => {
+    https.get(
+      url,
+      { headers: { "User-Agent": "Mozilla/5.0" } },
+      res => {
         if (res.statusCode === 302 || res.statusCode === 404) {
-          resolve(null); // trigger LOOP
+          resolve(null); // LOOP
           return;
         }
 
         if (res.statusCode !== 200) {
-          reject(new Error(`HTTP ${res.statusCode}`));
+          resolve(null); // treat ALL other HTTP errors as skip
           return;
         }
 
         let data = "";
         res.on("data", d => (data += d));
         res.on("end", () => resolve(data));
-      })
-      .on("error", reject);
+      }
+    ).on("error", () => {
+      // DNS / network failure → LOOP, never crash
+      resolve(null);
+    });
   });
 }
 
-/* ---- split into 1800–2200 char chunks ---- */
+/* ---------------- CHUNKER ---------------- */
 
 function chunkText(str, min = 1800, max = 2200) {
   const chunks = [];
@@ -90,7 +92,7 @@ function chunkText(str, min = 1800, max = 2200) {
   return chunks;
 }
 
-/* -------------------- MAIN -------------------- */
+/* ---------------- MAIN ---------------- */
 
 (async () => {
   console.log("▶ onepdf.js start");
@@ -109,7 +111,6 @@ function chunkText(str, min = 1800, max = 2200) {
       continue;
     }
 
-    // crude but reliable: ads INCLUDED
     const cleanText = html
       .replace(/<script[\s\S]*?<\/script>/gi, "")
       .replace(/<style[\s\S]*?<\/style>/gi, "")
@@ -143,17 +144,11 @@ function chunkText(str, min = 1800, max = 2200) {
 
     fs.writeFileSync(pdfPath, pdfBuffer);
 
-    /* ---- COMMIT PDF FIRST ---- */
-    try {
-      execSync(`git add "${pdfPath}"`);
-      execSync(`git commit -m "Add PNW article ${articleId}"`);
-    } catch (e) {
-      console.error("❌ Git commit failed for PDF:", articleId);
-      process.exit(1);
-    }
+    // ---- COMMIT PDF FIRST ----
+    execSync(`git add "${pdfPath}"`);
+    execSync(`git commit -m "Add PNW article ${articleId}"`);
 
-    /* ---- UPDATE data.json ONLY AFTER PDF COMMIT ---- */
-
+    // ---- UPDATE STATE ----
     state.last_article_number = articleId;
     fs.writeFileSync(DATA_FILE, JSON.stringify(state, null, 2));
 
