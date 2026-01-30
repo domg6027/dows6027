@@ -1,6 +1,5 @@
 /**
- * onepdf.js
- * One-article PDF generator (robust, CI-safe)
+ * onepdf.js — FINAL, pdfme-correct, CI-safe
  */
 
 import fs from "fs";
@@ -8,9 +7,6 @@ import path from "path";
 import https from "https";
 import { execSync } from "child_process";
 import { generate } from "@pdfme/generator";
-import pkg from "@pdfme/common";
-
-const { text } = pkg;
 
 /* ---------------- PATHS ---------------- */
 
@@ -44,28 +40,23 @@ function fetchArticle(id) {
   return new Promise(resolve => {
     const url = `https://www.prophecynewswatch.com/?p=${id}`;
 
-    https.get(
-      url,
-      { headers: { "User-Agent": "Mozilla/5.0" } },
-      res => {
+    https
+      .get(url, { headers: { "User-Agent": "Mozilla/5.0" } }, res => {
         if (res.statusCode === 302 || res.statusCode === 404) {
           resolve(null); // LOOP
           return;
         }
 
         if (res.statusCode !== 200) {
-          resolve(null); // treat ALL other HTTP errors as skip
+          resolve(null); // treat all other HTTP errors as skip
           return;
         }
 
         let data = "";
         res.on("data", d => (data += d));
         res.on("end", () => resolve(data));
-      }
-    ).on("error", () => {
-      // DNS / network failure → LOOP, never crash
-      resolve(null);
-    });
+      })
+      .on("error", () => resolve(null)); // DNS / network → LOOP
   });
 }
 
@@ -119,7 +110,6 @@ function chunkText(str, min = 1800, max = 2200) {
       .trim();
 
     const chunks = chunkText(cleanText);
-
     const pdfPath = path.join(PDF_DIR, `PNW-${articleId}.pdf`);
 
     const template = {
@@ -127,7 +117,7 @@ function chunkText(str, min = 1800, max = 2200) {
       schemas: [
         {
           body: {
-            type: text,
+            type: "text", // ✅ MUST be string
             position: { x: 40, y: 40 },
             width: 515,
             height: 760,
