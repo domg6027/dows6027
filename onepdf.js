@@ -6,7 +6,7 @@ import { generate } from "@pdfme/generator";
 /* ---------- CONSTANTS ---------- */
 const DATA_FILE = "./data.json";
 const PDF_DIR = "./pdfs";
-const BLANK_PDF = "./blank.pdf";
+const BLANK_PDF = "./TEMPLATES/blank.pdf";
 
 /* ---------- SAFETY GUARDS ---------- */
 if (!fs.existsSync(PDF_DIR)) {
