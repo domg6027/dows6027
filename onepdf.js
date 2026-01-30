@@ -9,7 +9,7 @@ const PDF_DIR = path.join(ROOT, "PDFS");
 const DATA_FILE = path.join(ROOT, "data.json");
 const BLANK_PDF = path.join(ROOT, "TEMPLATES", "blank.pdf");
 
-/* ---- Guards ---- */
+/* ---------- Guards ---------- */
 if (!fs.existsSync(BLANK_PDF)) {
   throw new Error("blank.pdf missing in TEMPLATES folder");
 }
@@ -17,20 +17,20 @@ if (!fs.existsSync(PDF_DIR)) {
   fs.mkdirSync(PDF_DIR);
 }
 
-/* ---- Git identity (CI-safe) ---- */
+/* ---------- Git identity ---------- */
 try {
   execSync(`git config user.email "actions@github.com"`);
   execSync(`git config user.name "GitHub Actions"`);
 } catch {}
 
-/* ---- Fetch helper ---- */
+/* ---------- Fetch ---------- */
 function fetchArticle(id) {
   return new Promise((resolve, reject) => {
     const url = `https://www.prophecynewswatch.com/?p=${id}`;
 
     https.get(url, res => {
       if (res.statusCode === 302 || res.statusCode === 404) {
-        resolve(null); // LOOP trigger
+        resolve(null); // ONLY LOOP CONDITION
         return;
       }
 
@@ -46,7 +46,7 @@ function fetchArticle(id) {
   });
 }
 
-/* ---- Chunk text (safe size) ---- */
+/* ---------- Chunk ---------- */
 function chunkText(text, size = 2000) {
   const chunks = [];
   for (let i = 0; i < text.length; i += size) {
@@ -55,9 +55,12 @@ function chunkText(text, size = 2000) {
   return chunks;
 }
 
-/* ---- MAIN ---- */
-export async function runOnePdf(startId) {
-  let articleId = startId;
+/* ---------- MAIN ---------- */
+(async () => {
+  console.log("▶ onepdf.js start");
+
+  const state = JSON.parse(fs.readFileSync(DATA_FILE, "utf8"));
+  let articleId = state.last_article_number + 1;
 
   while (true) {
     console.log(`➡ Trying article ${articleId}`);
@@ -65,7 +68,7 @@ export async function runOnePdf(startId) {
     const html = await fetchArticle(articleId);
     if (!html) {
       articleId++;
-      continue; // ONLY loop point
+      continue;
     }
 
     const cleanText = html
@@ -77,9 +80,6 @@ export async function runOnePdf(startId) {
 
     const chunks = chunkText(cleanText);
 
-    const pdfPath = path.join(PDF_DIR, `PNW-${articleId}.pdf`);
-
-    /* ---- CORRECT pdfme usage ---- */
     const template = {
       basePdf: BLANK_PDF,
       schemas: [
@@ -96,28 +96,23 @@ export async function runOnePdf(startId) {
     };
 
     const inputs = chunks.map(c => ({ body: c }));
-
     const pdf = await generate({ template, inputs });
+
+    const pdfPath = path.join(PDF_DIR, `PNW-${articleId}.pdf`);
     fs.writeFileSync(pdfPath, pdf);
 
-    /* ---- Verify PDF ---- */
-    if (!fs.existsSync(pdfPath) || fs.statSync(pdfPath).size === 0) {
-      throw new Error(`PDF generation failed for ${articleId}`);
-    }
-
-    /* ---- Commit PDF ---- */
+    /* ---------- Commit PDF ---------- */
     execSync(`git add "${pdfPath}"`);
     execSync(`git commit -m "Add PNW article ${articleId}"`);
 
-    /* ---- Update ROOT data.json ---- */
-    const data = JSON.parse(fs.readFileSync(DATA_FILE, "utf8"));
-    data.last_article_number = articleId;
-    fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
+    /* ---------- Update ROOT state ---------- */
+    state.last_article_number = articleId;
+    fs.writeFileSync(DATA_FILE, JSON.stringify(state, null, 2));
 
     execSync(`git add "${DATA_FILE}"`);
     execSync(`git commit -m "Update last_article_number to ${articleId}"`);
 
     console.log(`✅ Git commit executed for article ${articleId}`);
-    return articleId;
+    process.exit(0);
   }
-}
+})();
