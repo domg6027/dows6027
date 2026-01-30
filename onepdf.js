@@ -9,10 +9,10 @@ const PDF_DIR = path.join(ROOT, "PDFS");
 const DATA_FILE = path.join(ROOT, "data.json");
 const BLANK_PDF = path.join(ROOT, "TEMPLATES", "blank.pdf");
 
+/* ---- Guards ---- */
 if (!fs.existsSync(BLANK_PDF)) {
   throw new Error("blank.pdf missing in TEMPLATES folder");
 }
-
 if (!fs.existsSync(PDF_DIR)) {
   fs.mkdirSync(PDF_DIR);
 }
@@ -30,7 +30,7 @@ function fetchArticle(id) {
 
     https.get(url, res => {
       if (res.statusCode === 302 || res.statusCode === 404) {
-        resolve(null); // trigger loop
+        resolve(null); // LOOP trigger
         return;
       }
 
@@ -46,14 +46,11 @@ function fetchArticle(id) {
   });
 }
 
-/* ---- Chunk text ---- */
-function chunkText(text, max = 2000) {
+/* ---- Chunk text (safe size) ---- */
+function chunkText(text, size = 2000) {
   const chunks = [];
-  let pos = 0;
-
-  while (pos < text.length) {
-    chunks.push(text.slice(pos, pos + max));
-    pos += max;
+  for (let i = 0; i < text.length; i += size) {
+    chunks.push(text.slice(i, i + size));
   }
   return chunks;
 }
@@ -68,7 +65,7 @@ export async function runOnePdf(startId) {
     const html = await fetchArticle(articleId);
     if (!html) {
       articleId++;
-      continue;
+      continue; // ONLY loop point
     }
 
     const cleanText = html
@@ -82,49 +79,45 @@ export async function runOnePdf(startId) {
 
     const pdfPath = path.join(PDF_DIR, `PNW-${articleId}.pdf`);
 
+    /* ---- CORRECT pdfme usage ---- */
     const template = {
       basePdf: BLANK_PDF,
-      schemas: chunks.map((_, i) => ({
-        [`page_${i}`]: {
-          type: "text",
-          position: { x: 40, y: 40 },
-          width: 515,
-          height: 760,
-          fontSize: 11
+      schemas: [
+        {
+          body: {
+            type: "text",
+            position: { x: 40, y: 40 },
+            width: 515,
+            height: 760,
+            fontSize: 11
+          }
         }
-      }))
+      ]
     };
 
-    const inputs = chunks.map(c => ({
-      page_0: c
-    }));
+    const inputs = chunks.map(c => ({ body: c }));
 
     const pdf = await generate({ template, inputs });
     fs.writeFileSync(pdfPath, pdf);
 
-    /* ---- VERIFY PDF ---- */
-    if (!fs.existsSync(pdfPath)) {
-      throw new Error(`PDF not created for ${articleId}`);
+    /* ---- Verify PDF ---- */
+    if (!fs.existsSync(pdfPath) || fs.statSync(pdfPath).size === 0) {
+      throw new Error(`PDF generation failed for ${articleId}`);
     }
 
-    /* ---- COMMIT PDF ---- */
+    /* ---- Commit PDF ---- */
     execSync(`git add "${pdfPath}"`);
     execSync(`git commit -m "Add PNW article ${articleId}"`);
 
-    /* ---- UPDATE data.json ---- */
-    const data = fs.existsSync(DATA_FILE)
-      ? JSON.parse(fs.readFileSync(DATA_FILE, "utf8"))
-      : {};
-
+    /* ---- Update ROOT data.json ---- */
+    const data = JSON.parse(fs.readFileSync(DATA_FILE, "utf8"));
     data.last_article_number = articleId;
     fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
 
     execSync(`git add "${DATA_FILE}"`);
     execSync(`git commit -m "Update last_article_number to ${articleId}"`);
 
-    /* ---- FINAL CONFIRMATION LOG ---- */
     console.log(`✅ Git commit executed for article ${articleId}`);
-
     return articleId;
   }
 }
