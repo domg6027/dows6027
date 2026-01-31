@@ -5,12 +5,10 @@ import { execSync } from "child_process";
 const ROOT = process.cwd();
 const PDF_DIR = path.join(ROOT, "PDFS");
 
-// 1️⃣ Ensure PDFS folder exists
 if (!fs.existsSync(PDF_DIR)) {
   fs.mkdirSync(PDF_DIR, { recursive: true });
 }
 
-// 2️⃣ Find all PDFs in root (nnnn.pdf pattern)
 const files = fs.readdirSync(ROOT).filter(f => /^\d{4}\.pdf$/.test(f));
 
 if (!files.length) {
@@ -20,17 +18,19 @@ if (!files.length) {
 
 console.log(`➡ Found PDFs to move: ${files.join(", ")}`);
 
-// 3️⃣ Move files using fs and git
 for (const file of files) {
   const oldPath = path.join(ROOT, file);
   const newPath = path.join(PDF_DIR, file);
+
+  console.log(`➡ Moving ${file} → PDFS/`);
+
   fs.renameSync(oldPath, newPath);
-  execSync(`git add "${newPath}"`);
+
+  // ✅ IMPORTANT: stage BOTH sides of the move
+  execSync(`git add "${oldPath}" "${newPath}"`);
 }
 
-if (files.length) {
-  execSync(`git commit -m "Move ${files.length} PDF(s) to PDFS folder"`);
-  console.log(`✅ Moved ${files.length} PDF(s) into PDFS folder and committed`);
-} else {
-  console.log("⚠ No PDFs were moved");
-}
+// ✅ Now commit EVERYTHING
+execSync(`git commit -am "Move ${files.length} PDF(s) to PDFS folder"`);
+
+console.log(`✅ Moved and committed ${files.length} PDF(s) into PDFS folder`);
