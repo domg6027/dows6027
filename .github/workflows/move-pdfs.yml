@@ -1,0 +1,21 @@
+name: Move PDFs to PDFS folder
+
+on:
+  workflow_dispatch: # allows manual trigger
+
+jobs:
+  move-pdfs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Run PDF mover
+        run: |
+          node .github/scripts/move-pdfs.js
