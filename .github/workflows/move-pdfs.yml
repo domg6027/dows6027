@@ -1,7 +1,7 @@
 name: Move PDFs to PDFS Folder
 
 on:
-  workflow_dispatch: # Manual trigger
+  workflow_dispatch:
 
 jobs:
   move-pdfs:
@@ -15,6 +15,12 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '20'
+
+      # --- Add Git identity so commits work ---
+      - name: Set Git user
+        run: |
+          git config --global user.name "Your Name"
+          git config --global user.email "you@example.com"
 
       - name: Run move-pdfs.js from ROOT
         run: node move-pdfs.js
