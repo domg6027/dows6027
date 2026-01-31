@@ -3,6 +3,9 @@ name: Move PDFs to PDFS Folder
 on:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   move-pdfs:
     runs-on: ubuntu-latest
