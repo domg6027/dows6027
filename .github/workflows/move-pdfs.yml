@@ -1,7 +1,7 @@
-name: Move PDFs to PDFS folder
+name: Move PDFs to PDFS Folder
 
 on:
-  workflow_dispatch: # allows manual trigger
+  workflow_dispatch: # Manual trigger
 
 jobs:
   move-pdfs:
@@ -9,13 +9,12 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '20'
 
-      - name: Run PDF mover
-        run: |
-          node .github/scripts/move-pdfs.js
+      - name: Run move-pdfs.js from ROOT
+        run: node move-pdfs.js
