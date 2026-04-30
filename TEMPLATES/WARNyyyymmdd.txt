@@ -6,9 +6,34 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Warnings and urgent updates from Derech Olam Warning Services (DOWS6027).">
   <meta name="keywords" content="Derech Olam, Warning Services, Prophecy, End Times, Global Events">
-  <meta name="author" content="Derech Olam Ministries">
-  <link rel="stylesheet" href="https://saphahcentral.github.io/saphah/style-public.css">
+  <meta name="author" content="Derech Olam Mishkan Int'l">
+  <link rel="stylesheet" href="https://domg6027.github.io/dows6027/style.css">
+
+  <script src="https://domg6027.github.io/dows6027/include.js" defer></script>
+
+  <script defer>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Load header
+      fetch('header.html')
+        .then(r => r.text())
+        .then(d => document.getElementById('header-placeholder').innerHTML = d)
+        .catch(console.error);
+
+      // Load navbar
+      fetch('nav_bar.html')
+        .then(r => r.text())
+        .then(d => document.getElementById('nav-placeholder').innerHTML = d)
+        .catch(console.error);
+
+      // Load footer
+      fetch('footer.html')
+        .then(r => r.text())
+        .then(d => document.getElementById('footer-placeholder').innerHTML = d)
+        .catch(console.error);
+    });
+  </script>
 </head>
+
 <body>
 
   <!-- Header dynamically loaded -->
@@ -37,66 +62,66 @@
     <section>
       <h2>1. Middle East, WWIII and related news</h2>
       <ul>
-        <li><a href="" target="_blank">X</a></li>
+        <li><a href="" target="_blank" rel="noopener noreferrer">X</a></li>
       </ul>
     </section>
 
     <section>
       <h2>2. Revival, persecution, false church and related news</h2>
       <ul>
-        <li><a href="" target="_blank">X</a></li>
+        <li><a href="" target="_blank" rel="noopener noreferrer">X</a></li>
       </ul>
     </section>
 
     <section>
       <h2>3. LGBT+ updates and related news</h2>
       <ul>
-        <li><a href="" target="_blank">X</a></li>
+        <li><a href="" target="_blank" rel="noopener noreferrer">X</a></li>
       </ul>
     </section>
 
     <section>
       <h2>4. Economy updates</h2>
       <ul>
-        <li><a href="" target="_blank">X</a></li>
+        <li><a href="" target="_blank" rel="noopener noreferrer">X</a></li>
       </ul>
     </section>
 
     <section>
       <h2>5. False Messiah, world government updates and related news</h2>
       <ul>
-        <li><a href="" target="_blank">X</a></li>
+        <li><a href="" target="_blank" rel="noopener noreferrer">X</a></li>
       </ul>
     </section>
 
     <section>
       <h2>6. AI, cryptocurrency and related news</h2>
       <ul>
-        <li><a href="" target="_blank">X</a></li>
+        <li><a href="" target="_blank" rel="noopener noreferrer">X</a></li>
       </ul>
     </section>
 
     <section>
       <h2>7. Disaster and other news</h2>
       <ul>
-        <li><a href="" target="_blank">X</a></li>
+        <li><a href="" target="_blank" rel="noopener noreferrer">X</a></li>
       </ul>
     </section>
 
-<hr />
+    <hr />
 
     <section>
       <h3 style="text-align: left;"><span style="font-size: x-large;"><u>📌 PLEASE NOTE</u></span></h3>
       <p><strong>Above news articles are only <em>part</em> of the whole story.</strong><br />Bookmark and check for more news on these websites:</p>
       <ul>
-        <li><a href="https://www.prophecynewswatch.com/" target="_blank">Prophecy News Watch</a></li>
-        <li><a href="https://endtimesprophecywatch.com/" target="_blank">End Times Prophecy Watch</a></li>
+        <li><a href="https://www.prophecynewswatch.com/" target="_blank" rel="noopener noreferrer">Prophecy News Watch</a></li>
+        <li><a href="https://endtimesprophecywatch.com/" target="_blank" rel="noopener noreferrer">End Times Prophecy Watch</a></li>
       </ul>
     </section>
 
     <section>
       <h3><span style="font-size: x-large;"><u>⚠ Are You Ready for What’s About to Come?</u></span></h3>
-      <p><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=4517" target="_blank"><strong>PREPARE YOURSELF</strong></a></p>
+      <p><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=4517" target="_blank" rel="noopener noreferrer"><strong>PREPARE YOURSELF</strong></a></p>
       <p>Even our <strong>warnings</strong> can disappear anytime without notice! We might be removed from the earth and the internet before we can post more warnings...</p>
     </section>
 
@@ -116,24 +141,6 @@
 
   <!-- Footer dynamically loaded -->
   <div id="footer-placeholder"></div>
-
-  <!-- Dynamic inclusion scripts -->
-  <script>
-    // Load header
-    fetch('header.html')
-      .then(r => r.text())
-      .then(d => document.getElementById('header-placeholder').innerHTML = d);
-
-    // Load navbar
-    fetch('nav_bar.html')
-      .then(r => r.text())
-      .then(d => document.getElementById('nav-placeholder').innerHTML = d);
-
-    // Load footer
-    fetch('footer.html')
-      .then(r => r.text())
-      .then(d => document.getElementById('footer-placeholder').innerHTML = d);
-  </script>
 
 </body>
 </html>
