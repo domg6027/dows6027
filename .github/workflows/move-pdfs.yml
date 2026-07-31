@@ -1,4 +1,3 @@
-```yaml
 name: Move PDFs to PDFS Folder
 
 on:
@@ -33,4 +32,3 @@ jobs:
 
       - name: Push commit to GitHub
         run: git push origin HEAD
-```
