@@ -9,7 +9,7 @@ if (!fs.existsSync(PDF_DIR)) {
   fs.mkdirSync(PDF_DIR, { recursive: true });
 }
 
-const files = fs.readdirSync(ROOT).filter(f => /^\d{4}\.pdf$/.test(f));
+const files = fs.readdirSync(ROOT).filter(f => /^\d+\.pdf$/.test(f));
 
 if (!files.length) {
   console.log("✅ No PDFs to move in root folder");
