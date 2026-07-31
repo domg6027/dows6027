@@ -6,29 +6,29 @@ const ROOT = process.cwd();
 const PDF_DIR = path.join(ROOT, "PDFS");
 
 if (!fs.existsSync(PDF_DIR)) {
-fs.mkdirSync(PDF_DIR, { recursive: true });
+  fs.mkdirSync(PDF_DIR, { recursive: true });
 }
 
-const files = fs.readdirSync(ROOT).filter(f => /^\d{4}.pdf$/.test(f));
+const files = fs.readdirSync(ROOT).filter(f => /^\d{4}\.pdf$/.test(f));
 
 if (!files.length) {
-console.log("✅ No PDFs to move in root folder");
-process.exit(0);
+  console.log("✅ No PDFs to move in root folder");
+  process.exit(0);
 }
 
-console.log(➡ Found PDFs to move: ${files.join(", ")});
+console.log(`➡ Found PDFs to move: ${files.join(", ")}`);
 
 for (const file of files) {
-const oldPath = path.join(ROOT, file);
-const newPath = path.join(PDF_DIR, file);
+  const oldPath = path.join(ROOT, file);
+  const newPath = path.join(PDF_DIR, file);
 
-console.log(➡ Moving ${file} → PDFS/);
+  console.log(`➡ Moving ${file} → PDFS/`);
 
-fs.renameSync(oldPath, newPath);
+  fs.renameSync(oldPath, newPath);
 
-execSync(git add "${oldPath}" "${newPath}");
+  execSync(`git add "${oldPath}" "${newPath}"`);
 }
 
-execSync(git commit -am "Move ${files.length} PDF(s) to PDFS folder");
+execSync(`git commit -m "Move ${files.length} PDF(s) to PDFS folder"`);
 
-console.log(✅ Moved and committed ${files.length} PDF(s) into PDFS folder);
+console.log(`✅ Moved and committed ${files.length} PDF(s) into PDFS folder`);
