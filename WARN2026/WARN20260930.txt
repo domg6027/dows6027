@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>DERECH OLAM WARNING SERVICES</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Warnings and urgent updates from Derech Olam Warning Services (DOWS6027).">
+  <meta name="keywords" content="Derech Olam, Warning Services, Prophecy, End Times, Global Events">
+  <meta name="author" content="Derech Olam Mishkan Int'l">
+  <link rel="stylesheet" href="https://domg6027.github.io/dows6027/style.css">
+
+  <script src="https://domg6027.github.io/dows6027/include.js" defer></script>
+
+  <script defer>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Load header
+      fetch('header.html')
+        .then(r => r.text())
+        .then(d => document.getElementById('header-placeholder').innerHTML = d)
+        .catch(console.error);
+
+      // Load navbar
+      fetch('nav_bar.html')
+        .then(r => r.text())
+        .then(d => document.getElementById('nav-placeholder').innerHTML = d)
+        .catch(console.error);
+
+      // Load footer
+      fetch('footer.html')
+        .then(r => r.text())
+        .then(d => document.getElementById('footer-placeholder').innerHTML = d)
+        .catch(console.error);
+    });
+  </script>
+</head>
+
+<body>
+
+  <!-- Header dynamically loaded -->
+  <div id="header-placeholder"></div>
+
+  <!-- Navbar dynamically loaded -->
+  <div id="nav-placeholder"></div>
+
+  <main style="max-width: 900px; margin: 2em auto; padding: 1em;">
+    <h1 style="text-align:center;">Warnings from August 31, 2026 to September 30, 2026</h1>
+    <p style="text-align:center;">Latest news from around the world</p>
+
+    <!--Intro-->
+    <section>
+      <p style="font-size: large;">Greetings, friend!</p>
+      <p style="font-size: large;">Firstly, sorry for not posting for a while - we were very, very busy... We're giving you a FULL update since the last report.</p>
+      <p style="font-size: large;">Secondly, remember our <b><u style="background-color: #fcff01;">ARTICLES</u></b> service. This service INCLUDES a copy of our END TIMES articles and SPECIAL articles in the <b>WEBSITE</b> folder. Special news flashes are also available for quick access. Other folders are available for more articles. This is just in case these articles get removed by people who think they can hide the truth from the world...</p>
+      <p style="color: red; font-size: large; font-weight: bold;">Lastly, please note that the time for the rapture / snatching away is here. The Antichrist / False Messiah has been revealed and is in power now. Please make sure your heart belongs to the Creator alone and that your intentions are to serve Him and Him alone. Do NOT postpone it. DO IT NOW! Tomorrow may be too late forever... SOON we might be in Paradise! ALL the signs for the final 7 years of mankind have been fulfilled. This Rosh Hashanah might be the time of the "Last Trumpet / Shofar". Or even before then... Make sure NOW that you WILL hear the last Shofar blast and not find yourself making the decision that would condemn yourself to Gehinnom!</p>
+      <p style="color: red; font-size: large; font-weight: bold;">The Messiah is coming to take His bride for the Marriage Supper and it is very, very, very imminent! Make sure you're ready for His return. <i>1. Does your heart belong to the Creator or someone or something else, even your own desires? 2. Are your daily, hourly, minutely intentions always to serve Him and Him alone? 3. Are any unbelief and misbelief removed from your life?</i> Make sure NOW before it's too late! If you're not ready NOW, you'll have to be <u>martyred</u> to go to heaven after the Creator has taken the true believers away. <u>We are NOT made for the time of the false Messiah / Antichrist!</u> Rather be ready and go now than not be ready and have to decide at gunpoint to die for your faith (it can be VERY difficult then as chances are you would make the wrong decision)... And that counts whether you're a Christian, a Jew or a Muslim!</p>
+      <p style="color: red; font-size: large; font-weight: bold;">If you think it's a joke, read Revelation NOW! The False Messiah has been revealed AND CONFIRMED in his actions already! And, if you STILL don't know it, it's the new American president and his team is straight out of hell / Gehinnom! Babylon is AMERICA! The time is NOW! Next time we might not be here anymore...</p>
+    </section>
+
+    <hr />
+
+    <!-- WARNINGS -->
+    <section>
+      <h2>1. Middle East, WWIII and related news</h2>
+      <ul>
+        <li><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=10450" target="_blank" rel="noopener noreferrer">Hidden Beneath The Waves: The New Nuclear Threat From Russia And China</a></li>
+        <li><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=10458" target="_blank" rel="noopener noreferrer">Hamas Has No Intention Of Disarming — So Why Is The US Still Negotiating?</a></li>
+        <li><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=10460" target="_blank" rel="noopener noreferrer">The Blackout Weapon: Could China Or Russia Turn Off America?</a></li>
+        <li><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=10463" target="_blank" rel="noopener noreferrer">Damascus: The Center Of One Of The Bible's Most Dramatic Unfulfilled Prophecies</a></li>
+        <li><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=10466" target="_blank" rel="noopener noreferrer">Israel's Election: Is The Third Temple Moving From Prophecy To Politics?</a></li>
+        <li><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=10467" target="_blank" rel="noopener noreferrer">Israelis Worry Next October 7 Could Come From Judea & Samaria</a></li>
+        <li><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=10486" target="_blank" rel="noopener noreferrer">Israel Is Approaching A Prophetic Milestone Few Generations Thought Possible</a></li>
+        <li><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=10490" target="_blank" rel="noopener noreferrer">Oct. 7: A Tale of Two Screens</a></li>
+        <li><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=10499" target="_blank" rel="noopener noreferrer">The Palestinians' Dead-End Choice: Fatah Or Hamas</a></li>
+        <li><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=10505" target="_blank" rel="noopener noreferrer">The Sounds Of The Temple Are Returning To Jerusalem</a></li>
+        <li><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=10507" target="_blank" rel="noopener noreferrer">Majority Of Israelis Fear October 7-Style Attack From Judea And Samaria</a></li>
+        <li><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=10528" target="_blank" rel="noopener noreferrer">Israel Forgot God. Then Came The Yom Kippur War And October 7</a></li>
+        <li><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=10542" target="_blank" rel="noopener noreferrer">Israel's Most Unexpected Weapon Isn't A Missile - It's A Netflix Show</a></li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>2. Revival, persecution, false church and related news</h2>
+      <ul>
+        <li><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=10436" target="_blank" rel="noopener noreferrer">Nothing New Under The Sun: Burning Man And The Return Of Ancient Spirituality</a></li>
+        <li><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=10437" target="_blank" rel="noopener noreferrer">Canada’s Judeo-Christian Culture Under Attack: Churches Burn, Jews Flee</a></li>
+        <li><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=10448" target="_blank" rel="noopener noreferrer">Does The First Amendment Give You the Right To Disrupt A Church Service?</a></li>
+        <li><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=10451" target="_blank" rel="noopener noreferrer">Court Restricts Girl's Church Attendance Over Claims Of "Psychological Harm"</a></li>
+        <li><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=10464" target="_blank" rel="noopener noreferrer">10 Reasons Socialism Sounds Christian - Until You Look More Closely</a></li>
+        <li><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=10470" target="_blank" rel="noopener noreferrer">When The Church Becomes Entertainment, Who Preaches Repentance?</a></li>
+        <li><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=10473" target="_blank" rel="noopener noreferrer">When The Prison Gang Becomes A Caliphate</a></li>
+        <li><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=10477" target="_blank" rel="noopener noreferrer">Revival In Secular Sweden: When Christianity Becomes The New Rebellion</a></li>
+        <li><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=10478" target="_blank" rel="noopener noreferrer">The Methodist Shaking: One Church Is Shrinking While Another Is Growing</a></li>
+        <li><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=10515" target="_blank" rel="noopener noreferrer">The Israel Fault Line: Dividing Christians And Jews From Within</a></li>
+        <li><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=10516" target="_blank" rel="noopener noreferrer">The Church Of England's Collapse Is Happening In Plain Sight</a></li>
+        <li><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=10519" target="_blank" rel="noopener noreferrer">The Boys Are Coming Back To Church - But Where Are The Girls Going?</a></li>
+        <li><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=10521" target="_blank" rel="noopener noreferrer">When Churches Become Mosques: The Changing Face Of An American City</a></li>
+        <li><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=10554" target="_blank" rel="noopener noreferrer">Worship At Your Own Risk: Christianity Under Pressure Across The Muslim World</a></li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>3. LGBT+ updates and related news</h2>
+      <ul>
+        <li><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=10453" target="_blank" rel="noopener noreferrer">The Progressive Paradox: Fleeing Spain For Gaza</a></li>
+        <li><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=10454" target="_blank" rel="noopener noreferrer">The Women Nobody Wants To Talk About In The Transgender Debate</a></li>
+        <li><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=10457" target="_blank" rel="noopener noreferrer">The Church Of Confusion: When Affirmation Replaces Biblical Truth</a></li>
+        <li><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=10474" target="_blank" rel="noopener noreferrer">The Queer Beatitudes: When Pride Replaces Repentance</a></li>
+        <li><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=10487" target="_blank" rel="noopener noreferrer">10 Ways LGBTQ+ Ideology Is Reshaping The Church</a></li>
+        <li><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=10492" target="_blank" rel="noopener noreferrer">Just Ditch It: Nike's $200 Billion Woke Wipeout</a></li>
+        <li><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=10500" target="_blank" rel="noopener noreferrer">Daughter Taken From Catholic Parents For Refusing to Affirm Trans Identity</a></li>
+        <li><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=10504" target="_blank" rel="noopener noreferrer">A Bizarre Alliance: When The Church Pulpit Becomes A Platform For Queer Islam</a></li>
+        <li><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=10508" target="_blank" rel="noopener noreferrer">A Different Gospel Requires Different Saints</a></li>
+        <li><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=10520" target="_blank" rel="noopener noreferrer">The Inclusive Bible: When ‘Son Of God’ Becomes Too Offensive For Church</a></li>
+        <li><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=10529" target="_blank" rel="noopener noreferrer">When Every Desire Becomes An Identity - And Every Identity Demands Protection</a></li>
+        <li><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=10532" target="_blank" rel="noopener noreferrer">2,293 Female Athletes Have Lost First-Place Medals To Biological Males</a></li>
+        <li><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=10543" target="_blank" rel="noopener noreferrer">The Woke Priesthood Has A New Revelation: Jesus 'Transitioned'</a></li>
+        <li><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=10545" target="_blank" rel="noopener noreferrer">Witches Are Finding Jesus While Liberal Churches Are Reinventing Him</a></li>
+        <li><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=10555" target="_blank" rel="noopener noreferrer">The Pick-And-Choose Bible: A Generation Wants Scripture Without Its Authority</a></li>
+        <li><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=10556" target="_blank" rel="noopener noreferrer">The Interfaith Gospel: When Religious Unity Comes At The Expense Of Truth</a></li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>4. Economy updates</h2>
+      <ul>
+        <li><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=10510" target="_blank" rel="noopener noreferrer">The Winter Fuel Crisis Is Building - And America Won't Be Immune</a></li>
+        <li><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=10534" target="_blank" rel="noopener noreferrer">The Debt Bomb Meets The Socialist Generation</a></li>
+        <li><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=10557" target="_blank" rel="noopener noreferrer">Seven Economic Warning Signs Every American Should Be Watching Right Now</a></li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>5. False Messiah, world government updates and related news</h2>
+      <ul>
+        <li><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=10439" target="_blank" rel="noopener noreferrer">JD Vance Says The Antichrist May Be Walking Among Us - Could He Be Right?</a></li>
+        <li><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=10456" target="_blank" rel="noopener noreferrer">JD Vance Gives Himself A 7 Out Of 10 Chance Of Heaven - What Would You Say?</a></li>
+        <li><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=10548" target="_blank" rel="noopener noreferrer">The World Keeps Rewarding The Palestinian Authority - So Why Change?</a></li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>6. AI, cryptocurrency, internet and related news</h2>
+      <ul>
+        <li><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=10459" target="_blank" rel="noopener noreferrer">The Age Of AI Agents Has Arrived - What Happens When We Give Them Bodies?</a></li>
+        <li><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=10465" target="_blank" rel="noopener noreferrer">China Readies Humanoid Robots For Combat</a></li>
+        <li><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=10471" target="_blank" rel="noopener noreferrer">There Is No Off Switch: How Surveillance Followed Us Home</a></li>
+        <li><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=10475" target="_blank" rel="noopener noreferrer">The People Building Superintelligence Admit They Cannot Control It</a></li>
+        <li><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=10479" target="_blank" rel="noopener noreferrer">The Digital ID Gatekeeper Is Coming To Windows</a></li>
+        <li><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=10485" target="_blank" rel="noopener noreferrer">Apple Says It Isn't Recording You — But Its AI Is Still Listening</a></li>
+        <li><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=10493" target="_blank" rel="noopener noreferrer">The Kill Switch Beneath The Ocean</a></li>
+        <li><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=10494" target="_blank" rel="noopener noreferrer">The AI Cold War Is Already Here</a></li>
+        <li><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=10517" target="_blank" rel="noopener noreferrer">The UN Wants The Keys To AI - What Could Possibly Go Wrong?</a></li>
+        <li><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=10530" target="_blank" rel="noopener noreferrer">AI Almost Started A War With China - And We Nearly Didn't Catch It</a></li>
+        <li><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=10544" target="_blank" rel="noopener noreferrer">Your Papers, Please - The Internet Is Entering The Digital ID Era</a></li>
+        <li><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=10551" target="_blank" rel="noopener noreferrer">Think You're Anonymous? 5 Ways AI Can Find You Without GPS</a></li>
+        <li><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=10552" target="_blank" rel="noopener noreferrer">AI And The Coming Argument For A One-World Government</a></li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>7. Disaster and other news</h2>
+      <ul>
+        <li><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=10438" target="_blank" rel="noopener noreferrer">The September Perfect Storm: Too Many Warning Lights Are Flashing At Once</a></li>
+        <li><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=10449" target="_blank" rel="noopener noreferrer">More Than Entertainment: Who You Support Matters</a></li>
+        <li><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=10455" target="_blank" rel="noopener noreferrer">Playing God With The Weather: Are We Opening A Door We Can't Close?</a></li>
+        <li><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=10468" target="_blank" rel="noopener noreferrer">Christian Physicians Are Being Screened Out By The Medical Establishment</a></li>
+        <li><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=10476" target="_blank" rel="noopener noreferrer">A Generation Is Learning About 9/11 Without Learning Why It Happened</a></li>
+        <li><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=10480" target="_blank" rel="noopener noreferrer">Canada To Christian Doctors: Provide Puberty Blocker Or Be Fined Thousands</a></li>
+        <li><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=10484" target="_blank" rel="noopener noreferrer">Number Of Single Men In U.S. Reaches Record High</a></li>
+        <li><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=10509" target="_blank" rel="noopener noreferrer">Netflix's Narnia Has A New Aslan - And Christians Are Not Happy</a></li>
+        <li><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=10514" target="_blank" rel="noopener noreferrer">When The Patient Cannot Say Yes: The Next Frontier Of Euthanasia</a></li>
+        <li><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=10522" target="_blank" rel="noopener noreferrer">2027: The Perfect Storm Is Already Forming</a></li>
+        <li><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=10533" target="_blank" rel="noopener noreferrer">The Homeschool Generation Is Growing Up - And A New Battle Is Just Beginning</a></li>
+        <li><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=10535" target="_blank" rel="noopener noreferrer">After Decades Of Debate, Scientists Are Finally Testing The Noah's Ark Site</a></li>
+        <li><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=10549" target="_blank" rel="noopener noreferrer">Spotlight Grows On Sharia Law's Abuse Of Women</a></li>
+      </ul>
+    </section>
+
+    <hr />
+
+    <section>
+      <h3 style="text-align: left;"><span style="font-size: x-large;"><u>📌 PLEASE NOTE</u></span></h3>
+      <p><strong>Above news articles are only <em>part</em> of the whole story.</strong><br />Bookmark and check for more news on these websites:</p>
+      <ul>
+        <li><a href="https://www.prophecynewswatch.com/" target="_blank" rel="noopener noreferrer">Prophecy News Watch</a></li>
+        <li><a href="https://endtimesprophecywatch.com/" target="_blank" rel="noopener noreferrer">End Times Prophecy Watch</a></li>
+      </ul>
+    </section>
+
+    <section>
+      <h3><span style="font-size: x-large;"><u>⚠ Are You Ready for What’s About to Come?</u></span></h3>
+      <p><a href="https://www.prophecynewswatch.com/article.cfm?recent_news_id=4517" target="_blank" rel="noopener noreferrer"><strong>PREPARE YOURSELF</strong></a></p>
+      <p>Even our <strong>warnings</strong> can disappear anytime without notice! We might be removed from the earth and the internet before we can post more warnings...</p>
+    </section>
+
+    <section>
+      <h3 style="text-align: left;"><span style="font-size: x-large;"><u>❓ TODAY'S QUESTIONS</u></span></h3>
+      <ul>
+        <li>Are you doing what the Creator wants you to do?</li>
+        <li>Or are you deviating from His orders — even if just slightly?</li>
+      </ul>
+      <p><strong>Forgiveness and a new life is waiting for you! It is better to be ready and prepared for what is about to come NOW!</strong></p>
+      <p>You know what to do… <strong style="background-color: #f1c232; color: red;">GO AND DO IT NOW!</strong></p>
+    </section>
+
+    <hr />
+
+  </main>
+
+  <!-- Footer dynamically loaded -->
+  <div id="footer-placeholder"></div>
+
+</body>
+</html>
