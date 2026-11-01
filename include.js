@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
   const includes = {
     "header-placeholder": "https://domg6027.github.io/dows6027/header.html",
-    "nav-placeholder": "https://domg6027.github.io/dows6027/nav_bar.html",
+    "nav-placeholder": "https://domg6027.github.io/dows6027/nav.html",
     "footer-placeholder": "https://domg6027.github.io/dows6027/footer.html"
   };
 
